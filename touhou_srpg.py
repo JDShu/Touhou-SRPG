@@ -3,7 +3,7 @@ from main_loop import *
 def main():
     game = Main_Loop(640.0,480.0)
     running = True
-    while True:
+    while running:
         running = game.process()
         game.draw()
     

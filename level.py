@@ -1,6 +1,6 @@
 from objects import *
 
-TILE_BASE, TILE_HEIGHT, TILE_OFFSET = 41, 22, 12
+TILE_SETTINGS = TILE_BASE, TILE_HEIGHT, TILE_OFFSET = 80, 44, 24
 
 class Level:
     def __init__( self, width, height ):
@@ -12,7 +12,8 @@ class Level:
                 temp += [None]
             self.map += [temp]
         self.print_map()
-        self.ground_tile = Tile(0.0,0.0,1.0,TILE_BASE, TILE_HEIGHT, TILE_OFFSET,"grass.png", 2.0)
+        self.tile_settings = TILE_SETTINGS
+        self.ground_tile = Tile(0.0,0.0,1.0,TILE_BASE, TILE_HEIGHT, TILE_OFFSET,"grass.png")
             
     def print_map( self ):
         for r in reversed(self.map):

@@ -14,8 +14,11 @@ class Game_State:
         self.map = None
         
     def process( self, current_mode ):
-        self.current_mode = self.play
-        self.current_mode.process()
-
+        #self.current_mode = self.play
+        result = self.current_mode.process()
+        return result
+    
     def draw( self ):
         self.current_mode.draw()
+        
+            
