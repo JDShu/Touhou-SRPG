@@ -66,7 +66,7 @@ class Tile( Graphic ):
 
 class Animated( Graphic ):
     def __init__( self, x,y,a,across,down,filename,scale_factor = 1.0):
-        Graphic.__init__( self, x,y,a,filename)
+        Graphic.__init__( self, x,y,a,filename,scale_factor)
         self.across = across
         self.down = down
         self.sprite_width = 1.0/across
@@ -110,7 +110,7 @@ class Animated( Graphic ):
 
 class Actor( Animated ):
     def __init__( self, x,y,a,across,down,filename,scale_factor = 1.0):
-        Animated.__init__( self, x,y,a,across,down,filename,scale_factor = 1.0)
+        Animated.__init__( self, x,y,a,across,down,filename,scale_factor)
         self.idle = []
         for i in xrange(self.across):
             self.idle += [(i,0)]
@@ -126,3 +126,4 @@ class Actor( Animated ):
     def set_pos(self, x, y, tile_settings):
         base, height, offset = tile_settings
         Graphic.set_pos(self, y*offset + base*x, height*y)
+

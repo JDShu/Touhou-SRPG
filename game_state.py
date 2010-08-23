@@ -4,8 +4,8 @@ import play
 import level
 
 class Game_State:
-    def __init__( self ):
-        self.play = play.Play()
+    def __init__( self,w,h ):
+        self.play = play.Play(w,h)
 
         test_level = level.Level(10,10) 
         self.play.load_level(test_level)

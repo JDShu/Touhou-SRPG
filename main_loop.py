@@ -12,7 +12,7 @@ class Main_Loop:
         glOrtho(0.0, self.width, 0.0, self.height,-1.0,1.0)
         glClearColor(0.0,0.0,0.0,0.0)    
         self.current_mode = None
-        self.game_state = game_state.Game_State()
+        self.game_state = game_state.Game_State(x,y)
         pygame.time.set_timer(pygame.USEREVENT+1, 200)
         
     def process( self ):
