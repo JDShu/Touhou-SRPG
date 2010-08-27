@@ -55,14 +55,15 @@ class Graphic:
         glPopMatrix()
 
 class Tile( Graphic ):
-    def __init__( self, x,y,a,base,height,top_offset,filename,scale_factor = 1.0):
+    def __init__( self, x,y,a,base,height,width_offset, height_offset,filename,scale_factor = 1.0):
         Graphic.__init__( self, x,y,a,filename, scale_factor)
         self.base = base
         self.height = height
-        self.top_offset = top_offset
+        self.width_offset = width_offset
+        self.height_offset = height_offset
 	
     def set_pos( self, x, y):
-        Graphic.set_pos(self, y*self.top_offset + self.base*x, self.height*y)
+        Graphic.set_pos(self, -(x+y)*self.width_offset + self.base*x, (x-y)*self.height_offset + self.height*y)
 
 class Animated( Graphic ):
     def __init__( self, x,y,a,across,down,filename,scale_factor = 1.0):
@@ -123,7 +124,7 @@ class Actor( Animated ):
             self.frame_index = 0
         self.current_frame = self.current_routine[self.frame_index] 
 
-    def set_pos(self, x, y, tile_settings):
-        base, height, offset = tile_settings
-        Graphic.set_pos(self, y*offset + base*x, height*y)
-
+    def set_pos(self, x, y, tile_settings, tile_offsets):
+        base, height = tile_settings
+        width_offset, height_offset = tile_offsets
+        Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)

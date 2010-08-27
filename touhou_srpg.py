@@ -1,7 +1,7 @@
 from main_loop import *
 
 def main():
-    game = Main_Loop(640.0,480.0)
+    game = Main_Loop(640,480)
     running = True
     while running:
         running = game.process()
