@@ -25,7 +25,7 @@ class Play:
         self.test_menu.add_entry(ui.Menu_Entry("2", g, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
         self.w, self.h = w, h
         self.font = glFreeType.font_data( "free_sans.ttf", 30 )
-
+        
     def new_keybuffer( self ):
         self.keybuffer = []
         for i in range(320):
@@ -37,7 +37,6 @@ class Play:
         l_click, m_click, r_click = pygame.mouse.get_pressed()
 
         self.hover_square = self.get_mouse_square(mouse_x,mouse_y)
-        print self.hover_square
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -93,23 +92,23 @@ class Play:
         self.level = level
         self.left_offset, self.up_offset = 0, 0
         self.animation_test.set_pos(0,0,self.level.tile_dimensions, self.level.tile_offsets)
-        
+        t_offsets = self.level.tile_offsets
+        self.tile_w = sqrt(pow(t_offsets[0],2) + pow(t_offsets[1],2))
+        self.tile_h = self.tile_w
         
     def get_mouse_square(self, mouse_x, mouse_y ):
-        #make sure mouse is in area
+        
         t_offsets = self.level.tile_offsets
         t_dimensions = self.level.tile_dimensions
-        
-
         mouse_x -= self.left_offset + t_offsets[0]
         mouse_y -= self.up_offset
         theta1 = atan(t_offsets[0]/t_offsets[1])
         theta2 = atan(t_offsets[1]/t_offsets[0])
         x = mouse_x*cos(theta1) + mouse_y*sin(theta1)
         y = -mouse_x*sin(theta2) + mouse_y*cos(theta2)
-        w = sqrt(pow(t_offsets[0],2) + pow(t_offsets[1],2))
-        h = w
-        if 0 < x < w*(self.level.w-1) and 0 < y < h*(self.level.h-1):
-            return floor((x/(w*(self.level.w-1)))*self.level.w), floor((y/(h*(self.level.h-1)))*self.level.h)
+        max_x = self.tile_w*(self.level.w-1)
+        max_y = self.tile_h*(self.level.h-1)
+        if 0 < x < max_x and 0 < y < max_y:
+            return floor((x/max_x)*self.level.w), floor((y/max_y)*self.level.h)
         else:
             return False
