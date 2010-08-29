@@ -2,6 +2,11 @@ import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+import level
+
+TILE_DIMENSIONS = level.TILE_DIMENSIONS
+TILE_OFFSETS = level.TILE_OFFSETS
+
 class Graphic:
     def __init__( self, x,y,a,texture = None, scale_factor = 1.0):
         self.a = a
@@ -124,7 +129,18 @@ class Actor( Animated ):
             self.frame_index = 0
         self.current_frame = self.current_routine[self.frame_index] 
 
-    def set_pos(self, x, y, tile_settings, tile_offsets):
-        base, height = tile_settings
-        width_offset, height_offset = tile_offsets
+    def set_pos(self, x, y):
+        base, height = TILE_DIMENSIONS
+        width_offset, height_offset = TILE_OFFSETS
         Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)
+
+class Character:
+    def __init__( self, spritesheet, across, down, portrait, stats = None, scale_factor = 1.0 ):
+        self.actor = Actor( 0.0,0.0,1.0,across,down,spritesheet,scale_factor)
+        self.portrait = Graphic( 0.0,0.0,1.0,portrait, 2*scale_factor)        
+        self.position = (0,0)
+        
+    #in tile coordinates
+    def set_pos(self, x ,y):
+        self.actor.set_pos(x,y)
+        self.position = (x,y)

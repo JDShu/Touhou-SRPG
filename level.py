@@ -1,7 +1,8 @@
-from objects import *
 SCALE = 0.8
 TILE_DIMENSIONS = TILE_BASE, TILE_HEIGHT = SCALE*90, SCALE*60
 TILE_OFFSETS = WIDTH_OFFSET, HEIGHT_OFFSET = SCALE*45, SCALE*30
+
+from objects import *
 
 class Level:
     def __init__( self, width, height ):

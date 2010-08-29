@@ -98,6 +98,7 @@ class Menu:
         self.entries = []
         self.x, self.y = 0, 0
         self.visible = False
+        self.screen_w = pygame.display.get_surface().get_width()
         
     def toggle(self):
         self.visible = not self.visible
@@ -111,7 +112,8 @@ class Menu:
             for entry in self.entries:
                 if entry.graphic.current == entry.graphic.clicked:
                     entry.execute(*args)
-            
+            self.visible = False
+        
     def update( self, mouse_pos, left_click ):
         for i, entry in enumerate(self.entries):
             entry.set_pos(self.x, self.y, i)
@@ -124,14 +126,17 @@ class Menu:
                 temp_x = self.x + MENU_BORDER
                 temp_y = self.y - MENU_BORDER - TITLE_HEIGHT - (1+i)*ENTRY_HEIGHT
                 entry.graphic.current.Draw()
-#self.option.set_pos(self.x + MENU_BORDER,self.y - MENU_BORDER - TITLE_HEIGHT, i)
-                #self.option.Draw()
                 
                 print_text(entry.title,temp_x,temp_y,self.font)
             print_text(self.title,self.x + MENU_BORDER,self.y - TITLE_HEIGHT - MENU_BORDER,self.font)
             
     def set_pos(self, x, y):
         self.x, self.y = x, y
+        if y < self.body.h:
+            self.y = y + self.body.h
+        if x > self.screen_w - self.body.w:
+            self.x = x - self.body.w
         self.body.set_pos(self.x, self.y)
-
+        
+            
 
