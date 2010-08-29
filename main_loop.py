@@ -13,7 +13,7 @@ class Main_Loop:
         glClearColor(0.0,0.0,0.0,0.0)    
         self.current_mode = None
         self.game_state = game_state.Game_State(x,y)
-        pygame.time.set_timer(pygame.USEREVENT+1, 200)
+        pygame.time.set_timer(pygame.USEREVENT+1, 150)
         pygame.time.set_timer(pygame.USEREVENT+2, 100)
         
     def process( self ):
