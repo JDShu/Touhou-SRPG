@@ -67,18 +67,18 @@ class Play:
             elif event.type == pygame.KEYUP:
                 self.keybuffer[ event.key ] = False
             elif event.type == pygame.USEREVENT + 1:
-                self.reimu_test.actor.update()
+                self.reimu_test.anim_update()
+            elif event.type == pygame.USEREVENT + 2:
+                self.reimu_test.pos_update()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pass
             elif event.type == pygame.MOUSEBUTTONUP:
-                if r_click:
-                    if self.play_state.mode != BROWSE:
-                        self.play_state.set_state(BROWSE)
                 if self.play_state.mode == BROWSE:
                     if r_click:
                         self.test_menu.set_pos(mouse_x, mouse_y)
                         self.test_menu.toggle()
                         self.reimu_menu.visible = False
+                        self.selected_character = None
                     elif l_click:
                         self.test_menu.process_click(1)
                         self.reimu_menu.process_click(self.play_state)
@@ -86,10 +86,17 @@ class Play:
                             self.selected_character = self.reimu_test
                             self.reimu_menu.set_pos(mouse_x, mouse_y)
                             self.reimu_menu.visible = True
-                        else:
-                            self.selected_character = None
                         
-        #scroll around map
+
+                elif self.play_state.mode == MOVE:
+                    if r_click:
+                        self.play_state.set_state(BROWSE)
+                    if l_click:
+                        if self.hover_square:
+                            self.selected_character.move_to(*self.hover_square)
+                            self.play_state.set_state(BROWSE)
+                        
+#scroll around map
         if self.keybuffer[pygame.K_UP]:
             self.up_offset -= 3.0
         if self.keybuffer[pygame.K_DOWN]:

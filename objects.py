@@ -1,11 +1,21 @@
 import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from math import *
 
 import level
 
 TILE_DIMENSIONS = level.TILE_DIMENSIONS
 TILE_OFFSETS = level.TILE_OFFSETS
+ratio = sqrt(pow(TILE_DIMENSIONS[0],2) + pow(TILE_DIMENSIONS[1],2))
+INC_UP = TILE_DIMENSIONS[0]/ratio
+INC_ACROSS = TILE_DIMENSIONS[1]/ratio
+
+def square_to_screen(x,y):
+    base, height = TILE_DIMENSIONS
+    width_offset, height_offset = TILE_OFFSETS
+    return -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y
+
 
 class Graphic:
     def __init__( self, x,y,a,texture = None, scale_factor = 1.0):
@@ -134,13 +144,51 @@ class Actor( Animated ):
         width_offset, height_offset = TILE_OFFSETS
         Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)
 
+    def step(self,up,across,speed = 5.0):
+        Graphic.set_pos(self, self.x +speed*(up)*INC_UP, self.y + speed*(across)*INC_ACROSS)
+        
 class Character:
     def __init__( self, spritesheet, across, down, portrait, stats = None, scale_factor = 1.0 ):
         self.actor = Actor( 0.0,0.0,1.0,across,down,spritesheet,scale_factor)
         self.portrait = Graphic( 0.0,0.0,1.0,portrait, 2*scale_factor)        
-        self.position = (0,0)
+        self.position = self.x, self.y = 0,0
+        self.moving = False
         
     #in tile coordinates
     def set_pos(self, x ,y):
         self.actor.set_pos(x,y)
-        self.position = (x,y)
+        self.position = self.x, self.y = x,y
+
+    def move_to( self, x, y ):
+        self.moving = True
+        self.destination = (x,y)
+        base, height = TILE_DIMENSIONS
+        width_offset, height_offset = TILE_OFFSETS
+        self.map_dest = square_to_screen(x,y)
+        
+#self.set_pos(x,y)
+
+    def step( self,up,across,speed, destination):
+        #print destination[0], self.actor.x
+        temp_x, temp_y = square_to_screen(*destination)
+        if abs(temp_x - self.actor.x) > speed:
+            self.actor.step(up,across,speed)
+        else:
+            self.set_pos(*destination)
+            #print "Arrived: ", self.x, self.y
+            
+    def pos_update( self ):
+        if self.moving:  
+            #print self.destination, (self.x,self.y)
+            if self.destination[0] < self.x:
+                self.step(-1,-1,5.0,(self.x - 1, self.y))
+            elif self.destination[0] > self.x:
+                self.step(1,1,5.0,(self.x + 1, self.y))
+            elif self.destination[1] < self.y:
+                self.step(1,-1,5.0,(self.x, self.y - 1))
+            elif self.destination[1] > self.y:
+                self.step(-1,1,5.0,(self.x, self.y + 1))
+            else:
+                self.moving = False
+    def anim_update(self):
+        self.actor.update()
