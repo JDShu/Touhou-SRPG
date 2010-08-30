@@ -32,9 +32,9 @@ class Graphic:
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST )
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
 
-        if not self.w:
+        if w:
             self.w = w
-        if not self.h:
+        if h:
             self.h = h
         
         self.w *= scale_factor
@@ -124,7 +124,7 @@ class Animated( Graphic ):
         glBindTexture( GL_TEXTURE_2D, self.texture )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
-
+        
         #draw
         glTranslatef(self.x,self.y,0.0)
         glColor4f(*color)

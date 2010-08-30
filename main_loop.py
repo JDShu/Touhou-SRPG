@@ -14,7 +14,7 @@ class Main_Loop:
         self.current_mode = None
         self.game_state = game_state.Game_State(x,y)
         pygame.time.set_timer(pygame.USEREVENT+1, 150)
-        pygame.time.set_timer(pygame.USEREVENT+2, 100)
+        pygame.time.set_timer(pygame.USEREVENT+2, 50)
         
     def process( self ):
         self.current_mode = self.game_state.process( self.current_mode )

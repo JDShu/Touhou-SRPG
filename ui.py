@@ -19,10 +19,10 @@ class Menu_Body( Graphic ):
         h = MENU_BORDER*2 + TITLE_HEIGHT
         w = MENU_BORDER*2 + ENTRY_WIDTH
         Graphic.__init__( self, 0.0,0.0,0.8,filename,scale_factor,w,h)
-        
 
     def add_entry( self ):
         self.h += ENTRY_HEIGHT
+        self.setup_draw()
 
     def set_pos(self, x,y):
         self.x = x
@@ -63,7 +63,6 @@ class Menu_Option_Graphic:
         return True
 
     def Draw( self ):
-        self.setup_draw()
         self.current.Draw()
         
     def set_pos( self,x,y):

@@ -48,6 +48,7 @@ class Play:
             self.keybuffer.append( False )
         
     def process( self ):
+        
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mouse_y = self.h - mouse_y
         l_click, m_click, r_click = pygame.mouse.get_pressed()
@@ -70,6 +71,7 @@ class Play:
                 self.reimu_test.anim_update()
             elif event.type == pygame.USEREVENT + 2:
                 self.reimu_test.pos_update()
+        
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pass
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -125,7 +127,8 @@ class Play:
         return True
     
     def draw( self ):
-        #draw map
+        
+#draw map
         glPushMatrix()
         glTranslatef(self.left_offset,self.up_offset,0.0)
         self.draw_map()
