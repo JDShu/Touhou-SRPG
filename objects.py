@@ -18,13 +18,12 @@ def square_to_screen(x,y):
 
 
 class Graphic:
-    def __init__( self, x,y,a,texture = None, scale_factor = 1.0):
+    def __init__( self, x,y,a,texture = None, scale_factor = 1.0, w = None, h = None):
         self.a = a
-        self.x, self.y = x,y
+        self.x, self.y = 0,0#x,y
         self.texture = texture
         texture_surface = pygame.image.load(texture)
         texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
-            
         self.w = texture_surface.get_width()
         self.h = texture_surface.get_height()
         self.texture = glGenTextures(1)
@@ -33,16 +32,27 @@ class Graphic:
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST )
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
 
+        if not self.w:
+            self.w = w
+        if not self.h:
+            self.h = h
+        
         self.w *= scale_factor
         self.h *= scale_factor
-
+        
+        #pregenerate render code
+        self.draw_list = glGenLists(2)
+        self.draw_list_2 = self.draw_list + 1 
+        self.setup_draw()
+        
     def set_pos(self, x,y):
         self.x = x
         self.y = y
         #print "position set to", x, y
+
+    def setup_draw( self ):
         
-    def Draw( self ):
-        #set up
+        glNewList(self.draw_list, GL_COMPILE)
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
@@ -51,9 +61,9 @@ class Graphic:
         glBindTexture( GL_TEXTURE_2D, self.texture )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+        glEndList()
 
-        #draw
-        glTranslatef(self.x,self.y,0.0)
+        glNewList(self.draw_list_2,GL_COMPILE)
         glColor4f(*color)
         glBegin(GL_QUADS)
         glTexCoord2f(0.0, 0.0)
@@ -68,6 +78,14 @@ class Graphic:
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
         glPopMatrix()
+        
+        glEndList()
+        
+    def Draw( self ):
+        #set up
+        glCallList(self.draw_list)
+        glTranslatef(self.x,self.y,0.0)
+        glCallList(self.draw_list_2)
 
 class Tile( Graphic ):
     def __init__( self, x,y,a,base,height,width_offset, height_offset,filename,scale_factor = 1.0):
@@ -148,11 +166,13 @@ class Actor( Animated ):
         Graphic.set_pos(self, self.x +speed*(up)*INC_UP, self.y + speed*(across)*INC_ACROSS)
         
 class Character:
+    READY, MOVING, MOVED = xrange(3)
     def __init__( self, spritesheet, across, down, portrait, stats = None, scale_factor = 1.0 ):
         self.actor = Actor( 0.0,0.0,1.0,across,down,spritesheet,scale_factor)
         self.portrait = Graphic( 0.0,0.0,1.0,portrait, 2*scale_factor)        
         self.position = self.x, self.y = 0,0
-        self.moving = False
+        self.moving = self.READY
+        self.before_position = self.position
         
     #in tile coordinates
     def set_pos(self, x ,y):
@@ -160,14 +180,13 @@ class Character:
         self.position = self.x, self.y = x,y
 
     def move_to( self, x, y ):
-        self.moving = True
+        self.moving = self.MOVING
         self.destination = (x,y)
         base, height = TILE_DIMENSIONS
         width_offset, height_offset = TILE_OFFSETS
         self.map_dest = square_to_screen(x,y)
+        self.before_position = self.position
         
-#self.set_pos(x,y)
-
     def step( self,up,across,speed, destination):
         #print destination[0], self.actor.x
         temp_x, temp_y = square_to_screen(*destination)
@@ -178,7 +197,7 @@ class Character:
             #print "Arrived: ", self.x, self.y
             
     def pos_update( self ):
-        if self.moving:  
+        if self.moving == self.MOVING:  
             #print self.destination, (self.x,self.y)
             if self.destination[0] < self.x:
                 self.step(-1,-1,5.0,(self.x - 1, self.y))
@@ -189,6 +208,16 @@ class Character:
             elif self.destination[1] > self.y:
                 self.step(-1,1,5.0,(self.x, self.y + 1))
             else:
-                self.moving = False
+                self.moving = self.MOVED
+
+    def revert(self):
+        self.position = self.before_position
+        self.set_pos(*self.position)
+        self.moving = self.READY
+
+    def confirm(self):
+        self.before_position = self.position
+        self.moving = self.READY
+        
     def anim_update(self):
         self.actor.update()

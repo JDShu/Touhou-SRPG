@@ -16,9 +16,10 @@ def print_text(text,x,y,font):
 
 class Menu_Body( Graphic ):
     def __init__( self, filename,scale_factor = 1.0 ):
-        Graphic.__init__( self, 0.0,0.0,0.8,filename,scale_factor)
-        self.h = MENU_BORDER*2 + TITLE_HEIGHT
-        self.w = MENU_BORDER*2 + ENTRY_WIDTH
+        h = MENU_BORDER*2 + TITLE_HEIGHT
+        w = MENU_BORDER*2 + ENTRY_WIDTH
+        Graphic.__init__( self, 0.0,0.0,0.8,filename,scale_factor,w,h)
+        
 
     def add_entry( self ):
         self.h += ENTRY_HEIGHT
@@ -29,20 +30,18 @@ class Menu_Body( Graphic ):
 
 class Menu_Option_Graphic:
     def __init__( self, idle, hover = None, clicked = None, scale_factor = 1.0 ): #filename str arguments
+
+        h = ENTRY_HEIGHT
+        w = ENTRY_WIDTH
+    
+        self.idle = Graphic(0.0,0.0,0.8,idle,scale_factor,w,h)
         
-        self.idle = Graphic(0.0,0.0,0.8,idle,scale_factor)
-        self.idle.h = ENTRY_HEIGHT
-        self.idle.w = ENTRY_WIDTH
         if hover:
-            self.hover = Graphic(0.0,0.0,0.8,hover,scale_factor)
-            self.hover.h = ENTRY_HEIGHT
-            self.hover.w = ENTRY_WIDTH
+            self.hover = Graphic(0.0,0.0,0.8,hover,scale_factor,w,h)
         else:
             self.hover = None
         if clicked:
-            self.clicked = Graphic(0.0,0.0,0.8,clicked,scale_factor)
-            self.clicked.h = ENTRY_HEIGHT
-            self.clicked.w = ENTRY_WIDTH
+            self.clicked = Graphic(0.0,0.0,0.8,clicked,scale_factor,w,h)
         else:
             self.clicked = None
 
@@ -64,6 +63,7 @@ class Menu_Option_Graphic:
         return True
 
     def Draw( self ):
+        self.setup_draw()
         self.current.Draw()
         
     def set_pos( self,x,y):

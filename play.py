@@ -90,12 +90,26 @@ class Play:
 
                 elif self.play_state.mode == MOVE:
                     if r_click:
-                        self.play_state.set_state(BROWSE)
-                    if l_click:
+                        if self.selected_character.moving == self.selected_character.MOVING:
+                            self.selected_character.revert()
+                        elif self.selected_character.moving == self.selected_character.MOVED:
+                            self.selected_character.confirm()
+                            print "1"
+                            self.play_state.set_state(BROWSE)
+                        else:
+                            print "2"
+                            self.play_state.set_state(BROWSE)
+                            
+                    if l_click and not self.selected_character.moving:
                         if self.hover_square:
                             self.selected_character.move_to(*self.hover_square)
-                            self.play_state.set_state(BROWSE)
-                        
+                    
+                    
+
+        #if self.play_state.mode == MOVE:
+        #    if self.selected_character.moving == self.selected_character.MOVED:
+        #        self.play_state.set_state(BROWSE)
+        #        print "3"
 #scroll around map
         if self.keybuffer[pygame.K_UP]:
             self.up_offset -= 3.0
@@ -115,6 +129,7 @@ class Play:
         glPushMatrix()
         glTranslatef(self.left_offset,self.up_offset,0.0)
         self.draw_map()
+#        self.reimu_test.actor.setup_draw()
         self.reimu_test.actor.Draw()
         glPopMatrix()
 #        self.test_menu.Draw()
@@ -129,6 +144,7 @@ class Play:
         pass
 
     def draw_map( self ):
+        self.level.ground_tile.setup_draw()
         for x in xrange(self.level.w):
             for y in xrange(self.level.h):
                 self.level.ground_tile.set_pos(x,y)
@@ -136,7 +152,8 @@ class Play:
         if self.hover_square:
             self.level.hover_tile.set_pos(*self.hover_square)
             self.level.hover_tile.Draw()
-                    
+            
+            
     def load_level( self, level ):
         self.level = level
         self.left_offset, self.up_offset = 0, 0
