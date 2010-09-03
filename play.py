@@ -7,6 +7,8 @@ import ui
 import glFreeType
 from objects import *
 import actions
+import stats
+import astar
 
 SCALE = 0.5
 
@@ -31,7 +33,8 @@ class Play:
         
         self.level = None
         self.new_keybuffer()
-        self.reimu_test = Character("reimu2.png",9,2,"reimu_portrait.png",None,SCALE)
+        self.reimu_stats = stats.Stats(100, 5)
+        self.reimu_test = Character("reimu2.png",9,2,"reimu_portrait.png",self.reimu_stats,SCALE)
         self.reimu_menu = ui.Menu("Reimu")
         self.reimu_menu.add_entry(ui.Menu_Entry("Move", actions.move, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
         self.test_menu = ui.Menu("Title")
@@ -70,8 +73,8 @@ class Play:
             elif event.type == pygame.USEREVENT + 1:
                 self.reimu_test.anim_update()
             elif event.type == pygame.USEREVENT + 2:
-                self.reimu_test.pos_update()
-        
+                self.reimu_test.move()
+                
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pass
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -104,7 +107,7 @@ class Play:
                             
                     if l_click and not self.selected_character.moving:
                         if self.hover_square:
-                            self.selected_character.move_to(*self.hover_square)
+                            self.selected_character.move_to(self.level, self.hover_square)
                     
                     
 
@@ -160,7 +163,7 @@ class Play:
     def load_level( self, level ):
         self.level = level
         self.left_offset, self.up_offset = 0, 0
-        self.reimu_test.set_pos(0,0)
+        self.reimu_test.set_pos(5,5)
         t_offsets = self.level.tile_offsets
         self.tile_w = sqrt(pow(t_offsets[0],2) + pow(t_offsets[1],2))
         self.tile_h = self.tile_w

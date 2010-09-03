@@ -4,6 +4,9 @@ from OpenGL.GLU import *
 from math import *
 
 import level
+import astar
+import copy
+import collections
 
 TILE_DIMENSIONS = level.TILE_DIMENSIONS
 TILE_OFFSETS = level.TILE_OFFSETS
@@ -162,9 +165,25 @@ class Actor( Animated ):
         width_offset, height_offset = TILE_OFFSETS
         Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)
 
-    def step(self,up,across,speed = 5.0):
-        Graphic.set_pos(self, self.x +speed*(up)*INC_UP, self.y + speed*(across)*INC_ACROSS)
+    #def step(self,up,across,speed = 5.0):
+    #    Graphic.set_pos(self, self.x +speed*(up)*INC_UP, self.y + speed*(across)*INC_ACROSS)
+    # return screen coordinates after moving actor by "distance"
+    def move( self, distance, direction ):
+        if direction == "up":
+            up = -1
+            across = 1
+        elif direction == "down":
+            up = 1
+            across = -1
+        elif direction == "left":
+            up = -1
+            across = -1
+        else:
+            up = 1
+            across = 1
         
+        Graphic.set_pos(self, self.x + distance*(up)*INC_UP, self.y + distance*(across)*INC_ACROSS)
+                
 class Character:
     READY, MOVING, MOVED = xrange(3)
     def __init__( self, spritesheet, across, down, portrait, stats = None, scale_factor = 1.0 ):
@@ -173,43 +192,76 @@ class Character:
         self.position = self.x, self.y = 0,0
         self.moving = self.READY
         self.before_position = self.position
-        
+        self.stats = stats
+        self.path = collections.deque()
+        self.next_node = None
+        self.next_node_coordinate = None
+        self.direction = "up"#None
+    
     #in tile coordinates
     def set_pos(self, x ,y):
         self.actor.set_pos(x,y)
         self.position = self.x, self.y = x,y
 
-    def move_to( self, x, y ):
-        self.moving = self.MOVING
-        self.destination = (x,y)
-        base, height = TILE_DIMENSIONS
-        width_offset, height_offset = TILE_OFFSETS
-        self.map_dest = square_to_screen(x,y)
-        self.before_position = self.position
-        
-    def step( self,up,across,speed, destination):
-        #print destination[0], self.actor.x
-        temp_x, temp_y = square_to_screen(*destination)
-        if abs(temp_x - self.actor.x) > speed:
-            self.actor.step(up,across,speed)
+    #takes the map and the destination as input and returns a list of map coordinates leading to destination
+    def move_to( self, level, destination ):
+        temp_grid = astar.Grid(level)
+        path = astar.Path(temp_grid, self.position, [(int(destination[0]),int(destination[1]))])
+        self.path = collections.deque()
+        for c in path.path:
+            self.path.appendleft(c)
+        #print self.path
+        self.next_node = self.path.popleft()
+        self.next_node_coordinate = square_to_screen(*self.next_node)
+        print self.next_node, self.position
+        #calculate which direction
+        across = self.next_node[0] - self.position[0]
+        up = self.next_node[1] - self.position[1]
+        if across == -1:
+            self.direction = "left"
+        elif across == 1:
+            self.direction = "right"
+        elif up == -1:
+            self.direction = "down"
+        elif up == 1:
+            self.direction = "up"
         else:
-            self.set_pos(*destination)
-            #print "Arrived: ", self.x, self.y
-            
-    def pos_update( self ):
-        if self.moving == self.MOVING:  
-            #print self.destination, (self.x,self.y)
-            if self.destination[0] < self.x:
-                self.step(-1,-1,5.0,(self.x - 1, self.y))
-            elif self.destination[0] > self.x:
-                self.step(1,1,5.0,(self.x + 1, self.y))
-            elif self.destination[1] < self.y:
-                self.step(1,-1,5.0,(self.x, self.y - 1))
-            elif self.destination[1] > self.y:
-                self.step(-1,1,5.0,(self.x, self.y + 1))
-            else:
-                self.moving = self.MOVED
+            self.direction = None
+        
+#move to next coordinate in path    
+    def move( self ):
+        if self.next_node and self.position != self.next_node:
+            #move according to direction
+            self.move_update()
 
+    #the actual function that updates the position, if it arrives at the node, it snaps to position
+    def move_update( self ):
+        x, y = self.position
+        self.actor.move(10.0, self.direction)
+        #check arrived condition
+        if abs(self.actor.x - self.next_node_coordinate[0]) < 10*INC_UP:
+            self.set_pos(*self.next_node)
+            self.position = self.next_node
+            if self.path:
+                self.next_node = self.path.popleft()
+                self.next_node_coordinate = square_to_screen(*self.next_node)
+                #calculate which direction
+                across = self.next_node[0] - self.position[0]
+                up = self.next_node[1] - self.position[1]
+                if across == -1:
+                    self.direction = "left"
+                elif across == 1:
+                    self.direction = "right"
+                elif up == -1:
+                    self.direction = "down"
+                elif up == 1:
+                    self.direction = "up"
+                else:
+                    self.direction = None
+            else:
+                direction = None
+
+        
     def revert(self):
         self.position = self.before_position
         self.set_pos(*self.position)

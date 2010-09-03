@@ -8,7 +8,7 @@ class Main_Loop:
         pygame.display.init()
         pygame.display.set_caption("Touhou SRPG")
         self.width, self.height = x, y
-        self.screen =  pygame.display.set_mode((self.width, self.height), pygame.OPENGL)
+        self.screen =  pygame.display.set_mode((self.width, self.height), pygame.OPENGL|pygame.DOUBLEBUF)
         glOrtho(0.0, self.width, 0.0, self.height,-1.0,1.0)
         glClearColor(0.0,0.0,0.0,0.0)    
         self.current_mode = None
