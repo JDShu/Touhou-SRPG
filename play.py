@@ -18,8 +18,17 @@ class Play_State:
     def __init__( self, level ):
         self.mode = BROWSE
         self.level = level
+        #temporary touhou specific menus
+        self.menus = {}
+        self.menus["reimu"] = ui.Menu("Reimu")
+        self.menus["reimu"].add_entry(ui.Menu_Entry("Move", actions.move, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
+        self.menus["move_confirm"] = ui.Menu("OK?")
+        self.menus["move_confirm"].add_entry(ui.Menu_Entry("Yes", actions.confirm, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
+        self.menus["move_confirm"].add_entry(ui.Menu_Entry("No", actions.revert, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
+        
+        
     def set_state(self, state):
-        print "state: ", state
+        #print "state: ", state
         self.mode = state
         
 #map file, scenario file, characters
@@ -33,13 +42,8 @@ class Play:
         
         self.level = None
         self.new_keybuffer()
-        self.reimu_stats = stats.Stats(100, 5)
+        self.reimu_stats = stats.Stats(100, 4)
         self.reimu_test = Character("reimu2.png",9,2,"reimu_portrait.png",self.reimu_stats,SCALE)
-        self.reimu_menu = ui.Menu("Reimu")
-        self.reimu_menu.add_entry(ui.Menu_Entry("Move", actions.move, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
-        self.test_menu = ui.Menu("Title")
-        self.test_menu.add_entry(ui.Menu_Entry("1", f, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
-        self.test_menu.add_entry(ui.Menu_Entry("2", g, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
         self.w, self.h = w, h
         self.font = glFreeType.font_data( "free_sans.ttf", 30 )
         self.selected_character = None
@@ -74,47 +78,42 @@ class Play:
                 self.reimu_test.anim_update()
             elif event.type == pygame.USEREVENT + 2:
                 self.reimu_test.move()
-                
+            elif event.type == pygame.USEREVENT + 3:
+                self.play_state.menus["move_confirm"].set_pos(mouse_x, mouse_y)
+                self.play_state.menus["move_confirm"].visible = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pass
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.play_state.mode == BROWSE:
                     if r_click:
-                        self.test_menu.set_pos(mouse_x, mouse_y)
-                        self.test_menu.toggle()
-                        self.reimu_menu.visible = False
+                        #self.test_menu.set_pos(mouse_x, mouse_y)
+                        #self.test_menu.toggle()
+                        self.play_state.menus["reimu"].visible = False
                         self.selected_character = None
                     elif l_click:
-                        self.test_menu.process_click(1)
-                        self.reimu_menu.process_click(self.play_state)
+                        #self.test_menu.process_click(1)
+                        for m in self.play_state.menus:
+                            self.play_state.menus[m].process_click(self.play_state, self.selected_character)
                         if self.hover_square == self.reimu_test.position:
                             self.selected_character = self.reimu_test
-                            self.reimu_menu.set_pos(mouse_x, mouse_y)
-                            self.reimu_menu.visible = True
+                            self.play_state.menus["reimu"].set_pos(mouse_x, mouse_y)
+                            self.play_state.menus["reimu"].visible = True
                         
 
                 elif self.play_state.mode == MOVE:
-                    if r_click:
-                        if self.selected_character.moving == self.selected_character.MOVING:
-                            self.selected_character.revert()
-                        elif self.selected_character.moving == self.selected_character.MOVED:
-                            self.selected_character.confirm()
-                            print "1"
-                            self.play_state.set_state(BROWSE)
-                        else:
-                            print "2"
-                            self.play_state.set_state(BROWSE)
-                            
+                    #calculate and display accessible tiles
+                    
                     if l_click and not self.selected_character.moving:
                         if self.hover_square:
                             self.selected_character.move_to(self.level, self.hover_square)
-                    
-                    
 
-        #if self.play_state.mode == MOVE:
-        #    if self.selected_character.moving == self.selected_character.MOVED:
-        #        self.play_state.set_state(BROWSE)
-        #        print "3"
+                    if self.selected_character.moving == self.selected_character.MOVED:
+                        for m in self.play_state.menus:
+                            self.play_state.menus[m].process_click(self.play_state, self.selected_character)
+                        if r_click:
+                            actions.revert(self.play_state, self.selected_character)
+                            self.play_state.menus["move_confirm"].visible = False
+
 #scroll around map
         if self.keybuffer[pygame.K_UP]:
             self.up_offset -= 3.0
@@ -124,9 +123,8 @@ class Play:
             self.left_offset += 3.0
         if self.keybuffer[pygame.K_RIGHT]:
             self.left_offset -= 3.0
-
-        self.test_menu.update((mouse_x,mouse_y),l_click)
-        self.reimu_menu.update((mouse_x,mouse_y),l_click)
+        for m in self.play_state.menus:
+            self.play_state.menus[m].update((mouse_x,mouse_y),l_click)
         return True
     
     def draw( self ):
@@ -138,13 +136,12 @@ class Play:
 #        self.reimu_test.actor.setup_draw()
         self.reimu_test.actor.Draw()
         glPopMatrix()
-#        self.test_menu.Draw()
-        self.reimu_menu.Draw()
+        for m in self.play_state.menus:
+            self.play_state.menus[m].Draw()
         if self.hover_character:
             self.hover_character.portrait.Draw()
         elif self.selected_character:
             self.selected_character.portrait.Draw()
-            
         
     def load_map( self, level_map ):
         pass
@@ -155,10 +152,14 @@ class Play:
             for y in xrange(self.level.h):
                 self.level.ground_tile.set_pos(x,y)
                 self.level.ground_tile.Draw()
+        if self.play_state.mode == MOVE:
+            for t in self.selected_character.accessible:
+                if 0 <= t[0] < self.level.w and 0 <= t[1] <self.level.h:
+                    self.level.hover_tile.set_pos(*t)
+                    self.level.hover_tile.Draw()
         if self.hover_square:
             self.level.hover_tile.set_pos(*self.hover_square)
             self.level.hover_tile.Draw()
-            
             
     def load_level( self, level ):
         self.level = level

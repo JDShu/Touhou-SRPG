@@ -111,8 +111,8 @@ class Menu:
             for entry in self.entries:
                 if entry.graphic.current == entry.graphic.clicked:
                     entry.execute(*args)
-            self.visible = False
-        
+                    self.visible = False
+            
     def update( self, mouse_pos, left_click ):
         for i, entry in enumerate(self.entries):
             entry.set_pos(self.x, self.y, i)

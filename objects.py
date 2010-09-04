@@ -193,11 +193,13 @@ class Character:
         self.moving = self.READY
         self.before_position = self.position
         self.stats = stats
+        #movement variables
         self.path = collections.deque()
         self.next_node = None
         self.next_node_coordinate = None
-        self.direction = "up"#None
-    
+        self.direction = None
+        self.accessible = []
+        
     #in tile coordinates
     def set_pos(self, x ,y):
         self.actor.set_pos(x,y)
@@ -205,28 +207,30 @@ class Character:
 
     #takes the map and the destination as input and returns a list of map coordinates leading to destination
     def move_to( self, level, destination ):
-        temp_grid = astar.Grid(level)
-        path = astar.Path(temp_grid, self.position, [(int(destination[0]),int(destination[1]))])
-        self.path = collections.deque()
-        for c in path.path:
-            self.path.appendleft(c)
-        #print self.path
-        self.next_node = self.path.popleft()
-        self.next_node_coordinate = square_to_screen(*self.next_node)
-        print self.next_node, self.position
-        #calculate which direction
-        across = self.next_node[0] - self.position[0]
-        up = self.next_node[1] - self.position[1]
-        if across == -1:
-            self.direction = "left"
-        elif across == 1:
-            self.direction = "right"
-        elif up == -1:
-            self.direction = "down"
-        elif up == 1:
-            self.direction = "up"
-        else:
-            self.direction = None
+        if destination in self.accessible:
+            self.before_position = self.position
+            temp_grid = astar.Grid(level)
+            path = astar.Path(temp_grid, self.position, [(int(destination[0]),int(destination[1]))])
+            self.path = collections.deque()
+            for c in path.path:
+                self.path.appendleft(c)
+            #print self.path
+            self.next_node = self.path.popleft()
+            self.next_node_coordinate = square_to_screen(*self.next_node)
+            #print self.next_node, self.position
+            #calculate direction
+            across = self.next_node[0] - self.position[0]
+            up = self.next_node[1] - self.position[1]
+            if across == -1:
+                self.direction = "left"
+            elif across == 1:
+                self.direction = "right"
+            elif up == -1:
+                self.direction = "down"
+            elif up == 1:
+                self.direction = "up"
+            else:
+                self.direction = None
         
 #move to next coordinate in path    
     def move( self ):
@@ -259,17 +263,35 @@ class Character:
                 else:
                     self.direction = None
             else:
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT + 3))
                 direction = None
-
+                self.moving = self.MOVED
         
     def revert(self):
         self.position = self.before_position
         self.set_pos(*self.position)
         self.moving = self.READY
-
+        self.direction = None
+        self.next_node = self.position
+        
     def confirm(self):
         self.before_position = self.position
         self.moving = self.READY
         
     def anim_update(self):
         self.actor.update()
+
+    #create a list of map coordinates that the character is allowed to move to
+    def find_accessible(self):
+        accessible = set()
+        accessible.add(self.position)
+        for i in xrange(self.stats.speed):
+            temp = set()
+            for c in accessible:
+                temp.add((c[0],c[1]-1))
+                temp.add((c[0],c[1]+1))
+                temp.add((c[0]-1,c[1]))
+                temp.add((c[0]+1,c[1]))
+            accessible = accessible.union(temp)
+        self.accessible = accessible
+            
