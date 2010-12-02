@@ -8,7 +8,7 @@ import astar
 import copy
 import collections
 
-TILE_DIMENSIONS = level.TILE_DIMENSIONS
+TILE_DIMENSIONS = TILE_BASE, TILE_HEIGHT = level.TILE_DIMENSIONS
 TILE_OFFSETS = level.TILE_OFFSETS
 ratio = sqrt(pow(TILE_DIMENSIONS[0],2) + pow(TILE_DIMENSIONS[1],2))
 INC_UP = TILE_DIMENSIONS[0]/ratio
@@ -33,7 +33,10 @@ class Graphic:
         glBindTexture( GL_TEXTURE_2D, self.texture )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST )
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
+        # OpenGL < 2.0 hack
+        gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
+        # OpenGL >= 2.0
+        #glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.w, self.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
 
         if w:
             self.w = w
@@ -90,6 +93,11 @@ class Graphic:
         glTranslatef(self.x,self.y,0.0)
         glCallList(self.draw_list_2)
 
+    def set_map_pos( self, x, y):
+        base, height = TILE_DIMENSIONS
+        width_offset, height_offset = TILE_OFFSETS
+        Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+0.5)*height_offset + height*y)
+        
 class Tile( Graphic ):
     def __init__( self, x,y,a,base,height,width_offset, height_offset,filename,scale_factor = 1.0):
         Graphic.__init__( self, x,y,a,filename, scale_factor)
@@ -243,9 +251,12 @@ class Character:
         x, y = self.position
         self.actor.move(10.0, self.direction)
         #check arrived condition
+        self.previous_node = self.position
+        
         if abs(self.actor.x - self.next_node_coordinate[0]) < 10*INC_UP:
             self.set_pos(*self.next_node)
             self.position = self.next_node
+        
             if self.path:
                 self.next_node = self.path.popleft()
                 self.next_node_coordinate = square_to_screen(*self.next_node)
@@ -262,6 +273,7 @@ class Character:
                     self.direction = "up"
                 else:
                     self.direction = None
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT + 4))
             else:
                 pygame.event.post(pygame.event.Event(pygame.USEREVENT + 3))
                 direction = None
@@ -282,7 +294,7 @@ class Character:
         self.actor.update()
 
     #create a list of map coordinates that the character is allowed to move to
-    def find_accessible(self):
+    def find_accessible(self, level):
         accessible = set()
         accessible.add(self.position)
         for i in xrange(self.stats.speed):
@@ -293,5 +305,15 @@ class Character:
                 temp.add((c[0]-1,c[1]))
                 temp.add((c[0]+1,c[1]))
             accessible = accessible.union(temp)
+            temp = set()
+            for t in accessible:
+                if not (0 <= t[0] < level.w and 0 <= t[1] < level.h):
+                    temp.add(t)
+                elif level.map[t[0]][t[1]]:
+                    temp.add(t)
+                accessible = accessible.difference(temp)
+            
+        #temp = set()
+        
         self.accessible = accessible
             

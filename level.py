@@ -24,11 +24,15 @@ class Level:
             
     def insert( self, coords, item ):
         if 0 <= coords[0] < self.w and 0 <= coords[1] < self.h:
-            self.map[coords[1]][coords[0]] = item
+            self.map[coords[0]][coords[1]] = item
 
     def remove (self, coords ):
-        self.map[coords[1]][coords[0]] = None
+        self.map[coords[0]][coords[1]] = None
             
+    def relocate (self, before, after, item):
+        self.remove(before)
+        self.insert(after,item)
+        
     def move( self, before, after ):
         self.map[after[0]][after[1]] = self.map[before[0]][before[1]]
         self.map[before[0]][before[1]] = None

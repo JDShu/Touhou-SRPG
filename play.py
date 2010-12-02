@@ -40,14 +40,13 @@ class Play:
         def g(x):
             print x + 1
         
-        self.level = None
         self.new_keybuffer()
         self.reimu_stats = stats.Stats(100, 4)
-        self.reimu_test = Character("reimu2.png",9,2,"reimu_portrait.png",self.reimu_stats,SCALE)
+        self.reimu_test = Character("reimu.png",9,2,"reimu_portrait.png",self.reimu_stats,SCALE)
         self.w, self.h = w, h
         self.font = glFreeType.font_data( "free_sans.ttf", 30 )
         self.selected_character = None
-        
+        self.tree_test = Graphic(0.0,0.0,1.0,"tree.png",SCALE)
         
     def new_keybuffer( self ):
         self.keybuffer = []
@@ -81,6 +80,9 @@ class Play:
             elif event.type == pygame.USEREVENT + 3:
                 self.play_state.menus["move_confirm"].set_pos(mouse_x, mouse_y)
                 self.play_state.menus["move_confirm"].visible = True
+                self.play_state.level.relocate(self.selected_character.previous_node,self.selected_character.position,  "X")
+            elif event.type == pygame.USEREVENT + 4:
+                self.play_state.level.relocate(self.selected_character.previous_node,self.selected_character.position,  "X")
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pass
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -105,7 +107,7 @@ class Play:
                     
                     if l_click and not self.selected_character.moving:
                         if self.hover_square:
-                            self.selected_character.move_to(self.level, self.hover_square)
+                            self.selected_character.move_to(self.play_state.level, self.hover_square)
 
                     if self.selected_character.moving == self.selected_character.MOVED:
                         for m in self.play_state.menus:
@@ -134,7 +136,8 @@ class Play:
         glTranslatef(self.left_offset,self.up_offset,0.0)
         self.draw_map()
 #        self.reimu_test.actor.setup_draw()
-        self.reimu_test.actor.Draw()
+        
+                            
         glPopMatrix()
         for m in self.play_state.menus:
             self.play_state.menus[m].Draw()
@@ -142,47 +145,63 @@ class Play:
             self.hover_character.portrait.Draw()
         elif self.selected_character:
             self.selected_character.portrait.Draw()
-        
+
+            
     def load_map( self, level_map ):
         pass
 
     def draw_map( self ):
-        self.level.ground_tile.setup_draw()
-        for x in xrange(self.level.w):
-            for y in xrange(self.level.h):
-                self.level.ground_tile.set_pos(x,y)
-                self.level.ground_tile.Draw()
+        objects = []
+        self.play_state.level.ground_tile.setup_draw()
+        for x in xrange(self.play_state.level.w):
+            for y in xrange(self.play_state.level.h):
+                self.play_state.level.ground_tile.set_pos(x,y)
+                self.play_state.level.ground_tile.Draw()
+                if self.play_state.level.map[x][y]:
+                    objects += [(self.play_state.level.map[x][y],(x,y))]
         if self.play_state.mode == MOVE:
             for t in self.selected_character.accessible:
-                if 0 <= t[0] < self.level.w and 0 <= t[1] <self.level.h:
-                    self.level.hover_tile.set_pos(*t)
-                    self.level.hover_tile.Draw()
+                #if 0 <= t[0] < self.play_state.level.w and 0 <= t[1] <self.play_state.level.h:
+                self.play_state.level.hover_tile.set_pos(*t)
+                self.play_state.level.hover_tile.Draw()
         if self.hover_square:
-            self.level.hover_tile.set_pos(*self.hover_square)
-            self.level.hover_tile.Draw()
-            
+            self.play_state.level.hover_tile.set_pos(*self.hover_square)
+            self.play_state.level.hover_tile.Draw()
+        #draw obstacles
+        for o in reversed(objects):
+            if o[0] == "T":
+                self.tree_test.set_map_pos(*o[1])
+                self.tree_test.Draw()
+            if o[0] == "X":
+                self.reimu_test.actor.Draw()
+
     def load_level( self, level ):
-        self.level = level
+        self.play_state = Play_State(level)
         self.left_offset, self.up_offset = 0, 0
         self.reimu_test.set_pos(5,5)
-        t_offsets = self.level.tile_offsets
+        self.play_state.level.insert((5,5),"X")
+        self.play_state.level.insert((7,7),"T")
+        self.play_state.level.insert((7,6),"T")
+        self.play_state.level.insert((7,5),"T")
+        self.play_state.level.insert((4,7),"T")
+        t_offsets = level.tile_offsets
         self.tile_w = sqrt(pow(t_offsets[0],2) + pow(t_offsets[1],2))
         self.tile_h = self.tile_w
-        self.play_state = Play_State(self.level)
+        
         
     def get_mouse_square(self, mouse_x, mouse_y ):
         
-        t_offsets = self.level.tile_offsets
-        t_dimensions = self.level.tile_dimensions
+        t_offsets = self.play_state.level.tile_offsets
+        t_dimensions = self.play_state.level.tile_dimensions
         mouse_x -= self.left_offset + t_offsets[0]
         mouse_y -= self.up_offset
         theta1 = atan(t_offsets[0]/t_offsets[1])
         theta2 = atan(t_offsets[1]/t_offsets[0])
         x = mouse_x*cos(theta1) + mouse_y*sin(theta1)
         y = -mouse_x*sin(theta2) + mouse_y*cos(theta2)
-        max_x = self.tile_w*(self.level.w-1)
-        max_y = self.tile_h*(self.level.h-1)
+        max_x = self.tile_w*(self.play_state.level.w-1)
+        max_y = self.tile_h*(self.play_state.level.h-1)
         if 0 < x < max_x and 0 < y < max_y:
-            return floor((x/max_x)*self.level.w), floor((y/max_y)*self.level.h)
+            return floor((x/max_x)*self.play_state.level.w), floor((y/max_y)*self.play_state.level.h)
         else:
             return False
