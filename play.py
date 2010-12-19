@@ -145,7 +145,6 @@ class Play:
             self.hover_character.portrait.Draw()
         elif self.selected_character:
             self.selected_character.portrait.Draw()
-
             
     def load_map( self, level_map ):
         pass
