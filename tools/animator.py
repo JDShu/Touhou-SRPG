@@ -33,10 +33,16 @@ def set_up(width, height):
     glOrtho(0.0, width, 0.0, height,-1.0,1.0)
     glClearColor(0.0,0.0,0.0,0.0)    
     
-    widgets_list["object_text"] = widgets.Text_Box(0,300, "Object", "default")
-    widgets_list["frame_text"] = widgets.Text_Box(200,300, "Frame", "default")
+    widgets_list["object_text"] = widgets.Text_Box(0,300, True, "default")
     widgets_list["object_button"] = widgets.Button(50, 300, "button.png", "button_down.png", load_spritesheet, (widgets_list["object_text"],))
     widgets_list["spritesheet"] = widgets.Null_Widget()
+    
+    widgets_list["action_name"] = widgets.Text_Box(200,300, True, "action name")
+    widgets_list["frame_number"] = widgets.Int_Box(200,280, True, "0")
+    widgets_list["frame_x"] = widgets.Int_Box(200,260, True, "0")
+    widgets_list["frame_y"] = widgets.Int_Box(230,260, True, "0")
+    widgets_list["frame_w"] = widgets.Int_Box(200,240, True, "0")
+    widgets_list["frame_h"] = widgets.Int_Box(230,240, True, "0")
 
 def process():
     for event in pygame.event.get():
@@ -54,7 +60,6 @@ def process():
     return True
     
 def draw():
-    global widgets_list
     glClear(GL_COLOR_BUFFER_BIT)
         
     for w in widgets_list:

@@ -10,24 +10,67 @@ def print_text(text,x,y,font):
     font.glPrint( x, y, text, [ 1.0, 1.0, 0.0 ] )
     glPopMatrix()
 
-class Text_Box:
-    def __init__(self, x, y, title, modable = False, default = "default"):
+class Input_Box:
+    def __init__(self, x, y, modable = False):
         self.font = glFreeType.font_data( "free_sans.ttf", 20 )
-        self.title = title
-        self.text_list = list(default)
         self.selected = False
         self.x, self.y = x, y
         self.modable = modable
         
     def draw(self):
-        print_text("".join(self.text_list), self.x, self.y, self.font)
+        pass
 
     def process_click(self, mouse_x, mouse_y):
         mouse_y = 480 - mouse_y
+        #print self, self.x, mouse_x, self.x + 100
         if self.x < mouse_x < self.x + 100 and self.y < mouse_y < self.y + 20:
             self.selected = True
         else:
             self.selected = False
+        if self.selected:
+            print self, "selected"
+    def process_key(self, event):
+        pass
+
+    def process_release( self, mouse_x, mouse_y ):
+        pass
+
+class Int_Box(Input_Box):
+    def __init__(self, x, y, modable = False, default = "0"):
+        
+        Input_Box.__init__(self,x,y,modable)
+        self.num = list(default)
+        
+
+    def process_key(self, event):
+        key = event.key
+        if self.selected and self.modable:
+            if key == K_BACKSPACE:
+                if self.num:
+                    self.num.pop()
+                else:
+                    pass
+            elif key == K_RETURN:
+                self.selected = False
+            elif 47 < key < 58:
+                self.num.append(chr(key))
+                #self.num = list(str(self.num))
+                self.numberize()
+
+    def numberize(self):
+        n = int("".join(self.num))
+        self.num = list(str(n))
+
+    def draw(self):
+        print_text("".join(self.num), self.x, self.y, self.font)
+
+    def number(self):
+        return int("".join(self.num))
+
+class Text_Box(Input_Box):
+    def __init__(self, x, y, modable = False, default = "default"):
+        Input_Box.__init__(self,x,y,modable)
+        self.text_list = list(default)
 
     def process_key(self, event):
         key = event.key
@@ -44,11 +87,11 @@ class Text_Box:
                     key -= 32
                 self.text_list.append(chr(key))
 
+    def draw(self):
+        print_text("".join(self.text_list), self.x, self.y, self.font)
+
     def text(self):
         return "".join(self.text_list)
-
-    def process_release( self, mouse_x, mouse_y ):
-        pass
 
 class Button:
     def __init__(self, x,y,gfx_idle, gfx_pressed, function, args = ()):
