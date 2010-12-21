@@ -34,7 +34,7 @@ class Graphic:
         self.draw_list = glGenLists(2)
         self.draw_list_2 = self.draw_list + 1 
         self.setup_draw()
-        
+        self.dimensions = self.x, self.y, self.w, self.h
 
     def set_pos(self, x,y):
         self.x = x

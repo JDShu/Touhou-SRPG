@@ -1,8 +1,9 @@
 import pygame
 import glFreeType
-from pygame.locals import *
 import pickle
 from OpenGL.GL import *
+from pygame.locals import *
+
 import os.path
 
 import objects
@@ -33,7 +34,7 @@ def set_up(width, height):
     glOrtho(0.0, width, 0.0, height,-1.0,1.0)
     glClearColor(0.0,0.0,0.0,0.0)    
     
-    widgets_list["object_text"] = widgets.Text_Box(0,300, True, "default")
+    widgets_list["object_text"] = widgets.Text_Box(0,300, True, "reimu.png")
     widgets_list["object_button"] = widgets.Button(50, 300, "button.png", "button_down.png", load_spritesheet, (widgets_list["object_text"],))
     widgets_list["spritesheet"] = widgets.Null_Widget()
     
@@ -43,6 +44,11 @@ def set_up(width, height):
     widgets_list["frame_y"] = widgets.Int_Box(230,260, True, "0")
     widgets_list["frame_w"] = widgets.Int_Box(200,240, True, "0")
     widgets_list["frame_h"] = widgets.Int_Box(230,240, True, "0")
+    widgets_list["selection"] = widgets.Selection_Box(10,10,100,100,widgets_list, "spritesheet")
+    f = widgets_list["selection"].set_dimensions
+    args = widgets_list["frame_x"], widgets_list["frame_y"], widgets_list["frame_w"], widgets_list["frame_h"]
+    widgets_list["frame_button"] = widgets.Button(210, 220, "button.png", "button_down.png", f, args)
+
 
 def process():
     for event in pygame.event.get():
@@ -65,6 +71,8 @@ def draw():
     for w in widgets_list:
         widgets_list[w].draw()
 
+    widgets_list["selection"].draw()
+
     pygame.display.flip()
 
 def load_spritesheet(spritesheet):
@@ -77,6 +85,7 @@ def load_spritesheet(spritesheet):
         print "This file does not exist"
         return
     widgets_list["spritesheet"] = objects.Graphic(0,0,1.0, text,1.0)
+    
 
 if __name__ == "__main__":
     main()
