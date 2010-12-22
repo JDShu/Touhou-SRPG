@@ -151,8 +151,10 @@ class Selection_Box(Widget):
         xs,ys,ws,hs = self.table[self.key].dimensions
         print self.table[self.key].dimensions
         x,y,w,h = ox.current, oy.current, ow.current, oh.current
+        y = hs - y - h
+        print "y =", y
         print x,y,w,h
-        if xs < x < xs + ws and ys < y < ys + hs:
+        if xs <= x <= xs + ws and ys <= y <= ys + hs:
             print "set"
             self.x, self.y = x,y
             self.w, self.h = w,h
