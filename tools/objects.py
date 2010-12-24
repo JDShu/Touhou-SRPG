@@ -4,12 +4,12 @@ from OpenGL.GLU import *
 from math import *
 
 class Graphic:
-    def __init__( self, x,y,a,texture = None, scale_factor = 1.0, w = None, h = None):
+    def __init__( self, x,y,a,filename = None, scale_factor = 1.0, w = None, h = None):
         
         self.a = a
         self.x, self.y = x,y
-        self.texture = texture
-        texture_surface = pygame.image.load(texture)
+        self.filename = filename
+        texture_surface = pygame.image.load(filename + ".png")
         texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
         self.w = texture_surface.get_width()
         self.h = texture_surface.get_height()

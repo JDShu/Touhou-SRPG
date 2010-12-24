@@ -1,5 +1,8 @@
 from OpenGL.GL import *
+from OpenGL.GLU import *
 from pygame.locals import *
+import pickle
+import pygame
 
 import objects
 import glFreeType
@@ -72,7 +75,6 @@ class Int_Box(Input_Box):
     def process_click(self, mouse_x, mouse_y):
         Input_Box.process_click(self, mouse_x, mouse_y)
         self.current = self.number()
-        
 
     def numberize(self):
         n = int("".join(self.num))
@@ -169,3 +171,82 @@ class Selection_Box(Widget):
         glVertex(self.x + self.w, self.y + self.h, 0)
         glVertex(self.x, self.y + self.h, 0)
         glEnd()        
+
+class Animated:
+    def __init__(self, x,y,w,h,sprite_name):
+        self.a = 1.0
+        self.x, self.y = x,y
+        
+        self.set_sprite(sprite_name)
+        self.current_action = "idle"
+        self.current_frame_number = 0
+        self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+        self.action = None
+        self.w, self.h = 50, 100
+        
+        #self.image = None
+
+    def set_sprite(self, sprite_name):
+        print "1"
+        try:
+            self.data = pickle.load(open(sprite_name + ".spr"))
+        except IOError:
+            self.data = pickle.load(open(sprite_name + ".spr", "wb"))
+            
+        texture_surface = pygame.image.load(sprite_name + ".png")
+        texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
+        
+        self.image = glGenTextures(1)
+        glBindTexture( GL_TEXTURE_2D, self.image )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST )
+        self.tex_w, self.tex_h = texture_surface.get_width(), texture_surface.get_height()
+        # OpenGL < 2.0 hack
+        #gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
+        # OpenGL >= 2.0
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.tex_w, self.tex_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
+
+
+    def update(self):
+        self.current_frame_number += 1
+        try:
+            self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+        except IndexError:
+            self.current_frame_number = 0
+            self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+
+    def draw( self ):
+        pix_x,pix_y,pix_w,pix_h = self.current_frame_dimensions
+        x = float(pix_x)/float(self.tex_w)
+        y = float(pix_y)/float(self.tex_h)
+        w = float(pix_w)/float(self.tex_w)
+        h = float(pix_h)/float(self.tex_h)
+        y = 1.0 - y - h
+        
+        glPushMatrix()
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        color = (1.0,1.0,1.0,1.0)
+        glEnable( GL_TEXTURE_2D )
+        glBindTexture( GL_TEXTURE_2D, self.image )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+        
+        
+        #draw
+        glTranslatef(self.x,self.y,0.0)
+        glColor4f(*color)
+        glBegin(GL_QUADS)
+        glTexCoord2f(x, y)
+        glVertex(0.0,0.0,0.0)
+        glTexCoord2f(x + w, y)
+        glVertex(self.w,0.0,0.0)
+        glTexCoord2f(x + w, y + h)
+        glVertex(self.w,self.h,0.0)
+        glTexCoord2f(x, y + h)
+        glVertex(0.0,self.h,0.0)
+        glEnd()
+        glDisable( GL_TEXTURE_2D )
+        glDisable( GL_BLEND)
+        glPopMatrix()
+        

@@ -8,10 +8,12 @@ import os.path
 
 import objects
 import widgets
+import sprite_rules
 
 x, y   = None, None
 w, h = None, None
 widgets_list = {}
+animated = None
 
 def main():
     width, height = 640, 480
@@ -34,11 +36,11 @@ def set_up(width, height):
     glOrtho(0.0, width, 0.0, height,-1.0,1.0)
     glClearColor(0.0,0.0,0.0,0.0)    
     
-    widgets_list["object_text"] = widgets.Text_Box(0,300, True, "reimu.png")
-    widgets_list["object_button"] = widgets.Button(50, 300, "button.png", "button_down.png", load_spritesheet, (widgets_list["object_text"],))
+    widgets_list["object_text"] = widgets.Text_Box(0,300, True, "reimu")
+    widgets_list["object_button"] = widgets.Button(50, 300, "button", "button_down", load_spritesheet, (widgets_list["object_text"],))
     widgets_list["spritesheet"] = widgets.Null_Widget()
     
-    widgets_list["action_name"] = widgets.Text_Box(200,300, True, "action name")
+    widgets_list["action_name"] = widgets.Text_Box(200,300, True, "idle")
     widgets_list["frame_number"] = widgets.Int_Box(200,280, True, "0")
     widgets_list["frame_x"] = widgets.Int_Box(200,260, True, "0")
     widgets_list["frame_y"] = widgets.Int_Box(230,260, True, "0")
@@ -47,8 +49,15 @@ def set_up(width, height):
     widgets_list["selection"] = widgets.Selection_Box(10,10,100,100,widgets_list, "spritesheet")
     f = widgets_list["selection"].set_dimensions
     args = widgets_list["frame_x"], widgets_list["frame_y"], widgets_list["frame_w"], widgets_list["frame_h"]
-    widgets_list["frame_button"] = widgets.Button(210, 220, "button.png", "button_down.png", f, args)
+    widgets_list["frame_button"] = widgets.Button(210, 220, "button", "button_down", f, args)
+    widgets_list["save_button"] = widgets.Button(180, 300, "button", "button_down", save_frame,())
 
+    global animated
+    try:
+        animated = widgets.Animated(400,320,50,80,"reimu")
+    except:
+        print "None"
+        animate = None
 
 def process():
     for event in pygame.event.get():
@@ -63,6 +72,9 @@ def process():
         if event.type == MOUSEBUTTONUP:
             for w in widgets_list:
                 widgets_list[w].process_release(*pygame.mouse.get_pos())
+    global animated
+    if animated:
+        animated.update()
     return True
     
 def draw():
@@ -72,20 +84,54 @@ def draw():
         widgets_list[w].draw()
 
     widgets_list["selection"].draw()
-
+    global animated
+    if animated:
+        animated.draw()
     pygame.display.flip()
 
 def load_spritesheet(spritesheet):
     
-    text = spritesheet.text()
+    filename = spritesheet.text()
     
     try:
-        open(text)
+        open(filename + ".png")
     except IOError:
         print "This file does not exist"
         return
-    widgets_list["spritesheet"] = objects.Graphic(0,0,1.0, text,1.0)
+    try:
+        open(filename + ".spr")
+        print "sprite file found"
+    except IOError:
+        print "No sprite file, creating new one"
+        F = open(filename + ".spr", "wb")
+        pickle.dump(sprite_rules.Sprite(filename))
+        F.close()
     
+    widgets_list["spritesheet"] = objects.Graphic(0,0,1.0, filename,1.0)
+    print widgets_list["spritesheet"].filename
+
+def save_frame():
+    spritesheet = widgets_list["spritesheet"].filename
+    action_name = widgets_list["action_name"].text()
+    frame_number = widgets_list["frame_number"].current
+    print spritesheet
+    try:
+        spr_file = open(spritesheet + ".spr")
+    except IOError:
+        print "No sprite file."
+        return
+
+    try:
+        info = pickle.load(spr_file)
+    except EOFError:
+        info = sprite_rules.Sprite(spritesheet)
+
+    dimensions = (widgets_list["frame_x"].current,widgets_list["frame_y"].current,widgets_list["frame_w"].current,widgets_list["frame_h"].current)
+    info.set_frame(action_name, frame_number, dimensions)
+    new_info = open(spritesheet + ".spr", "wb")
+    pickle.dump(info, new_info)
+    new_info.close()
+    print "frame written"
 
 if __name__ == "__main__":
     main()
