@@ -173,21 +173,21 @@ class Selection_Box(Widget):
         glEnd()        
 
 class Animated:
-    def __init__(self, x,y,w,h,sprite_name):
+    def __init__(self, x,y,sprite_name):
         self.a = 1.0
         self.x, self.y = x,y
-        
         self.set_sprite(sprite_name)
-        self.current_action = "idle"
+        self.actions = sorted( self.data.actions.keys())
+        self.action_index = 0
+        self.current_action = self.actions[self.action_index]
         self.current_frame_number = 0
         self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
         self.action = None
-        self.w, self.h = 50, 100
+        self.w, self.h = self.current_frame_dimensions[2], self.current_frame_dimensions[3]
         
         #self.image = None
 
     def set_sprite(self, sprite_name):
-        print "1"
         try:
             self.data = pickle.load(open(sprite_name + ".spr"))
         except IOError:
@@ -212,8 +212,12 @@ class Animated:
         try:
             self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
         except IndexError:
+            self.action_index += 1
+            self.action_index = self.action_index % len(self.actions)
+            self.current_action = self.actions[self.action_index]
             self.current_frame_number = 0
             self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+        self.w, self.h = self.current_frame_dimensions[2], self.current_frame_dimensions[3]
 
     def draw( self ):
         pix_x,pix_y,pix_w,pix_h = self.current_frame_dimensions

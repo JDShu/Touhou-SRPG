@@ -2,6 +2,8 @@ import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from math import *
+import pickle
+import sprite_rules
 
 import level
 import astar
@@ -109,44 +111,85 @@ class Tile( Graphic ):
     def set_pos( self, x, y):
         Graphic.set_pos(self, -(x+y)*self.width_offset + self.base*x, (x-y)*self.height_offset + self.height*y)
 
-class Animated( Graphic ):
-    def __init__( self, x,y,a,across,down,filename,scale_factor = 1.0):
-        Graphic.__init__( self, x,y,a,filename,scale_factor)
-        self.across = across
-        self.down = down
-        self.sprite_width = 1.0/across
-        self.sprite_height = 1.0/down
-        self.current_frame = (0,0)
-        self.w /= across
-        self.h /= down
-        
-    def Draw( self ):
+class Animated:
+    def __init__(self, x,y,sprite_name, scale_factor = 1.0):
+        self.a = 1.0
+        self.x, self.y = x,y
+        self.set_sprite(sprite_name)
+        self.current_action = "idle-s"
+        self.current_frame_number = 0
+        self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+        self.action = None
+        self.w, self.h = self.current_frame_dimensions[2], self.current_frame_dimensions[3]
+        self.w *= scale_factor
+        self.h *= scale_factor
+        self.scale_factor = scale_factor
 
-        tex_x = self.current_frame[0]*self.sprite_width
-        tex_x2 = tex_x + self.sprite_width
-        tex_y = self.current_frame[1]*self.sprite_height
-        tex_y2 = tex_y + self.sprite_height
+    def set_action(self, action):
+        self.current_action = action
+
+    def set_pos(self, x, y):
+        self.x, self.y =  x, y
+        #self.image = None
+
+    def set_sprite(self, sprite_name):
+        try:
+            self.data = pickle.load(open(sprite_name + ".spr"))
+        except IOError:
+            self.data = pickle.load(open(sprite_name + ".spr", "wb"))
+            
+        texture_surface = pygame.image.load(sprite_name + ".png")
+        texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
+        
+        self.image = glGenTextures(1)
+        glBindTexture( GL_TEXTURE_2D, self.image )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST )
+        self.tex_w, self.tex_h = texture_surface.get_width(), texture_surface.get_height()
+        # OpenGL < 2.0 hack
+        #gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGBA, self.w, self.h, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
+        # OpenGL >= 2.0
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.tex_w, self.tex_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
+
+
+    def update(self):
+        self.current_frame_number += 1
+        try:
+            self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+        except IndexError:
+            self.current_frame_number = 0
+            self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
+        self.w, self.h = self.current_frame_dimensions[2]*self.scale_factor, self.current_frame_dimensions[3]*self.scale_factor
+
+    def Draw( self ):
+        pix_x,pix_y,pix_w,pix_h = self.current_frame_dimensions
+        x = float(pix_x)/float(self.tex_w)
+        y = float(pix_y)/float(self.tex_h)
+        w = float(pix_w)/float(self.tex_w)
+        h = float(pix_h)/float(self.tex_h)
+        y = 1.0 - y - h
         
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-        color = (1.0,1.0,1.0,self.a)
+        color = (1.0,1.0,1.0,1.0)
         glEnable( GL_TEXTURE_2D )
-        glBindTexture( GL_TEXTURE_2D, self.texture )
+        glBindTexture( GL_TEXTURE_2D, self.image )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+        
         
         #draw
         glTranslatef(self.x,self.y,0.0)
         glColor4f(*color)
         glBegin(GL_QUADS)
-        glTexCoord2f(tex_x, tex_y)
+        glTexCoord2f(x, y)
         glVertex(0.0,0.0,0.0)
-        glTexCoord2f(tex_x2, tex_y)
+        glTexCoord2f(x + w, y)
         glVertex(self.w,0.0,0.0)
-        glTexCoord2f(tex_x2, tex_y2)
+        glTexCoord2f(x + w, y + h)
         glVertex(self.w,self.h,0.0)
-        glTexCoord2f(tex_x, tex_y2)
+        glTexCoord2f(x, y + h)
         glVertex(0.0,self.h,0.0)
         glEnd()
         glDisable( GL_TEXTURE_2D )
@@ -154,24 +197,17 @@ class Animated( Graphic ):
         glPopMatrix()
 
 class Actor( Animated ):
-    def __init__( self, x,y,a,across,down,filename,scale_factor = 1.0):
-        Animated.__init__( self, x,y,a,across,down,filename,scale_factor)
+    def __init__( self, x,y,filename,scale_factor = 1.0):
+        Animated.__init__( self, x,y,filename,scale_factor)
         self.idle = []
-        for i in xrange(self.across):
-            self.idle += [(i,0)]
-        self.current_routine = self.idle
-        self.frame_index = 0
-        
-    def update( self ):
-        self.frame_index += 1
-        if self.frame_index == self.across:
-            self.frame_index = 0
-        self.current_frame = self.current_routine[self.frame_index] 
+                
+    #def update( self ):
+    #    Animated.update()
 
     def set_pos(self, x, y):
         base, height = TILE_DIMENSIONS
         width_offset, height_offset = TILE_OFFSETS
-        Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)
+        Animated.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)
 
     #def step(self,up,across,speed = 5.0):
     #    Graphic.set_pos(self, self.x +speed*(up)*INC_UP, self.y + speed*(across)*INC_ACROSS)
@@ -190,12 +226,13 @@ class Actor( Animated ):
             up = 1
             across = 1
         
-        Graphic.set_pos(self, self.x + distance*(up)*INC_UP, self.y + distance*(across)*INC_ACROSS)
+        Animated.set_pos(self, self.x + distance*(up)*INC_UP, self.y + distance*(across)*INC_ACROSS)
                 
 class Character:
     READY, MOVING, MOVED = xrange(3)
     def __init__( self, spritesheet, across, down, portrait, stats = None, scale_factor = 1.0 ):
-        self.actor = Actor( 0.0,0.0,1.0,across,down,spritesheet,scale_factor)
+        self.actor = Actor(5,5,"reimu", scale_factor)
+        #Actor( 0.0,0.0,1.0,across,down,spritesheet,scale_factor)
         self.portrait = Graphic( 0.0,0.0,1.0,portrait, 2*scale_factor)        
         self.position = self.x, self.y = 0,0
         self.moving = self.READY
@@ -237,6 +274,7 @@ class Character:
                 self.direction = "down"
             elif up == 1:
                 self.direction = "up"
+                print "lol"
             else:
                 self.direction = None
         
@@ -264,12 +302,14 @@ class Character:
                 across = self.next_node[0] - self.position[0]
                 up = self.next_node[1] - self.position[1]
                 if across == -1:
+                    self.actor.set_action("idle-s")
                     self.direction = "left"
                 elif across == 1:
                     self.direction = "right"
                 elif up == -1:
                     self.direction = "down"
                 elif up == 1:
+                    self.actor.set_action("idle-w")
                     self.direction = "up"
                 else:
                     self.direction = None
