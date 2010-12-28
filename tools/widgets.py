@@ -40,7 +40,7 @@ class Input_Box(Widget):
         pass
 
     def process_click(self, mouse_x, mouse_y):
-        mouse_y = 480 - mouse_y
+        mouse_y = 600 - mouse_y
         #print self, self.x, mouse_x, self.x + 100
         if self.x < mouse_x < self.x + 20 and self.y < mouse_y < self.y + 20:
             self.selected = True
@@ -123,12 +123,12 @@ class Button(Widget):
         self.args = args
         
     def process_click(self, mouse_x, mouse_y):
-        mouse_y = 480 - mouse_y
+        mouse_y = 600 - mouse_y
         if self.x < mouse_x < self.x + self.w and self.y < mouse_y < self.y + self.h:
             self.gfx_current = self.gfx_pressed
             
     def process_release(self, mouse_x, mouse_y):
-        mouse_y = 480 - mouse_y
+        mouse_y = 600 - mouse_y
         if self.x < mouse_x < self.x + self.w and self.y < mouse_y < self.y + self.h:
             self.function(*self.args)
         self.gfx_current = self.gfx_idle

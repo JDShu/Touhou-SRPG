@@ -267,12 +267,16 @@ class Character:
             across = self.next_node[0] - self.position[0]
             up = self.next_node[1] - self.position[1]
             if across == -1:
+                self.actor.set_action("idle-s")
                 self.direction = "left"
             elif across == 1:
+                self.actor.set_action("idle-n")
                 self.direction = "right"
             elif up == -1:
+                self.actor.set_action("idle-e")
                 self.direction = "down"
             elif up == 1:
+                self.actor.set_action("idle-w")
                 self.direction = "up"
                 print "lol"
             else:
@@ -305,8 +309,10 @@ class Character:
                     self.actor.set_action("idle-s")
                     self.direction = "left"
                 elif across == 1:
+                    self.actor.set_action("idle-n")
                     self.direction = "right"
                 elif up == -1:
+                    self.actor.set_action("idle-e")
                     self.direction = "down"
                 elif up == 1:
                     self.actor.set_action("idle-w")
