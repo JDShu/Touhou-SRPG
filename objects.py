@@ -23,9 +23,8 @@ def square_to_screen(x,y):
 
 
 class Graphic:
-    def __init__( self, x,y,a,texture = None, scale_factor = 1.0, w = None, h = None):
+    def __init__( self, a, texture = None, scale_factor = 1.0, w = None, h = None):
         self.a = a
-        self.x, self.y = 0,0#x,y
         self.texture = texture
         texture_surface = pygame.image.load(texture)
         texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
@@ -50,14 +49,9 @@ class Graphic:
         
         #pregenerate render code
         self.draw_list = glGenLists(2)
-        self.draw_list_2 = self.draw_list + 1 
         self.setup_draw()
         
-    def set_pos(self, x,y):
-        self.x = x
-        self.y = y
-        #print "position set to", x, y
-
+      
     def setup_draw( self ):
         
         glNewList(self.draw_list, GL_COMPILE)
@@ -69,9 +63,6 @@ class Graphic:
         glBindTexture( GL_TEXTURE_2D, self.texture )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
-        glEndList()
-
-        glNewList(self.draw_list_2,GL_COMPILE)
         glColor4f(*color)
         glBegin(GL_QUADS)
         glTexCoord2f(0.0, 0.0)
@@ -89,32 +80,37 @@ class Graphic:
         
         glEndList()
         
-    def Draw( self ):
-        #set up
+    def draw( self, x,y ):
+        glTranslatef(x,y,0.0)
         glCallList(self.draw_list)
-        glTranslatef(self.x,self.y,0.0)
-        glCallList(self.draw_list_2)
 
-    def set_map_pos( self, x, y):
-        base, height = TILE_DIMENSIONS
-        width_offset, height_offset = TILE_OFFSETS
-        Graphic.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+0.5)*height_offset + height*y)
+    def draw_grid(self, x, y, dimensions, offsets):
+        w,h = dimensions
+        x_offset, y_offset = offsets
+        glPushMatrix()
+        self.draw(x*w + (y-x)*x_offset, -y*h + (x+y)*y_offset)
+        glPopMatrix()
+
+    def process_click(self):
+        pass
+
+            
+class Tile(Graphic):
+    def __init__(self, image_file):
+        Graphic.__init__(self, 1.0, image_file)
         
-class Tile( Graphic ):
-    def __init__( self, x,y,a,base,height,width_offset, height_offset,filename,scale_factor = 1.0):
-        Graphic.__init__( self, x,y,a,filename, scale_factor)
-        self.base = base
-        self.height = height
-        self.width_offset = width_offset
-        self.height_offset = height_offset
-	
-    def set_pos( self, x, y):
-        Graphic.set_pos(self, -(x+y)*self.width_offset + self.base*x, (x-y)*self.height_offset + self.height*y)
+    def draw(self, x, y):
+        """draw according to coordinate on grid"""
+        glPushMatrix()
+        Graphic.draw(self, x*self.w + (y-x)*self.x_offset, -y*self.h + (x+y)*self.y_offset)
+        glPopMatrix()
 
-class Animated:
+
+class Animated(Graphic):
     def __init__(self, x,y,sprite_name, scale_factor = 1.0):
         self.a = 1.0
         self.x, self.y = x,y
+        
         self.set_sprite(sprite_name)
         self.current_action = "idle-s"
         self.current_frame_number = 0
@@ -124,13 +120,9 @@ class Animated:
         self.w *= scale_factor
         self.h *= scale_factor
         self.scale_factor = scale_factor
-
+        
     def set_action(self, action):
         self.current_action = action
-
-    def set_pos(self, x, y):
-        self.x, self.y =  x, y
-        #self.image = None
 
     def set_sprite(self, sprite_name):
         try:
@@ -160,8 +152,11 @@ class Animated:
             self.current_frame_number = 0
             self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
         self.w, self.h = self.current_frame_dimensions[2]*self.scale_factor, self.current_frame_dimensions[3]*self.scale_factor
+        
 
-    def Draw( self ):
+    def draw( self,x,y ):
+        #print self.x
+        glTranslatef(x + self.x, y + self.y,0.0)
         pix_x,pix_y,pix_w,pix_h = self.current_frame_dimensions
         x = float(pix_x)/float(self.tex_w)
         y = float(pix_y)/float(self.tex_h)
@@ -180,7 +175,6 @@ class Animated:
         
         
         #draw
-        glTranslatef(self.x,self.y,0.0)
         glColor4f(*color)
         glBegin(GL_QUADS)
         glTexCoord2f(x, y)
@@ -196,38 +190,18 @@ class Animated:
         glDisable( GL_BLEND)
         glPopMatrix()
 
-class Actor( Animated ):
-    def __init__( self, x,y,filename,scale_factor = 1.0):
-        Animated.__init__( self, x,y,filename,scale_factor)
-        self.idle = []
-                
-    #def update( self ):
-    #    Animated.update()
+class Actor(Animated):
+    def __init__(self, x,y,sprite_name, scale_factor = 1.0):
+        Animated.__init__(self, x,y,sprite_name, scale_factor = 1.0)
+        self.selected = False
+        self.cell_offset_x, self.cell_offset_y = 0.0, 0.0
 
-    def set_pos(self, x, y):
-        base, height = TILE_DIMENSIONS
-        width_offset, height_offset = TILE_OFFSETS
-        Animated.set_pos(self, -(x+y-0.5)*width_offset + base*x, (x-y+1)*height_offset + height*y)
+    def draw_grid(self, x, y, dimensions, offsets):
+        glPushMatrix()
+        glTranslatef(self.cell_offset_x, self.cell_offset_y, 0.0)
+        Animated.draw_grid(self, x, y, dimensions, offsets)
+        glPopMatrix()
 
-    #def step(self,up,across,speed = 5.0):
-    #    Graphic.set_pos(self, self.x +speed*(up)*INC_UP, self.y + speed*(across)*INC_ACROSS)
-    # return screen coordinates after moving actor by "distance"
-    def move( self, distance, direction ):
-        if direction == "up":
-            up = -1
-            across = 1
-        elif direction == "down":
-            up = 1
-            across = -1
-        elif direction == "left":
-            up = -1
-            across = -1
-        else:
-            up = 1
-            across = 1
-        
-        Animated.set_pos(self, self.x + distance*(up)*INC_UP, self.y + distance*(across)*INC_ACROSS)
-                
 class Character:
     READY, MOVING, MOVED = xrange(3)
     def __init__( self, spritesheet, across, down, portrait, stats = None, scale_factor = 1.0 ):
@@ -278,7 +252,6 @@ class Character:
             elif up == 1:
                 self.actor.set_action("idle-w")
                 self.direction = "up"
-                print "lol"
             else:
                 self.direction = None
         

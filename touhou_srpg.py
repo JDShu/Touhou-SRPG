@@ -1,7 +1,8 @@
 from main_loop import *
+import touhou
 
 def main():
-    game = Main_Loop(640,480)
+    game = MainLoop(640,480,touhou.Module)
     running = True
     while running:
         running = game.process()

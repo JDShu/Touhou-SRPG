@@ -1,24 +1,32 @@
 import pygame
-
 import play
-import level
 
-class Game_State:
-    def __init__( self,w,h ):
-        self.play = play.Play(w,h)
 
-        test_level = level.Level(10,10) 
-        self.play.load_level(test_level)
+class GameState:
+    """determines what session to run for the given module at a given time"""
+    def __init__(self, module):
+        self.module = module()
+
+        #global variables
+        self.level = None
+        self.map = self.test_map()
+
+        #various sessions
+        self.main_menu = None
+        self.load_game = None
+        self.play = play.Play(self.module, self.map)
         
+        #temporarily test play mode
         self.current_mode = self.play
-        self.map = None
-        
-    def process( self, current_mode ):
-        #self.current_mode = self.play
-        result = self.current_mode.process()
-        return result
+
+
+    def process(self):
+        return self.current_mode.process()
     
-    def draw( self ):
+    def draw(self):
         self.current_mode.draw()
         
-            
+    #temporary map for testing before load map possible
+    def test_map(self):
+        test_map = self.module.map((10,10))
+        return test_map
