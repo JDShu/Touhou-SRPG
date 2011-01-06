@@ -32,9 +32,9 @@ class Node():
 BLOCKED = 1
 #2D list data structure for pathfinding
 class Grid():
-    def __init__( self , level):
-        self.grid = copy.deepcopy(level.map)
-        self.width, self.height = level.w, level.h
+    def __init__( self , touhou_map):
+        self.grid = copy.deepcopy(touhou_map.grid)
+        self.width, self.height = touhou_map.w, touhou_map.h
 
     def insert_block( self, x, y ):
         self.grid[x][y] = BLOCKED

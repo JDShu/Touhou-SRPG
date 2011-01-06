@@ -3,6 +3,7 @@ import objects
 import pygame
 from OpenGL.GL import *
 from math import *
+import astar
 
 class Module:
     """
@@ -43,33 +44,33 @@ class TouhouMap:
         self.draw_objects()
         
     def draw_floor(self):
-        """Draw the board."""
-        
+        """Draw the board."""   
         for x in range(self.w):
             for y in range(self.h):
                 self.tileset["ground"].draw_grid(x,y,self.dimensions, self.offsets)
                 
     def draw_objects(self):
         """Draw Active and Inactive objects"""
-        
         for x in range(self.w):
+            x = self.w - x - 1
             for y in range(self.h):
                 if self.grid[x][y]:
                     self.grid[x][y].draw_grid(x,y,self.dimensions, self.offsets)
+                    
 
     def temp_tileset(self):
         """Temporary tileset and objects to place on map"""
         tileset = {}
         tileset["ground"] = objects.Graphic(1.0,"grass.png")
         tileset["obstacle"] = objects.Graphic(1.0,"tree.png")
-        self.grid[3][3] = tileset["obstacle"]
         self.tile_w = sqrt(pow(self.offsets[0],2) + pow(self.offsets[1],2))
         return tileset
 
     def insert(self,instance,position):
         self.grid[position[0]][position[1]] = instance
 
-    def process_click(self, mouse_coords, offsets):
+    def grid_coordinate(self, mouse_coords, offsets):
+        """return grid coordinates of mouse click, None if not within grid"""
         mouse_x, mouse_y = mouse_coords
         
         mouse_x -= offsets[0]
@@ -86,15 +87,24 @@ class TouhouMap:
         max_y = self.tile_w*(self.h-1)
         if 0 < x < max_x and 0 < y < max_y:
             cell_x, cell_y = int(floor((x/max_x)*self.w)), int(floor((y/max_y)*self.h))
-            if self.grid[cell_x][cell_y]:
-                self.grid[cell_x][cell_y].process_click()
+            return cell_x, cell_y
+        return False
 
+    def process_click(self, mouse_coords, offsets):
+        coords = self.grid_coordinate(mouse_coords, offsets)
+        return self.grid[coords[0]][coords[1]]
+
+    def relocate(self, subject, new_position):
+        self.grid[new_position[0]][new_position[1]] = subject
+        self.grid[subject.position[0]][subject.position[1]] = None
+        subject.position = new_position
+        
 
 
 class TouhouPlay:
     """The state of a Touhou play session at any given moment"""
     FRAMEUPDATE = pygame.USEREVENT + 1
-
+    MOVE, ATTACK, BROWSE = range(3)
     def __init__(self, touhou_map):
         """ 
         selectable: Characters that can be clicked on at a given moment
@@ -106,22 +116,28 @@ class TouhouPlay:
         self.menu = {}
         self.map = touhou_map
         self.offsets = [0,0,0]
-
+        self.mode = self.MOVE
         
         self.test_objects()
 
         #Custom Events for Touhou Module
-        pygame.time.set_timer(self.FRAMEUPDATE,300)
+        pygame.time.set_timer(self.FRAMEUPDATE,150)
         
     def test_objects(self):
-        reimu = objects.Actor(15,15,"reimu")
         position = (4,4)
-        self.active += [(reimu,position)] 
-        self.map.insert(reimu,position)
+        reimu = Actor(15,15,"reimu",position,self.map)
+        self.active += [reimu] 
+        for x in range(4):
+            for y in range(4):
+                self.map.insert(self.map.tileset["obstacle"],(x,y))
 
+        self.map.insert(reimu,position)
+        
+        #self.active[0].move_cell("N")
+        
     def update(self):
         for a in self.active:
-            a[0].update()
+            a.update()
 
     def process_click(self, mouse_coords, mouse_state):
         """ What to do when user clicks """
@@ -129,16 +145,18 @@ class TouhouPlay:
         #What got clicked.
         clicked_object = self.determine_clicked(mouse_coords)
         if clicked_object:
-            clicked_object.process_click(mouse_coords, mouse_state)
+            clicked_object.process_click()
         #What to do given the current state and what got clicked
+        elif self.mode == self.MOVE:
+            destination = self.map.grid_coordinate(mouse_coords, self.offsets)
+            self.active[0].new_path(self.map,destination)
 
     def determine_clicked(self, mouse_coords):
         #TODO: see if clicked on a UI element
         
         #see if clicking within the grid
-        self.map.process_click(mouse_coords, self.offsets)
+        return self.map.process_click(mouse_coords, self.offsets)
 
-        return False
 
     def process_event(self,event):
         if event.type == self.FRAMEUPDATE:
@@ -162,5 +180,95 @@ class TouhouPlay:
         """ Draw all UI elements """
         pass
 
-    def move(self, subject, destination):
+    def move_square(self, subject, direction):
         pass
+        
+class Actor(objects.Animated):
+    MOVING, IDLE = range(2)
+    def __init__(self, x,y,sprite_name, position, touhou_map, scale_factor = 1.0):
+        objects.Animated.__init__(self, x,y,sprite_name, scale_factor = 1.0)
+        self.selected = False
+        self.set_cell_offsets(0,0)
+        self.position = position
+        self.state = self.IDLE
+        self.tile_offsets = touhou_map.offsets
+        self.map = touhou_map
+        self.path = []
+        self.direction = None
+        self.ticks = 0
+
+    def draw_grid(self, x, y, dimensions, offsets):
+        glPushMatrix()
+        glTranslatef(self.cell_offset_x, self.cell_offset_y, 0.0)
+        objects.Animated.draw_grid(self, x, y, dimensions, offsets)
+        glPopMatrix()
+        
+    def set_cell_offsets(self, x, y):
+        self.cell_offset_x, self.cell_offset_y = x, y
+
+    def mod_cell_offsets(self, x, y):
+        self.cell_offset_x += x
+        self.cell_offset_y += y
+
+    def move_cell(self, direction):
+        self.state = self.MOVING
+        self.direction = direction
+        self.ticks = 0
+
+    def move_inc(self):
+        """Move subject incrementally in a direction until it reaches one cell away"""
+        if self.direction == "N":
+            d = (1,1) 
+            p = (1,0)
+        elif self.direction == "S":
+            d = (-1,-1)
+            p = (-1,0)
+        elif self.direction == "E":
+            d = (1,-1)
+            p = (0,1)
+        elif self.direction == "W":
+            d = (-1,1)
+            p = (0,-1)
+        else:
+            d = (0,0)
+            p = (0,0)
+
+        self.mod_cell_offsets(d[0]*self.tile_offsets[0]/10.0, d[1]*self.tile_offsets[1]/10.0)
+        self.ticks += 1
+        if self.ticks >= 10:
+            #self.state = self.IDLE
+            self.map.relocate(self, (self.position[0] + p[0],self.position[1] + p[1]))
+            self.set_cell_offsets(0.0,0.0)
+            self.path = self.path[:-1]
+            self.move_to_destination()
+            self.ticks = 0
+                        
+
+    def move_to_destination(self):
+        try:
+            next_cell = self.path[-1]
+        except IndexError:
+            self.state = self.IDLE
+            return
+        direction = next_cell[0] - self.position[0], next_cell[1] - self.position[1]
+        if direction == (0,1):
+            self.direction = "E"
+        elif direction == (0,-1):
+            self.direction = "W"
+        elif direction == (1,0):
+            self.direction = "N"
+        elif direction == (-1,0):
+            self.direction = "S"
+        
+    def update(self):
+        objects.Animated.update(self)
+        if self.state == self.MOVING:
+            self.move_inc()
+        
+    def new_path(self, touhou_map, destination):
+        self.state = self.MOVING
+        grid = astar.Grid(touhou_map)
+        path = astar.Path(grid, self.position, [destination])
+        self.path = path.path
+        self.move_to_destination()
+        

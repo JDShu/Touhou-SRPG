@@ -190,17 +190,6 @@ class Animated(Graphic):
         glDisable( GL_BLEND)
         glPopMatrix()
 
-class Actor(Animated):
-    def __init__(self, x,y,sprite_name, scale_factor = 1.0):
-        Animated.__init__(self, x,y,sprite_name, scale_factor = 1.0)
-        self.selected = False
-        self.cell_offset_x, self.cell_offset_y = 0.0, 0.0
-
-    def draw_grid(self, x, y, dimensions, offsets):
-        glPushMatrix()
-        glTranslatef(self.cell_offset_x, self.cell_offset_y, 0.0)
-        Animated.draw_grid(self, x, y, dimensions, offsets)
-        glPopMatrix()
 
 class Character:
     READY, MOVING, MOVED = xrange(3)
