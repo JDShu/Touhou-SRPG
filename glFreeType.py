@@ -210,18 +210,18 @@ class font_data:
 		self.m_allocated = False
 		self.m_font_height = pixel_height
 		self.m_facename = facename
-		
+
 		# Try to obtain the FreeType font
 		try:
 			ft = ImageFont.truetype (facename, pixel_height)
 		except:
 			raise ValueError, "Unable to locate true type font '%s'" % (facename)
-		
+
 		# Here we ask opengl to allocate resources for
 		# all the textures and displays lists which we
 		# are about to create.  
 		self.m_list_base = glGenLists (128)
-		
+
 		# Consturct a list of 128 elements. This
 		# list will be assigned the texture IDs we create for each glyph
 		self.textures = [None] * 128
@@ -239,7 +239,7 @@ class font_data:
 		ft = None
 		return
 
-	def glPrint (self, x, y, string, color=[ 1.0, 1.0, 1.0 ]):
+	def glPrint (self, x, y, string):
 		"""
 		# ///Much like Nehe's glPrint function, but modified to work
 		# ///with freetype fonts.
@@ -299,7 +299,6 @@ class font_data:
 			# //  If you decide to use it make sure to also uncomment the glBitmap command
 			# //  in make_dlist().
 			# //	glRasterPos2f(0,0);
-			glColor3f( color[ 0 ], color[ 1 ], color[ 2 ] )
 			glCallLists (line)
 			# //	rpos = glGetFloatv (GL_CURRENT_RASTER_POSITION)
 			# //	float len=x-rpos[0];

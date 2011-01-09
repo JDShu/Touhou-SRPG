@@ -88,9 +88,12 @@ class Play:
         glPushMatrix()
         glTranslatef(self.left_offset,self.up_offset,0.0)
         self.session.draw_relative()
+        
         glPopMatrix()
+        glPushMatrix()
         self.session.draw_absolute()
-                    
+        glPopMatrix()
+
     def get_mouse_square(self, mouse_x, mouse_y ):
         
         t_offsets = self.play_state.level.tile_offsets
