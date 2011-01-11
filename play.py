@@ -14,11 +14,6 @@ SCALE = 0.5
 
 BROWSE, MOVE, ATTACK = xrange(3)
 
-FRAMEUPDATE = pygame.USEREVENT + 1
-MOVEUPDATE = pygame.USEREVENT + 2
-MOVEDONE = pygame.USEREVENT + 3
-MOVESQUARE = pygame.USEREVENT + 4
-
 class Play:
     """Play Session that is run each game loop """
     def __init__(self, module, module_map):
@@ -59,24 +54,16 @@ class Play:
                 self.keybuffer[ event.key ] = True
             elif event.type == pygame.KEYUP:
                 self.keybuffer[ event.key ] = False
-            elif event.type == MOVEUPDATE:
-                self.reimu_test.move()
-            elif event.type == MOVEDONE:
-                self.play_state.menus["move_confirm"].set_pos(mouse_x, mouse_y)
-                self.play_state.menus["move_confirm"].visible = True
-                self.play_state.level.relocate(self.selected_character.previous_node,self.selected_character.position,  "X")
-            elif event.type == MOVESQUARE:
-                self.play_state.level.relocate(self.selected_character.previous_node,self.selected_character.position,  "X")
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pass
             elif event.type == pygame.MOUSEBUTTONUP:
 
                 # what got clicked
                 self.session.process_click(mouse_coords, mouse_state)
-
+                
             else:
-                self.session.process_event(event)
-
+                self.session.process_event(event, mouse_coords, mouse_state)
+                
         self.session.process_keybuffer(self.keybuffer)
                 
         return True

@@ -1,10 +1,11 @@
 from OpenGL.GL import *
 import objects
 import astar
+import copy
 
 class Actor(objects.Animated):
     MOVING, IDLE = range(2)
-    TICKS = 10
+    TICKS = 5
     def __init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0):
         objects.Animated.__init__(self, x,y,sprite_name, scale_factor = 1.0)
         self.selected = False
@@ -17,7 +18,6 @@ class Actor(objects.Animated):
         self.direction = None
         self.ticks = 0
         self.play = touhou
-        
 
     def process_click(self, mode):
         pass
@@ -58,7 +58,7 @@ class Actor(objects.Animated):
             d = (0,0)
             p = (0,0)
 
-        self.mod_cell_offsets(d[0]*self.tile_offsets[0]/10.0, d[1]*self.tile_offsets[1]/10.0)
+        self.mod_cell_offsets(d[0]*self.tile_offsets[0]/self.TICKS, d[1]*self.tile_offsets[1]/self.TICKS)
         self.ticks += 1
         #print self.ticks
         if self.ticks >= self.TICKS:
@@ -99,12 +99,13 @@ class Actor(objects.Animated):
         if self.state == self.MOVING:
             self.move_inc()
         
+        
     def new_path(self, touhou_map, destination):
         self.state = self.MOVING
         grid = astar.Grid(touhou_map)
         path = astar.Path(grid, self.position, [destination])
+        self.path = [(5,4)]
         self.path = path.path
-        print self.path
         self.move_to_destination()
 
 class StaticObject(objects.Graphic):
@@ -121,8 +122,10 @@ class PlayerCharacter(Actor):
 
     def set_menu(self, menu):
         self.menu = menu
-        print "set menu"
-
+        
     def move_inc(self):
         Actor.move_inc(self)
         
+    def update(self, mouse_coords, mouse_state):
+        Actor.update(self)
+        self.menu.update(mouse_coords, mouse_state)

@@ -288,7 +288,7 @@ class font_data:
 		# //will be drawn immediatly after it.  
 		for i in xrange (len (lines)):
 			line = lines [i]
-
+			###print line
 			glPushMatrix ()
 			glLoadIdentity ()
 			glTranslatef (x,y-h*i,0);
