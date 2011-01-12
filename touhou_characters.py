@@ -5,10 +5,15 @@ import pygame
 import touhou_events
 
 class Reimu(PlayerCharacter):
+    SPEED = 4
+    MAX_AP = 100
     def __init__(self, position, touhou_map, touhou):
         PlayerCharacter.__init__(self, 15, 15, "reimu", position, touhou_map, touhou)
-        self.menu = ReimuMenu()
+        self.menu = ReimuMenu(self)
         
+        self.ap = self.MAX_AP
+                
+
     def menu_on(self):
         """Turn the menu on """
         self.menu.visible = True
@@ -18,13 +23,15 @@ class Reimu(PlayerCharacter):
         self.menu.visible = False
         
 class ReimuMenu(Menu):
-    def __init__(self, font = None):
+    def __init__(self, reimu, font = None):
         Menu.__init__(self, "Reimu")
         self.add_entry(MenuEntry("Move", self.move_function, "menu_option.png","menu_option_hover.png", "menu_option_clicked.png"))
+        self.reimu = reimu
 
     def draw(self):
         if self.visible:
             Menu.draw(self)
 
     def move_function(self):
-        pygame.event.post(pygame.event.Event(touhou_events.MOVEMODE))
+        pygame.event.post(pygame.event.Event(touhou_events.MOVEMODE, speed=self.reimu.SPEED))
+        

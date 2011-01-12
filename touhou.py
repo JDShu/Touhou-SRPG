@@ -41,12 +41,21 @@ class TouhouMap:
             self.grid += [temp]
         self.tileset = self.temp_tileset()
         self.actors = []
-
+        
     def draw(self,offsets):
         """Draws everything that is on the board."""
-        glTranslatef(*offsets)
+        
         self.draw_floor()
         self.draw_objects()
+        
+    def draw_highlights(self, highlighted ):
+        """highlights tiles in move or attack modes"""
+        for tile in highlighted:
+            self.tileset["hover"].draw_grid(tile[0],tile[1],self.dimensions, self.offsets)
+
+    def draw_hover(self, tile):
+        if tile:
+            self.tileset["hover"].draw_grid(tile[0],tile[1],self.dimensions, self.offsets)
         
     def draw_floor(self):
         """Draw the board."""   
@@ -67,8 +76,9 @@ class TouhouMap:
         """Temporary tileset and objects to place on map"""
         tileset = {}
         tileset["ground"] = objects.Graphic(1.0,"grass.png")
+        tileset["hover"] = objects.Graphic(0.4,"hover.png")
         tileset["obstacle"] = StaticObject(1.0,"tree.png")
-        self.tile_w = sqrt(pow(self.offsets[0],2) + pow(self.offsets[1],2))
+        self.tile_w = 50.0# TODO: magic number//sqrt(self.offsets[0]*self.offsets[0] + self.offsets[1]*self.offsets[1])
         return tileset
 
     def insert(self,instance,position):
@@ -79,7 +89,7 @@ class TouhouMap:
         mouse_x, mouse_y = mouse_coords
         
         mouse_x -= offsets[0]
-        mouse_y -= offsets[1] + self.offsets[1]
+        mouse_y -= self.offsets[1] + offsets[1]
         
         
         theta1 = atan(float(self.offsets[0])/float(self.offsets[1]))
@@ -88,8 +98,9 @@ class TouhouMap:
         
         y = mouse_x*sin(theta2) - mouse_y*cos(theta2)
         
-        max_x = self.tile_w*(self.w-1)
-        max_y = self.tile_w*(self.h-1)
+        max_x = self.tile_w*(self.w)
+        max_y = self.tile_w*(self.h)
+        
         if 0 < x < max_x and 0 < y < max_y:
             cell_x, cell_y = int(floor((x/max_x)*self.w)), int(floor((y/max_y)*self.h))
             return cell_x, cell_y
@@ -131,7 +142,7 @@ class TouhouPlay:
         self.mode = self.BROWSE
         
         self.test_objects()
-        
+        self.hover = None
 
         #Custom Events for Touhou Module
         pygame.time.set_timer(touhou_events.FRAMEUPDATE,100)
@@ -140,9 +151,9 @@ class TouhouPlay:
         position = (4,4)
         reimu = touhou_characters.Reimu(position,self.map,self)
         self.active += [reimu] 
-        #for x in range(4):
-        #    for y in range(4):
-        #        self.map.insert(self.map.tileset["obstacle"],(x,y))
+        for x in range(4):
+            for y in range(4):
+                self.map.insert(self.map.tileset["obstacle"],(x,y))
 
         self.map.insert(reimu,position)
         self.font = glFreeType.font_data( "free_sans.ttf", 30 )
@@ -151,6 +162,7 @@ class TouhouPlay:
     def update(self, mouse_coords, mouse_state):
         for a in self.active:
             a.update(mouse_coords, mouse_state)
+        self.hover = self.map.grid_coordinate(mouse_coords, self.offsets)
 
     def process_click(self, mouse_coords, mouse_state):
         """ What to do when user clicks """
@@ -161,18 +173,18 @@ class TouhouPlay:
         if self.mode == self.MOVE:
             #print "move"
             destination = self.map.grid_coordinate(mouse_coords, self.offsets)            
-            if destination and self.map.occupied(destination) == None:
+            if destination and self.map.occupied(destination) == None and destination in self.accessible:
                 self.selected.new_path(self.map,destination)
                 self.selected.menu_off()
                 self.mode = self.BROWSE
         elif self.mode == self.BROWSE:
             #print "browse"
             if clicked_object in self.active:
-                
                 self.selected = clicked_object
                 self.selected.menu_on()
                 self.selected.menu.set_pos(*mouse_coords)
-                #self.mode = self.MOVE
+                
+#self.mode = self.MOVE
         
     def determine_clicked(self, mouse_coords):
         #TODO: see if clicked on a UI element
@@ -190,7 +202,30 @@ class TouhouPlay:
             self.update(mouse_coords, mouse_state)
         if event.type == touhou_events.MOVEMODE:
             self.mode = self.MOVE
+            self.accessible = self.generate_accessible(self.selected)
+
+
+    def generate_accessible(self, character):
+        accessible = set()
+        accessible.add(character.position)
+        for i in xrange(character.SPEED):
+            temp = set()
+            for c in accessible:
+                temp.add((c[0],c[1]-1))
+                temp.add((c[0],c[1]+1))
+                temp.add((c[0]-1,c[1]))
+                temp.add((c[0]+1,c[1]))
+            accessible = accessible.union(temp)
+            temp = set()
+            for t in accessible:
+                if not (0 <= t[0] < self.map.w and 0 <= t[1] < self.map.h):
+                    temp.add(t)
+                elif self.map.grid[t[0]][t[1]]:
+                    temp.add(t)
+                accessible = accessible.difference(temp)
             
+        return accessible
+
     def process_keybuffer(self, keybuffer):
         if keybuffer[pygame.K_UP]:
             self.offsets[1] -= 3.0
@@ -203,9 +238,12 @@ class TouhouPlay:
     
     def draw_relative(self):
         """ Draw all map elements """
-        self.map.draw(self.offsets)
+        glTranslatef(*self.offsets)
+        self.map.draw_floor()
         if self.mode == self.MOVE:
-            pass
+            self.map.draw_highlights(self.accessible)
+        self.map.draw_objects()
+        self.map.draw_hover(self.hover)
 
     def draw_absolute(self):
         """ Draw all UI elements """
