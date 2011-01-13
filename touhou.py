@@ -78,7 +78,7 @@ class TouhouMap:
         tileset["ground"] = objects.Graphic(1.0,"grass.png")
         tileset["hover"] = objects.Graphic(0.4,"hover.png")
         tileset["obstacle"] = StaticObject(1.0,"tree.png")
-        self.tile_w = 50.0# TODO: magic number//sqrt(self.offsets[0]*self.offsets[0] + self.offsets[1]*self.offsets[1])
+        self.tile_w = 50.0# TODO: replace magic number//sqrt(self.offsets[0]*self.offsets[0] + self.offsets[1]*self.offsets[1])
         return tileset
 
     def insert(self,instance,position):
@@ -124,7 +124,8 @@ class TouhouMap:
 
 class TouhouPlay:
     """The state of a Touhou play session at any given moment"""
-    MOVE, ATTACK, BROWSE, WAIT = range(4)
+    MOVE, ATTACK, BROWSE, WAIT, TURNCHANGE, OPPONENT = range(6)
+    TURNCHANGE_INTERVAL = 2000
     def __init__(self, touhou_map):
         """ 
         selectable: Characters that can be clicked on at a given moment
@@ -133,23 +134,41 @@ class TouhouPlay:
         
         """
         self.active = []
-        self.menu_selections = {}
-        self.menu_title = ""
-        self.menu = ui.Menu(self.menu_title)
-        
+        self.main_menu = ui.Menu("Main")
+        self.main_menu.add_entry(ui.MenuEntry("End", 0, self.end_turn, 
+                                           "menu_option.png",
+                                           "menu_option_hover.png", 
+                                           "menu_option_clicked.png"))
+        self.main_menu.add_entry(ui.MenuEntry("Quit", 1, self.quit,
+                                           "menu_option.png",
+                                           "menu_option_hover.png", 
+                                           "menu_option_clicked.png"))
         self.map = touhou_map
         self.offsets = [0,0,0]
         self.mode = self.BROWSE
         
         self.test_objects()
         self.hover = None
+        self.selected = None
+        self.menu_on = False
+        self.wait_timeleft = 0
 
         #Custom Events for Touhou Module
         pygame.time.set_timer(touhou_events.FRAMEUPDATE,100)
+        pygame.time.set_timer(touhou_events.TENTHSECOND,100)
         
+    def quit(self):
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+    def end_turn(self):
+        self.mode = self.TURNCHANGE
+        self.wait_timeleft = self.TURNCHANGE_INTERVAL
+        self.main_menu.menu_off()
+        print "turn ended"
+
     def test_objects(self):
         position = (4,4)
-        reimu = touhou_characters.Reimu(position,self.map,self)
+        reimu = touhou_characters.Reimu(position, self.map, self)
         self.active += [reimu] 
         for x in range(4):
             for y in range(4):
@@ -162,8 +181,12 @@ class TouhouPlay:
     def update(self, mouse_coords, mouse_state):
         for a in self.active:
             a.update(mouse_coords, mouse_state)
-        self.hover = self.map.grid_coordinate(mouse_coords, self.offsets)
-
+        self.main_menu.update(mouse_coords, mouse_state)
+        if not self.menu_on:
+            self.hover = self.map.grid_coordinate(mouse_coords, self.offsets)
+        else:
+            self.hover = None
+        
     def process_click(self, mouse_coords, mouse_state):
         """ What to do when user clicks """
         left, middle, right = mouse_state
@@ -180,24 +203,42 @@ class TouhouPlay:
                     self.selected.new_path(self.map,destination)
                     self.selected.menu_off()
                     self.mode = self.BROWSE
+                    self.selected.ap -= self.selected.move_cost
+                    print self.selected.ap
+
         elif self.mode == self.ATTACK:
             if right:
                 self.mode = self.BROWSE
         elif self.mode == self.BROWSE:
             #print "browse"
-            if clicked_object in self.active:
-                self.selected = clicked_object
-                self.selected.menu_on()
-                self.selected.menu.set_pos(*mouse_coords)
-                
+            if left:
+                if not self.menu_on and clicked_object in self.active:
+                    self.selected = clicked_object
+                    self.selected.menu_on()
+                    self.menu_on = True
+                    self.selected.menu.set_pos(*mouse_coords)
+            elif right:
+                if self.menu_on:
+                    self.main_menu.menu_off()
+                    self.menu_on = False
+                    if self.selected:
+                        self.selected.menu_off()
+                else:
+                    
+                    self.menu_on = True
+                    self.main_menu.set_pos(*mouse_coords)
+                    self.main_menu.menu_on()
 #self.mode = self.MOVE
         
     def determine_clicked(self, mouse_coords):
-        #TODO: see if clicked on a UI element
+        """If UI element is clicked, let element process the click, otherwise, ask map instance what was clicked """
         for a in self.active:
             if a.menu.visible:
                 a.menu.process_click()
                 return False
+        if self.main_menu.visible:
+            self.main_menu.process_click()
+            return False
         else:
         #see if clicking within the grid
             return self.map.process_click(mouse_coords, self.offsets)
@@ -207,13 +248,30 @@ class TouhouPlay:
         if event.type == touhou_events.FRAMEUPDATE:
             self.update(mouse_coords, mouse_state)
         if event.type == touhou_events.CLICKEVENT:
+            self.menu_on = False
             if event.button == touhou_events.MOVE:
                 self.mode = self.MOVE
                 self.accessible = self.generate_accessible(event.character)
             elif event.button == touhou_events.ATTACK:
                 self.mode = self.ATTACK
                 self.attackable = self.generate_attackable(event.character)
-            
+            else:
+                print "nothin"
+        if event.type == touhou_events.TENTHSECOND:
+            self.wait_timeleft -= 100
+            if self.mode == self.TURNCHANGE and self.wait_timeleft <= 0:
+                #should start whoever's turn it is
+                print "turn start"
+                self.mode = self.BROWSE
+                self.menu_on = False
+                self.new_turn()
+
+    def new_turn(self):
+        """New player turn"""
+        for a in self.active:
+            a.restore_ap()
+
+
     def generate_attackable(self, character):
         temp = [] 
         for a in character.attackable:
@@ -262,13 +320,15 @@ class TouhouPlay:
         if self.mode == self.ATTACK:
             self.map.draw_highlights(self.attackable)
         self.map.draw_objects()
+        
         self.map.draw_hover(self.hover)
 
     def draw_absolute(self):
         """ Draw all UI elements """
         for a in self.active:
             a.menu.draw()
-                        
+        self.main_menu.draw()
+        
     def move_square(self, subject, direction):
         pass
         

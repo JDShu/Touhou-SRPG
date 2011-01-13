@@ -84,7 +84,10 @@ class MenuEntry:
         self.place = place
 
     def execute( self, *args ):
-        return self.function(*args)
+        if self.function:
+            return self.function(*args)
+        else:
+            print "No function implemented for this option"
 
     def draw(self):
         self.graphic.draw()
@@ -101,6 +104,15 @@ class Menu:
         self.visible = False
         self.screen_w = pygame.display.get_surface().get_width()
         
+    def menu_on(self):
+        self.visible = True
+        
+    def menu_off(self):
+        self.visible = False
+
+    def within_menu(self, x, y):
+        return (self.x < x < self.x + self.body.w and self.y - self.body.h < y < self.y)
+            
     def add_entry(self, entry):
         self.body.add_entry()
         self.entries += [entry]
@@ -110,8 +122,7 @@ class Menu:
             for entry in self.entries:
                 if entry.graphic.current == entry.graphic.clicked:
                     entry.execute(*args)
-                    self.visible = False
-                    
+                                        
         pass
             
     def update( self, mouse_pos, mouse_state ):
@@ -119,17 +130,17 @@ class Menu:
             entry.graphic.determine_mode(mouse_pos, mouse_state[0])
                                    
     def draw( self ):
-
-        self.body.draw(self.x,self.y)
-        for entry in self.entries:
+        if self.visible:
+            self.body.draw(self.x,self.y)
+            for entry in self.entries:
         
-            temp_x = self.x + MENU_BORDER
-            temp_y = self.y - MENU_BORDER - TITLE_HEIGHT - (1+entry.place)*ENTRY_HEIGHT
+                temp_x = self.x + MENU_BORDER
+                temp_y = self.y - MENU_BORDER - TITLE_HEIGHT - (1+entry.place)*ENTRY_HEIGHT
             #print entry
-            entry.draw()
-            self.print_text(entry.title,temp_x,temp_y)
+                entry.draw()
+                self.print_text(entry.title,temp_x,temp_y)
         #print "done"
-        self.print_text(self.title, self.x + MENU_BORDER, self.y - TITLE_HEIGHT - MENU_BORDER)
+            self.print_text(self.title, self.x + MENU_BORDER, self.y - TITLE_HEIGHT - MENU_BORDER)
         
     def print_text(self, text,x,y):
         glPushMatrix()
