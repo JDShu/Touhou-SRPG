@@ -206,15 +206,20 @@ class TouhouPlay:
     def process_event(self,event,mouse_coords, mouse_state):
         if event.type == touhou_events.FRAMEUPDATE:
             self.update(mouse_coords, mouse_state)
-        if event.type == touhou_events.MOVEMODE:
-            self.mode = self.MOVE
-            self.accessible = self.generate_accessible(event.character)
-        if event.type == touhou_events.ATTACKMODE:
-            self.mode = self.ATTACK
-            self.attackable = self.generate_attackable(event.character)
+        if event.type == touhou_events.CLICKEVENT:
+            if event.button == touhou_events.MOVE:
+                self.mode = self.MOVE
+                self.accessible = self.generate_accessible(event.character)
+            elif event.button == touhou_events.ATTACK:
+                self.mode = self.ATTACK
+                self.attackable = self.generate_attackable(event.character)
             
     def generate_attackable(self, character):
-        temp = [(character.position[0] + a[0], character.position[1] + a[1]) for a in character.attackable]
+        temp = [] 
+        for a in character.attackable:
+            t = (character.position[0] + a[0], character.position[1] + a[1])
+            if 0 <= t[0] < self.map.w and 0 <= t[1] < self.map.h and not self.map.grid[t[0]][t[1]]:
+                temp += [t]
         return temp
 
     def generate_accessible(self, character):

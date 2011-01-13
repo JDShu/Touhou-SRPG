@@ -36,7 +36,7 @@ class ReimuMenu(Menu):
             Menu.draw(self)
 
     def move_function(self):
-        pygame.event.post(pygame.event.Event(touhou_events.MOVEMODE, character=self.reimu))
+        pygame.event.post(pygame.event.Event(touhou_events.CLICKEVENT, button = touhou_events.MOVE, character=self.reimu))
         
     def attack_function(self):
-        pygame.event.post(pygame.event.Event(touhou_events.ATTACKMODE, character = self.reimu))
+        pygame.event.post(pygame.event.Event(touhou_events.CLICKEVENT, button = touhou_events.ATTACK, character = self.reimu))
