@@ -81,8 +81,10 @@ class Graphic:
         glEndList()
         
     def draw( self, x,y ):
+        glPushMatrix()
         glTranslatef(x,y,0.0)
         glCallList(self.draw_list)
+        glPopMatrix()
 
     def draw_grid(self, x, y, dimensions, offsets):
         w,h = dimensions

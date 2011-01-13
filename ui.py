@@ -30,12 +30,13 @@ class MenuBody( Graphic ):
 
 
 class MenuOptionGraphic:
-    def __init__( self, idle, hover = None, clicked = None, scale_factor = 1.0 ): 
+    def __init__( self, place, idle, hover = None, clicked = None, scale_factor = 1.0 ): 
 
         h = ENTRY_HEIGHT
         w = ENTRY_WIDTH
     
         self.idle = Graphic(0.8,idle,scale_factor,w,h)
+        
         if hover:
             self.hover = Graphic(0.8,hover,scale_factor,w,h)
         else:
@@ -49,7 +50,8 @@ class MenuOptionGraphic:
         self.w = ENTRY_WIDTH
         
         self.current = self.idle
-        self.x, self.y = 0,0
+        self.x, self.y = 0, 0
+        self.place = place
         
     def determine_mode(self, mouse_pos, left_click):
         
@@ -57,6 +59,7 @@ class MenuOptionGraphic:
             if left_click and self.clicked:
                 self.current = self.clicked
             elif self.hover:
+                #print self.place, "hovering"
                 self.current = self.hover
             return False
         else:
@@ -64,23 +67,27 @@ class MenuOptionGraphic:
         return True
 
     def set_pos(self, x, y):
-        self.x, self.y = x, y
+        self.x = x + MENU_BORDER
+        self.y = y - TITLE_HEIGHT - MENU_BORDER - (self.place+1)*ENTRY_HEIGHT
 
-    def draw(self):       
-        self.current.draw(MENU_BORDER,MENU_BORDER)
+    def draw(self):
+        
+        self.current.draw(self.x, self.y)
+        #print self.place
 
 class MenuEntry:
-    def __init__( self, title, function, idle, hover = None, clicked = None, scale_factor = 1.0 ):
+    def __init__( self, title, place, function, idle, hover = None, clicked = None, scale_factor = 1.0 ):
         self.title = title
         self.function = function
         self.mode = "idle"
-        self.graphic = MenuOptionGraphic(idle,hover,clicked,scale_factor)
-        
+        self.graphic = MenuOptionGraphic(place, idle,hover,clicked,scale_factor)
+        self.place = place
+
     def execute( self, *args ):
         return self.function(*args)
 
-    def draw(self,x,y):
-        self.graphic.draw(x,y)
+    def draw(self):
+        self.graphic.draw()
         
 class Menu:
     
@@ -89,7 +96,6 @@ class Menu:
         self.title = title
         self.num_entries = 0
         self.body = MenuBody("menu_body.png")
-        self.option = MenuOptionGraphic("menu_option.png", "menu_option_hover.png")
         self.entries = []
         self.x, self.y = 0, 0
         self.visible = False
@@ -98,7 +104,7 @@ class Menu:
     def add_entry(self, entry):
         self.body.add_entry()
         self.entries += [entry]
-
+        
     def process_click(self, *args):
         if self.visible:
             for entry in self.entries:
@@ -115,17 +121,22 @@ class Menu:
     def draw( self ):
 
         self.body.draw(self.x,self.y)
-        for i, entry in enumerate(self.entries):
+        for entry in self.entries:
+        
             temp_x = self.x + MENU_BORDER
-            temp_y = self.y - MENU_BORDER - TITLE_HEIGHT - (1+i)*ENTRY_HEIGHT
-            entry.graphic.draw()
+            temp_y = self.y - MENU_BORDER - TITLE_HEIGHT - (1+entry.place)*ENTRY_HEIGHT
+            #print entry
+            entry.draw()
             self.print_text(entry.title,temp_x,temp_y)
+        #print "done"
         self.print_text(self.title, self.x + MENU_BORDER, self.y - TITLE_HEIGHT - MENU_BORDER)
         
     def print_text(self, text,x,y):
+        glPushMatrix()
         glLoadIdentity()
         self.font.glPrint( x, y, text )
-        
+        glPopMatrix()
+
     def set_pos(self, x, y):
         self.x, self.y = x, y
         if y < self.body.h:
@@ -133,6 +144,6 @@ class Menu:
         if x > self.screen_w - self.body.w:
             self.x = x - self.body.w
         for entry in self.entries:
-            entry.graphic.set_pos(self.x, self.y - self.body.h + MENU_BORDER)
+            entry.graphic.set_pos(self.x, self.y)
         
         

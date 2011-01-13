@@ -172,10 +172,16 @@ class TouhouPlay:
                 #What to do given the current state and what got clicked
         if self.mode == self.MOVE:
             #print "move"
-            destination = self.map.grid_coordinate(mouse_coords, self.offsets)            
-            if destination and self.map.occupied(destination) == None and destination in self.accessible:
-                self.selected.new_path(self.map,destination)
-                self.selected.menu_off()
+            if right:
+                self.mode = self.BROWSE
+            elif left:
+                destination = self.map.grid_coordinate(mouse_coords, self.offsets)            
+                if destination and self.map.occupied(destination) == None and destination in self.accessible:
+                    self.selected.new_path(self.map,destination)
+                    self.selected.menu_off()
+                    self.mode = self.BROWSE
+        elif self.mode == self.ATTACK:
+            if right:
                 self.mode = self.BROWSE
         elif self.mode == self.BROWSE:
             #print "browse"
@@ -202,8 +208,14 @@ class TouhouPlay:
             self.update(mouse_coords, mouse_state)
         if event.type == touhou_events.MOVEMODE:
             self.mode = self.MOVE
-            self.accessible = self.generate_accessible(self.selected)
-
+            self.accessible = self.generate_accessible(event.character)
+        if event.type == touhou_events.ATTACKMODE:
+            self.mode = self.ATTACK
+            self.attackable = self.generate_attackable(event.character)
+            
+    def generate_attackable(self, character):
+        temp = [(character.position[0] + a[0], character.position[1] + a[1]) for a in character.attackable]
+        return temp
 
     def generate_accessible(self, character):
         accessible = set()
@@ -242,6 +254,8 @@ class TouhouPlay:
         self.map.draw_floor()
         if self.mode == self.MOVE:
             self.map.draw_highlights(self.accessible)
+        if self.mode == self.ATTACK:
+            self.map.draw_highlights(self.attackable)
         self.map.draw_objects()
         self.map.draw_hover(self.hover)
 
