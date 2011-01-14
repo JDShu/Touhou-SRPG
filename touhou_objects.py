@@ -3,11 +3,13 @@ import objects
 import astar
 import copy
 
+CHARACTER, MONSTER, OBSTACLE = range(3)
+
 class Actor(objects.Animated):
     MOVING, IDLE = range(2)
     TICKS = 5
     def __init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0):
-        objects.Animated.__init__(self, x,y,sprite_name, scale_factor = 1.0)
+        objects.Animated.__init__(self, x,y,sprite_name, scale_factor)
         self.selected = False
         self.set_cell_offsets(0,0)
         self.position = position
@@ -19,8 +21,8 @@ class Actor(objects.Animated):
         self.ticks = 0
         self.play = touhou
 
-    def process_click(self, mode):
-        pass
+    def process_click(self, mouse_coords, mouse_state):
+        print "process_click not implemented"
 
     def draw_grid(self, x, y, dimensions, offsets):
         glPushMatrix()
@@ -119,6 +121,7 @@ class PlayerCharacter(Actor):
     def __init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0):
         Actor.__init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0)
         self.menu = None
+        self.type = CHARACTER
 
     def set_menu(self, menu):
         self.menu = menu
@@ -129,3 +132,17 @@ class PlayerCharacter(Actor):
     def update(self, mouse_coords, mouse_state):
         Actor.update(self)
         self.menu.update(mouse_coords, mouse_state)
+
+    def process_click(self, mouse_coords, mouse_state):
+        self.menu.set_pos(*mouse_coords)
+        self.menu_on()
+
+    def menu_on(self):
+        """Turn the menu on """
+        self.menu.menu_on()
+
+    def menu_off(self):
+        """Turn the menu off"""
+        self.menu.menu_off()
+
+

@@ -8,6 +8,8 @@ import objects
 import touhou_characters
 import glFreeType
 import touhou_events
+import touhou_monsters
+import touhou_objects
 
 class Module:
     """
@@ -40,7 +42,7 @@ class TouhouMap:
                 temp += [None]
             self.grid += [temp]
         self.tileset = self.temp_tileset()
-        self.actors = []
+#        self.actors = []
         
     def draw(self,offsets):
         """Draws everything that is on the board."""
@@ -121,6 +123,10 @@ class TouhouMap:
     def occupied(self, position):
         return self.grid[position[0]][position[1]]
 
+    def remove(self, actor):
+        self.grid[actor.position[0]][actor.position[1]] = None
+        
+        #print self.grid
 
 class TouhouPlay:
     """The state of a Touhou play session at any given moment"""
@@ -169,7 +175,10 @@ class TouhouPlay:
     def test_objects(self):
         position = (4,4)
         reimu = touhou_characters.Reimu(position, self.map, self)
-        self.active += [reimu] 
+        monster = touhou_monsters.Blob((6,5), self.map, self)
+        self.active += [reimu]
+        self.active += [monster]
+        self.map.insert(monster,(6,5))
         for x in range(4):
             for y in range(4):
                 self.map.insert(self.map.tileset["obstacle"],(x,y))
@@ -207,21 +216,30 @@ class TouhouPlay:
                     print self.selected.ap
 
         elif self.mode == self.ATTACK:
-            if right:
+            if left:
+                defender = clicked_object
+                if defender and defender.type == touhou_objects.MONSTER:
+                    self.process_combat(self.selected, defender)
+                    print self.selected, "attacks", defender
+                    self.selected.menu_off
+                    self.menu_on = False
+                    self.mode = self.BROWSE
+            elif right:
                 self.mode = self.BROWSE
         elif self.mode == self.BROWSE:
             #print "browse"
             if left:
                 if not self.menu_on and clicked_object in self.active:
                     self.selected = clicked_object
-                    self.selected.menu_on()
-                    self.menu_on = True
-                    self.selected.menu.set_pos(*mouse_coords)
+                    self.selected.process_click(mouse_coords, mouse_state)
+                    if self.selected.type == touhou_objects.CHARACTER:
+                        self.menu_on = True
+                    
             elif right:
                 if self.menu_on:
                     self.main_menu.menu_off()
                     self.menu_on = False
-                    if self.selected:
+                    if self.selected and self.selected.type == touhou_objects.CHARACTER:
                         self.selected.menu_off()
                 else:
                     
@@ -233,9 +251,10 @@ class TouhouPlay:
     def determine_clicked(self, mouse_coords):
         """If UI element is clicked, let element process the click, otherwise, ask map instance what was clicked """
         for a in self.active:
-            if a.menu.visible:
-                a.menu.process_click()
-                return False
+            if a.type == touhou_objects.CHARACTER:
+                if a.menu.visible:
+                    a.menu.process_click()
+                    return False
         if self.main_menu.visible:
             self.main_menu.process_click()
             return False
@@ -276,7 +295,8 @@ class TouhouPlay:
         temp = [] 
         for a in character.attackable:
             t = (character.position[0] + a[0], character.position[1] + a[1])
-            if 0 <= t[0] < self.map.w and 0 <= t[1] < self.map.h and not self.map.grid[t[0]][t[1]]:
+            thing = self.map.grid[t[0]][t[1]]
+            if (0 <= t[0] < self.map.w and 0 <= t[1] < self.map.h) and (thing == None or thing.type == touhou_objects.MONSTER):
                 temp += [t]
         return temp
 
@@ -326,15 +346,29 @@ class TouhouPlay:
     def draw_absolute(self):
         """ Draw all UI elements """
         for a in self.active:
-            a.menu.draw()
+            if a.type == touhou_objects.CHARACTER:
+                a.menu.draw()
         self.main_menu.draw()
         
     def move_square(self, subject, direction):
         pass
         
+
+    def process_combat(self, attacker, defender):
+        damage = attacker.calculate_damage(defender)
+        defender.recieve_damage(damage)
+        if defender.is_dead():
+            self.remove(defender)
+
+    def remove(self, actor):
+        """remove actor from play"""
+        self.map.remove(actor)
+        self.active.remove(actor)
+
 class StaticObject(objects.Graphic):
     def __init__(self, a, texture = None, scale_factor = 1.0, w = None, h = None):
         objects.Graphic.__init__(self, a, texture, scale_factor, w, h)
+        self.type = touhou_objects.OBSTACLE
 
     def process_click(self, mode):
         pass

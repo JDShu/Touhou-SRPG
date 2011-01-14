@@ -118,7 +118,7 @@ class Animated(Graphic):
         self.current_frame_number = 0
         self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
         self.action = None
-        self.w, self.h = self.current_frame_dimensions[2], self.current_frame_dimensions[3]
+        self.w, self.h = float(self.current_frame_dimensions[2]), float(self.current_frame_dimensions[3])
         self.w *= scale_factor
         self.h *= scale_factor
         self.scale_factor = scale_factor
