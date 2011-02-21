@@ -96,7 +96,42 @@ class Graphic:
     def process_click(self):
         pass
 
-            
+class DynamicGraphic(Graphic):
+    def __init__(self, a, texture = None, scale_factor = 1.0, w = None, h = None):
+        Graphic.__init__(self, a, texture, scale_factor, w, h)
+        
+    def setup_draw(self):
+        self.v_array = [(0.0,0.0),(self.w,0.0),(self.w,self.h),(0.0,self.h)]
+        self.indices = range(4)
+        self.t_array = [(0.0,0.0),(1.0,0.0),(1.0,1.0),(0.0,1.0)]
+
+    def draw(self,x,y):
+        glPushMatrix()
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        color = (1.0,1.0,1.0,self.a)
+        
+        glEnable( GL_TEXTURE_2D )
+        glBindTexture( GL_TEXTURE_2D, self.texture )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+        glColor4f(*color)
+        
+        glTranslatef(x,y,0.0)
+        glEnableClientState(GL_VERTEX_ARRAY)
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, self.v_array)
+        glTexCoordPointer(2, GL_FLOAT, 0, self.t_array)
+        glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, self.indices);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        
+        glDisable( GL_TEXTURE_2D )
+        glDisable( GL_BLEND)
+        
+        glPopMatrix()
+
+
 class Tile(Graphic):
     def __init__(self, image_file):
         Graphic.__init__(self, 1.0, image_file)

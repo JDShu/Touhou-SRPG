@@ -1,20 +1,20 @@
-import touhou_objects
+from touhou_objects import *
 
-class Monster(touhou_objects.Actor):
+class Monster(Actor):
     def __init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0):
-        touhou_objects.Actor.__init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor)
+        Actor.__init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor)
         self.menu = None
-        self.type = touhou_objects.MONSTER
+        self.type = MONSTER
         
 
     def set_menu(self, menu):
         self.menu = menu
         
     def move_inc(self):
-        touhou_objects.Actor.move_inc(self)
+        Actor.move_inc(self)
         
     def update(self, mouse_coords, mouse_state):
-        touhou_objects.Actor.update(self)
+        Actor.update(self)
         
 class Blob(Monster):
     MAX_AP = 100
@@ -22,17 +22,16 @@ class Blob(Monster):
 
     def __init__(self, position, touhou_map, touhou):
         Monster.__init__(self, 15, 15, "monster", position, touhou_map, touhou, 0.8)
-        self.hp = self.MAX_HP
-        self.ap = self.MAX_AP
+        self.stats = Stats(self.MAX_HP, self.MAX_AP, "monster.png")
 
     def restore_ap(self):
-        self.ap = self.MAX_AP
+        self.stats.ap = self.MAX_AP
 
     def calculate_damage(self, defender):
         return 30
 
     def recieve_damage(self, damage):
-        self.hp -= damage
+        self.stats.hp -= damage
 
     def is_dead(self):
-        return self.hp <= 0
+        return self.stats.hp <= 0

@@ -5,7 +5,23 @@ import copy
 
 CHARACTER, MONSTER, OBSTACLE = range(3)
 
+class Stats:
+    """Collection of statistics describing actor"""
+    def __init__(self, hp, ap, portrait):
+        self.MAX_HP = hp
+        self.MAX_AP = ap
+        self.hp = hp
+        self.ap = ap
+        self.portrait = objects.Graphic(1.0, portrait)
+
+    def restore_ap(self):
+        self.ap = self.MAX_AP
+
+    def restor_hp(self):
+        self.hp = self.MAX_HP
+
 class Actor(objects.Animated):
+    """An Actor is anything that influences the game, usually a character or monster"""
     MOVING, IDLE = range(2)
     TICKS = 5
     def __init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0):

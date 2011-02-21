@@ -12,9 +12,7 @@ class Reimu(PlayerCharacter):
         PlayerCharacter.__init__(self, 15, 15, "reimu", position, touhou_map, touhou)
         self.menu = ReimuMenu(self)
         
-        self.ap = self.MAX_AP
-        self.hp = self.MAX_HP
-
+        self.stats = Stats(self.MAX_HP, self.MAX_AP, "reimu_portrait.png")
         self.attackable = [(0,1),(0,-1),(1,0),(-1,0)]
 
         self.move_cost = 30
@@ -25,17 +23,17 @@ class Reimu(PlayerCharacter):
         return self.menu.within_menu(*mouse_coords)
         
     def restore_ap(self):
-        self.ap = self.MAX_AP
+        self.stats.ap = self.MAX_AP
 
     def calculate_damage(self, defender):
-        self.ap -= self.attack_cost
+        self.stats.ap -= self.attack_cost
         return 30
 
     def recieve_damage(self, damage):
-        self.hp -= damage
+        self.stats.hp -= damage
 
     def is_dead(self):
-        return self.hp <= 0
+        return self.stats.hp <= 0
 
 class ReimuMenu(Menu):
     def __init__(self, reimu, font = None):
@@ -48,11 +46,11 @@ class ReimuMenu(Menu):
         Menu.draw(self)
 
     def move_function(self):
-        if self.reimu.ap >= self.reimu.move_cost:
+        if self.reimu.stats.ap >= self.reimu.move_cost:
             pygame.event.post(pygame.event.Event(touhou_events.CLICKEVENT, button = touhou_events.MOVE, character=self.reimu))
             self.menu_off()
 
     def attack_function(self):
-        if self.reimu.ap >= self.reimu.attack_cost:
+        if self.reimu.stats.ap >= self.reimu.attack_cost:
             pygame.event.post(pygame.event.Event(touhou_events.CLICKEVENT, button = touhou_events.ATTACK, character = self.reimu))
             self.menu_off()

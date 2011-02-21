@@ -10,6 +10,7 @@ import glFreeType
 import touhou_events
 import touhou_monsters
 import touhou_objects
+import touhou_ui
 
 class Module:
     """
@@ -56,6 +57,7 @@ class TouhouMap:
             self.tileset["hover"].draw_grid(tile[0],tile[1],self.dimensions, self.offsets)
 
     def draw_hover(self, tile):
+        """highlight a particular tile"""
         if tile:
             self.tileset["hover"].draw_grid(tile[0],tile[1],self.dimensions, self.offsets)
         
@@ -84,6 +86,7 @@ class TouhouMap:
         return tileset
 
     def insert(self,instance,position):
+        """change object at a coordinate into something else"""
         self.grid[position[0]][position[1]] = instance
 
     def grid_coordinate(self, mouse_coords, offsets):
@@ -116,14 +119,17 @@ class TouhouMap:
         return False
 
     def relocate(self, subject, new_position):
+        """move a particular object to a specified coordinate """
         self.grid[new_position[0]][new_position[1]] = subject
         self.grid[subject.position[0]][subject.position[1]] = None
         subject.position = new_position
         
     def occupied(self, position):
+        """Return whether or not there is something in the given position"""
         return self.grid[position[0]][position[1]]
 
     def remove(self, actor):
+        """Remove the actor from play."""
         self.grid[actor.position[0]][actor.position[1]] = None
         
         #print self.grid
@@ -156,6 +162,7 @@ class TouhouPlay:
         self.test_objects()
         self.hover = None
         self.selected = None
+        self.status_window = touhou_ui.StatusWindow((0,0))
         self.menu_on = False
         self.wait_timeleft = 0
 
@@ -164,9 +171,11 @@ class TouhouPlay:
         pygame.time.set_timer(touhou_events.TENTHSECOND,100)
         
     def quit(self):
+        """Send quit signal to quit game"""
         pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def end_turn(self):
+        """Change states assciated with clicking on the End Turn button"""
         self.mode = self.TURNCHANGE
         self.wait_timeleft = self.TURNCHANGE_INTERVAL
         self.main_menu.menu_off()
@@ -188,9 +197,11 @@ class TouhouPlay:
         #self.active[0].move_cell("N")
         
     def update(self, mouse_coords, mouse_state):
+        """Update all objects"""
         for a in self.active:
             a.update(mouse_coords, mouse_state)
         self.main_menu.update(mouse_coords, mouse_state)
+        
         if not self.menu_on:
             self.hover = self.map.grid_coordinate(mouse_coords, self.offsets)
         else:
@@ -212,15 +223,15 @@ class TouhouPlay:
                     self.selected.new_path(self.map,destination)
                     self.selected.menu_off()
                     self.mode = self.BROWSE
-                    self.selected.ap -= self.selected.move_cost
-                    print self.selected.ap
+                    self.selected.stats.ap -= self.selected.move_cost
+                    print self.selected.stats.ap
 
         elif self.mode == self.ATTACK:
             if left:
                 defender = clicked_object
                 if defender and defender.type == touhou_objects.MONSTER:
                     self.process_combat(self.selected, defender)
-                    print self.selected, "attacks", defender
+                    #print self.selected, "attacks", defender
                     self.selected.menu_off
                     self.menu_on = False
                     self.mode = self.BROWSE
@@ -231,6 +242,7 @@ class TouhouPlay:
             if left:
                 if not self.menu_on and clicked_object in self.active:
                     self.selected = clicked_object
+                    self.status_window.load_stats(clicked_object.stats)
                     self.selected.process_click(mouse_coords, mouse_state)
                     if self.selected.type == touhou_objects.CHARACTER:
                         self.menu_on = True
@@ -264,6 +276,8 @@ class TouhouPlay:
 
 
     def process_event(self,event,mouse_coords, mouse_state):
+        """Read custom events and proccess them"""
+        #TODO: Subdivide into smaller functions
         if event.type == touhou_events.FRAMEUPDATE:
             self.update(mouse_coords, mouse_state)
         if event.type == touhou_events.CLICKEVENT:
@@ -292,6 +306,7 @@ class TouhouPlay:
 
 
     def generate_attackable(self, character):
+        """generate list of grid coordinates that are in range of attack by the character"""
         temp = [] 
         for a in character.attackable:
             t = (character.position[0] + a[0], character.position[1] + a[1])
@@ -301,6 +316,7 @@ class TouhouPlay:
         return temp
 
     def generate_accessible(self, character):
+        """generate list of coordinates that the character is able to move to"""
         accessible = set()
         accessible.add(character.position)
         for i in xrange(character.SPEED):
@@ -322,6 +338,7 @@ class TouhouPlay:
         return accessible
 
     def process_keybuffer(self, keybuffer):
+        """Browse around map"""
         if keybuffer[pygame.K_UP]:
             self.offsets[1] -= 3.0
         if keybuffer[pygame.K_DOWN]:
@@ -349,7 +366,8 @@ class TouhouPlay:
             if a.type == touhou_objects.CHARACTER:
                 a.menu.draw()
         self.main_menu.draw()
-        
+        self.status_window.draw()
+
     def move_square(self, subject, direction):
         pass
         
@@ -366,6 +384,7 @@ class TouhouPlay:
         self.active.remove(actor)
 
 class StaticObject(objects.Graphic):
+    """An object that is just a graphic and takes up space"""
     def __init__(self, a, texture = None, scale_factor = 1.0, w = None, h = None):
         objects.Graphic.__init__(self, a, texture, scale_factor, w, h)
         self.type = touhou_objects.OBSTACLE
