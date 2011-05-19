@@ -18,10 +18,10 @@ This is a personal project for now and I am currently not accepting patches. You
 People Involved
 ...............
 
-Programming: Hans Lo (http://jdshu.wordpress.com/)
-Sprite Artist: Traghetto (http://traghetto.wordpress.com/)
+:Programming: Hans Lo (http://jdshu.wordpress.com/)
+:Sprite Artist: Traghetto (http://traghetto.wordpress.com/)
 
 Disclaimer
 ..........
 
-We are not affiliated in any way with ZUN or associated companies or businesses.
+We are not affiliated in any way with ZUN or any associated companies or businesses.
