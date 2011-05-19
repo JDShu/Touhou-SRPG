@@ -15,10 +15,13 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from touhou_objects import *
-from ui import *
-import glFreeType
+
 import pygame
+
+import core.glFreeType
+from core.ui import *
+
+from touhou_objects import *
 import touhou_events
 
 class Reimu(PlayerCharacter):

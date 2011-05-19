@@ -16,9 +16,9 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import pygame
-import glFreeType
 from OpenGL.GL import *
 
+import glFreeType
 from objects import *
 
 TITLE_HEIGHT = 40
@@ -94,10 +94,12 @@ class MenuOptionGraphic:
 
 class MenuEntry:
     def __init__( self, title, place, function, idle, hover = None, clicked = None, scale_factor = 1.0 ):
+        self.gfx = "./content/gfx/gui/"
+
         self.title = title
         self.function = function
         self.mode = "idle"
-        self.graphic = MenuOptionGraphic(place, idle,hover,clicked,scale_factor)
+        self.graphic = MenuOptionGraphic(place, self.gfx+idle, self.gfx+hover, self.gfx+clicked, scale_factor)
         self.place = place
 
     def execute( self, *args ):
@@ -112,10 +114,10 @@ class MenuEntry:
 class Menu:
     
     def __init__( self, title):
-        self.font = glFreeType.font_data( "free_sans.ttf", 30 )
+        self.font = glFreeType.font_data( "./content/font/free_sans.ttf", 30 )
         self.title = title
         self.num_entries = 0
-        self.body = MenuBody("menu_body.png")
+        self.body = MenuBody("./content/gfx/gui/menu_body.png")
         self.entries = []
         self.x, self.y = 0, 0
         self.visible = False

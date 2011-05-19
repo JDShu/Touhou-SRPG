@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 '''
 * This file is part of Touhou SRPG.
 * Copyright (c) Hans Lo
@@ -15,11 +17,11 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from main_loop import *
-import touhou
+from core.main_loop import *
+import touhou.touhou
 
 def main():
-    game = MainLoop(640,480,touhou.Module)
+    game = MainLoop(640,480,touhou.touhou.Module)
     running = True
     while running:
         running = game.process()

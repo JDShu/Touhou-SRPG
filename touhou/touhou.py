@@ -19,11 +19,12 @@ import pygame
 from OpenGL.GL import *
 from math import *
 
-import astar
-import ui
-import objects
+import core.astar
+import core.ui
+import core.objects
+import core.glFreeType
+
 import touhou_characters
-import glFreeType
 import touhou_events
 import touhou_monsters
 import touhou_objects
@@ -52,6 +53,7 @@ class TouhouMap:
         #tiles dimensions and offsets
         self.dimensions = (90,60)
         self.offsets = (45,30)
+        self.gfx = "./content/gfx/sprites/"
 
         self.grid = []
         for y in xrange(self.h):
@@ -96,9 +98,9 @@ class TouhouMap:
     def temp_tileset(self):
         """Temporary tileset and objects to place on map"""
         tileset = {}
-        tileset["ground"] = objects.Graphic(1.0,"grass.png")
-        tileset["hover"] = objects.Graphic(0.4,"hover.png")
-        tileset["obstacle"] = StaticObject(1.0,"tree.png")
+        tileset["ground"] = core.objects.Graphic(1.0, self.gfx + "grass.png")
+        tileset["hover"] = core.objects.Graphic(0.4, self.gfx + "hover.png")
+        tileset["obstacle"] = StaticObject(1.0, self.gfx + "tree.png")
         self.tile_w = 50.0# TODO: replace magic number//sqrt(self.offsets[0]*self.offsets[0] + self.offsets[1]*self.offsets[1])
         return tileset
 
@@ -163,12 +165,12 @@ class TouhouPlay:
         
         """
         self.active = []
-        self.main_menu = ui.Menu("Main")
-        self.main_menu.add_entry(ui.MenuEntry("End", 0, self.end_turn, 
+        self.main_menu = core.ui.Menu("Main")
+        self.main_menu.add_entry(core.ui.MenuEntry("End", 0, self.end_turn, 
                                            "menu_option.png",
                                            "menu_option_hover.png", 
                                            "menu_option_clicked.png"))
-        self.main_menu.add_entry(ui.MenuEntry("Quit", 1, self.quit,
+        self.main_menu.add_entry(core.ui.MenuEntry("Quit", 1, self.quit,
                                            "menu_option.png",
                                            "menu_option_hover.png", 
                                            "menu_option_clicked.png"))
@@ -210,7 +212,7 @@ class TouhouPlay:
                 self.map.insert(self.map.tileset["obstacle"],(x,y))
 
         self.map.insert(reimu,position)
-        self.font = glFreeType.font_data( "free_sans.ttf", 30 )
+        self.font = core.glFreeType.font_data( "./content/font/free_sans.ttf", 30 )
         #self.active[0].move_cell("N")
         
     def update(self, mouse_coords, mouse_state):
@@ -400,10 +402,10 @@ class TouhouPlay:
         self.map.remove(actor)
         self.active.remove(actor)
 
-class StaticObject(objects.Graphic):
+class StaticObject(core.objects.Graphic):
     """An object that is just a graphic and takes up space"""
     def __init__(self, a, texture = None, scale_factor = 1.0, w = None, h = None):
-        objects.Graphic.__init__(self, a, texture, scale_factor, w, h)
+        core.objects.Graphic.__init__(self, a, texture, scale_factor, w, h)
         self.type = touhou_objects.OBSTACLE
 
     def process_click(self, mode):

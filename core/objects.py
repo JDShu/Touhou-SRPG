@@ -20,12 +20,11 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from math import *
 import pickle
-import sprite_rules
 
+import sprite_rules
 import level
 import astar
 import copy
-import collections
 
 TILE_DIMENSIONS = TILE_BASE, TILE_HEIGHT = level.TILE_DIMENSIONS
 TILE_OFFSETS = level.TILE_OFFSETS
@@ -161,6 +160,8 @@ class Tile(Graphic):
 
 
 class Animated(Graphic):
+    metafolder = "./content/metadata/"
+    gfx = "./content/gfx/sprites/"
     def __init__(self, x,y,sprite_name, scale_factor = 1.0):
         self.a = 1.0
         self.x, self.y = x,y
@@ -180,11 +181,11 @@ class Animated(Graphic):
 
     def set_sprite(self, sprite_name):
         try:
-            self.data = pickle.load(open(sprite_name + ".spr"))
+            self.data = pickle.load(open(self.metafolder + sprite_name + ".spr"))
         except IOError:
-            self.data = pickle.load(open(sprite_name + ".spr", "wb"))
+            self.data = pickle.load(open(self.metafolder + sprite_name + ".spr", "wb"))
             
-        texture_surface = pygame.image.load(sprite_name + ".png")
+        texture_surface = pygame.image.load(self.gfx+sprite_name+".png")
         texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
         
         self.image = glGenTextures(1)
