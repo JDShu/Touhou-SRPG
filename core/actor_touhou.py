@@ -14,19 +14,23 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
-
 '''
-class Sprite:
-    def __init__(self, filename):
-        self.filename = filename
-        self.actions = {}
-        
-    def set_frame(self, name, frame, dimensions):
-        if name not in self.actions:
-            self.actions[name] = []
+import objects
+
+# draw animation instead of character when needed
+class Animation:
+    def __init__(self):
+        pass
     
-        length = len(self.actions[name])
-        while frame >= length:
-            length += 1
-            self.actions[name] += [None]
-        self.actions[name][frame] = dimensions
+    def draw(self, x, y):
+        pass
+
+# animations - catalog of animation sequences
+class Touhou_Character:
+    def __init__(self):
+        pass
+
+    #draw character
+    #draw animation
+    def draw(self):
+        pass

@@ -14,19 +14,10 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
-
 '''
-class Sprite:
-    def __init__(self, filename):
-        self.filename = filename
-        self.actions = {}
-        
-    def set_frame(self, name, frame, dimensions):
-        if name not in self.actions:
-            self.actions[name] = []
-    
-        length = len(self.actions[name])
-        while frame >= length:
-            length += 1
-            self.actions[name] += [None]
-        self.actions[name][frame] = dimensions
+
+from touhou_objects import PlayerCharacter
+
+class Reimu(PlayerCharacter):
+    def __init__(self, touhou_map, touhou):
+        PlayerCharacter(self, 15, 15, "reimu", touhou_map, touhou)

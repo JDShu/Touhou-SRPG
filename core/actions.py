@@ -14,19 +14,27 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
-
 '''
-class Sprite:
-    def __init__(self, filename):
-        self.filename = filename
-        self.actions = {}
-        
-    def set_frame(self, name, frame, dimensions):
-        if name not in self.actions:
-            self.actions[name] = []
+
+import pygame
+
+import level
+
+BROWSE, MOVE = xrange(2)
+
+def print_w(play_state):
+    print play_state.level.w
+
+def move(play_state, character):
+    play_state.set_state(MOVE)
+    character.find_accessible(play_state.level)
+
+def revert(play_state, character):
+    play_state.level.relocate(character.position,character.before_position,  "X")
+    character.revert()
     
-        length = len(self.actions[name])
-        while frame >= length:
-            length += 1
-            self.actions[name] += [None]
-        self.actions[name][frame] = dimensions
+def confirm(play_state, character):
+    play_state.level.relocate(character.before_position, character.position,  "X")
+    character.confirm()
+    play_state.set_state(BROWSE)
+    

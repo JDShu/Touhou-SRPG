@@ -14,19 +14,24 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
-
 '''
-class Sprite:
-    def __init__(self, filename):
-        self.filename = filename
-        self.actions = {}
-        
-    def set_frame(self, name, frame, dimensions):
-        if name not in self.actions:
-            self.actions[name] = []
-    
-        length = len(self.actions[name])
-        while frame >= length:
-            length += 1
-            self.actions[name] += [None]
-        self.actions[name][frame] = dimensions
+# Play_State: Class that tracks the game state at any given instance. Offers functions to modify the state.
+
+# actors: list of all actors
+# selectable: list of characters that can be controlled at any time
+# menu: list of options currently available in a menu
+# map: map terrain and where objects on the map are
+
+
+class Rules:
+    def __init__(self):
+        pass
+
+    def combat(self, attacker, defender):
+        pass
+
+    def options(self, character):
+        pass
+
+    def main_menu(self):
+        pass
