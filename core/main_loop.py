@@ -37,3 +37,8 @@ class MainLoop:
         glClear(GL_COLOR_BUFFER_BIT)
         self.game_state.draw()
         pygame.display.flip()
+
+    def start(self):
+        running = True
+        while(running = True):
+            self.game_state.process()

@@ -15,9 +15,11 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 import pygame
 from math import *
 
+from input_session import InputSession
 import level
 #import events
 import ui
@@ -31,7 +33,8 @@ SCALE = 0.5
 
 BROWSE, MOVE, ATTACK = xrange(3)
 
-class Play:
+# TODO: Play can probably inherit a more basic class... "Session"?
+class Play(InputSession):
     """Play Session that is run each game loop """
     def __init__(self, module, module_map):
         """
@@ -41,29 +44,16 @@ class Play:
 
         Variables:
         session: specific module that runs on iso engine
-        keybuffer: The Keyboard Buffer
-
+        
         """
-        self.new_keybuffer()
+        InputSession.__init__(self)
+        
         self.session = module.play(module_map)
-        display = pygame.display.get_surface()
-        self.h = display.get_height()
         self.left_offset, self.up_offset = 0,0
 
-    def new_keybuffer(self):
-        """Clears Keyboard Buffer"""
-        self.keybuffer = []
-        for i in range(320):
-            self.keybuffer.append( False )
-        
     def process( self ):
         """One pass of the play session loop of the running module"""
         
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        mouse_y = self.h - mouse_y
-        mouse_coords = mouse_x, mouse_y
-        mouse_state = pygame.mouse.get_pressed()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -88,7 +78,7 @@ class Play:
     def draw( self ):
         """ Draw everything after one pass of the module loop is processed"""
         
-#draw map
+        #draw map
         glPushMatrix()
         glTranslatef(self.left_offset,self.up_offset,0.0)
         self.session.draw_relative()

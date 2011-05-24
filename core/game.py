@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 '''
 * This file is part of Touhou SRPG.
 * Copyright (c) Hans Lo
@@ -18,19 +16,27 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from core.game import Game
-from touhou.touhou import Touhou
+# Organizes everything together.
+class Game:
+    def __init__(self):
+        self.running = False
 
-def main():
+    # Load the central module file, eg. touhou
+    def load_module(self, module):
+        self.module = module
 
-    #game = MainLoop(640,480,touhou.touhou.Module)
-    #running = True
-    #while running:
-    #    running = game.process()
-    #    game.draw()
-    game = Game()
-    game.load_module(Touhou)
-    game.run()
+    def start(self):
+        self.running = True
 
-if __name__ == "__main__":
-    main()
+    def stop(self):
+        self.running = False
+        
+    def process(self)
+        while(self.running):
+            self.module.process()
+            self.module.draw()
+            self.running = self.module.running
+
+    def run(self):
+        self.start()
+        self.process()

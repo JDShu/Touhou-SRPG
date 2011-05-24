@@ -19,7 +19,7 @@
 import pygame
 import play
 
-
+# TODO: test should be decoupled
 class GameState:
     """determines what session to run for the given module at a given time"""
     def __init__(self, module):
@@ -39,8 +39,8 @@ class GameState:
 
 
     def process(self):
-        return self.current_mode.process()
-    
+        self.current_mode.process()
+        
     def draw(self):
         self.current_mode.draw()
         
