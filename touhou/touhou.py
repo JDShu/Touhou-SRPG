@@ -15,22 +15,49 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 import pygame
 from OpenGL.GL import *
 from math import *
+import pygame
+from pygame.locals import *
 
-import core.astar
+import core.misc.astar
 import core.ui
-import core.objects
-import core.glFreeType
+from core.misc.glFreeType import *
+from core.module import Module
+from core.graphics.graphic import Graphic
 
 import touhou_characters
 import touhou_events
 import touhou_monsters
 import touhou_objects
 import touhou_ui
+import touhou_level
+from touhou_play import TouhouPlay
 
-class Module:
+PLAY = 1
+class Touhou(Module):
+    def __init__(self):
+        #test, TODO: Level class
+        Module.__init__(self)
+        self.name = "Touhou SRPG"
+                
+    def start(self, dim):
+        pygame.init()
+        pygame.display.set_caption(self.name)
+        pygame.display.set_mode(dim, OPENGL|DOUBLEBUF)
+
+        #Setup OpenGL
+        glOrtho(0.0, dim[0], 0.0, dim[1],-1.0,1.0)
+        glClearColor(1.0,0.0,0.0,0.0) 
+
+        self.level_state = touhou_level.TouhouLevel()
+        self.register_session(PLAY,TouhouPlay(self.level_state))
+        self.load_session(PLAY)
+        Module.start_session(self)
+
+class DeprecatedModule:
     """
     Stores classes that define the module:
     map: map of objects in a sigle play session
@@ -40,7 +67,7 @@ class Module:
         self.map = TouhouMap
         self.play = TouhouPlay
 
-class TouhouMap:
+class DeprecatedTouhouMap:
     """The current map and what is on it"""
     def __init__(self,dimensions):
         """
@@ -66,7 +93,6 @@ class TouhouMap:
         
     def draw(self,offsets):
         """Draws everything that is on the board."""
-        
         self.draw_floor()
         self.draw_objects()
         
@@ -153,7 +179,7 @@ class TouhouMap:
         
         #print self.grid
 
-class TouhouPlay:
+class DeprecatedTouhouPlay:
     """The state of a Touhou play session at any given moment"""
     MOVE, ATTACK, BROWSE, WAIT, TURNCHANGE, OPPONENT = range(6)
     TURNCHANGE_INTERVAL = 2000
@@ -402,7 +428,7 @@ class TouhouPlay:
         self.map.remove(actor)
         self.active.remove(actor)
 
-class StaticObject(core.objects.Graphic):
+class DeprecatedStaticObject(Graphic):
     """An object that is just a graphic and takes up space"""
     def __init__(self, a, texture = None, scale_factor = 1.0, w = None, h = None):
         core.objects.Graphic.__init__(self, a, texture, scale_factor, w, h)

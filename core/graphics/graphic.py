@@ -15,10 +15,12 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
+from OpenGL.GL import *
+import pygame
 
 # Basic graphic object that can be drawn
 class Graphic:
-    def __init__( self, a = 1.0, texture = None, scale_factor = 1.0, w, h):
+    def __init__( self, a = 1.0, texture = None, scale_factor = 1.0, w = None, h = None):
         self.a = a
         self.texture = texture
         texture_surface = pygame.image.load(texture)
@@ -73,13 +75,12 @@ class Graphic:
         
         glEndList()
         
-    def draw( self, x,y ):
+    def draw( self):
         glPushMatrix()
-        glTranslatef(x,y,0.0)
         glCallList(self.draw_list)
         glPopMatrix()
     
-    # TODO: Needs to be moved somewhere else
+    # TODO: Needs to be moved to map
     def draw_grid(self, x, y, dimensions, offsets):
         w,h = dimensions
         x_offset, y_offset = offsets
@@ -89,3 +90,25 @@ class Graphic:
 
     def process_click(self):
         pass
+
+class GraphicList:
+    def __init__(self):
+        self.g_list = []
+
+    def add(self, graphic):
+        self.g_list += [graphic]
+
+    def draw(self):
+        for g in self.g_list:
+            g.draw()
+
+class GraphicPositioned:
+    def __init__(self, graphic, pos):
+        self.graphic = graphic
+        self.pos = (pos[0],pos[1],0)
+
+    def draw(self):
+        glPushMatrix()
+        glTranslate(*self.pos)
+        self.graphic.draw()
+        glPopMatrix()

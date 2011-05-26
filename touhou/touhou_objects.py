@@ -16,8 +16,8 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from OpenGL.GL import *
-import core.objects
-import core.astar
+from core.graphics.animated import Graphic, Animated
+import core.misc.astar
 import copy
 
 CHARACTER, MONSTER, OBSTACLE = range(3)
@@ -30,7 +30,7 @@ class Stats:
         self.MAX_AP = ap
         self.hp = hp
         self.ap = ap
-        self.portrait = core.objects.Graphic(1.0, self.gfx+portrait)
+        self.portrait = Graphic(1.0, self.gfx+portrait)
 
     def restore_ap(self):
         self.ap = self.MAX_AP
@@ -38,12 +38,12 @@ class Stats:
     def restor_hp(self):
         self.hp = self.MAX_HP
 
-class Actor(core.objects.Animated):
+class Actor(Animated):
     """An Actor is anything that influences the game, usually a character or monster"""
     MOVING, IDLE = range(2)
     TICKS = 5
     def __init__(self, x,y,sprite_name, position, touhou_map, touhou, scale_factor = 1.0):
-        core.objects.Animated.__init__(self, x, y, sprite_name, scale_factor)
+        Animated.__init__(self, x, y, sprite_name, scale_factor)
         self.selected = False
         self.set_cell_offsets(0,0)
         self.position = position
@@ -61,7 +61,7 @@ class Actor(core.objects.Animated):
     def draw_grid(self, x, y, dimensions, offsets):
         glPushMatrix()
         glTranslatef(self.cell_offset_x, self.cell_offset_y, 0.0)
-        core.objects.Animated.draw_grid(self, x, y, dimensions, offsets)
+        Animated.draw_grid(self, x, y, dimensions, offsets)
         glPopMatrix()
         
     def set_cell_offsets(self, x, y):
@@ -131,7 +131,7 @@ class Actor(core.objects.Animated):
             
         
     def update(self):
-        core.objects.Animated.update(self)
+        Animated.update(self)
         if self.state == self.MOVING:
             self.move_inc()
         
@@ -144,9 +144,9 @@ class Actor(core.objects.Animated):
         self.path = path.path
         self.move_to_destination()
 
-class StaticObject(core.objects.Graphic):
+class StaticObject(Graphic):
     def __init__(self, a, texture = None, scale_factor = 1.0, w = None, h = None):
-        core.objects.Graphic.__init__(self, a, texture, scale_factor, w, h)
+        Graphic.__init__(self, a, texture, scale_factor, w, h)
 
     def process_click(self, mode):
         pass

@@ -23,19 +23,20 @@ class Game:
 
     # Load the central module file, eg. touhou
     def load_module(self, module):
-        self.module = module
+        self.module = module()
 
     def start(self):
         self.running = True
+        self.module.start((640,480))
 
     def stop(self):
         self.running = False
         
-    def process(self)
+    def process(self):
         while(self.running):
             self.module.process()
             self.module.draw()
-            self.running = self.module.running
+            self.running = self.module.session_running()
 
     def run(self):
         self.start()

@@ -33,10 +33,10 @@ SCALE = 0.5
 
 BROWSE, MOVE, ATTACK = xrange(3)
 
-# TODO: Play can probably inherit a more basic class... "Session"?
-class Play(InputSession):
+# Keeps a hierachy of sprites and draws them
+class PlaySession(InputSession):
     """Play Session that is run each game loop """
-    def __init__(self, module, module_map):
+    def __init__(self, module):
         """
         key arguments:
         module: The Game module that is to be run on the engine.
@@ -47,10 +47,7 @@ class Play(InputSession):
         
         """
         InputSession.__init__(self)
-        
-        self.session = module.play(module_map)
-        self.left_offset, self.up_offset = 0,0
-
+                
     def process( self ):
         """One pass of the play session loop of the running module"""
         

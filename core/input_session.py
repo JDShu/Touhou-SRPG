@@ -18,11 +18,13 @@
 
 import pygame
 from pygame.locals import *
+from collections import deque
+from OpenGL.GL import *
 
 from session import Session
 
-# Handles basic keyboard and mouse inputs
-class InputSession(Session):
+# Handles keyboard/mouse and basic drawing
+class IOSession(Session):
     def __init__(self):
         Session.__init__(self)
 
@@ -31,11 +33,13 @@ class InputSession(Session):
 
         self.keybuffer = self.new_keybuffer()
         self.mouse_coords = None
+        self.draw_pending = deque()
 
         self.register_event(KEYDOWN, self.key_down)
         self.register_event(KEYUP, self.key_up)
-        self.register_event(MOUSEDOWN, self.update_mouse)
-        self.register_event(MOUSEUP, self.update_mouse)
+        self.register_event(MOUSEBUTTONDOWN, self.update_mouse)
+        self.register_event(MOUSEBUTTONUP, self.update_mouse)
+        self.register_event(MOUSEMOTION, self.update_mouse)
 
     def new_keybuffer(self):
         keybuffer = []
@@ -50,7 +54,21 @@ class InputSession(Session):
         self.keybuffer[e.key] = False
 
     def update_mouse(self, e):
-        x, y = pygame.mouse.get_pos()
+        x, y = e.pos
         y = self.h - y
         self.mouse_coords = x, y
         self.mouse_state = pygame.mouse.get_pressed()
+
+    def register_draw(self, graphic):
+        if graphic:
+            self.draw_pending.append(graphic)
+
+    def draw(self):
+        glClear(GL_COLOR_BUFFER_BIT)
+        while self.draw_pending:
+            graphic = self.draw_pending.popleft()
+            graphic.draw()
+        pygame.display.flip()
+    
+    def shift(self,value):
+        glTranslate(value[0],value[1],0)

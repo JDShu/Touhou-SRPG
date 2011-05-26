@@ -15,15 +15,29 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
 import pygame
 from OpenGL.GL import *
 
-import glFreeType
-from objects import *
+import misc.glFreeType as glFreeType
+#from objects import *
+from core.graphics.graphic import Graphic
 
 TITLE_HEIGHT = 40
 MENU_BORDER = 10
 ENTRY_HEIGHT, ENTRY_WIDTH = 40, 100
+
+# Container class for everything UI
+class UI:
+    def __init__(self):
+        self.elements = []
+
+    def process(self):
+        pass
+
+    # gets called by the play session
+    def draw(self):
+        return self.elements
 
 def print_text(text,x,y,font):
     glPushMatrix()

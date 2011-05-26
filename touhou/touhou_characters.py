@@ -18,7 +18,7 @@
 
 import pygame
 
-import core.glFreeType
+from core.misc.glFreeType import *
 from core.ui import *
 
 from touhou_objects import *

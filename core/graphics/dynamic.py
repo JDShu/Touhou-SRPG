@@ -21,8 +21,9 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from math import *
 
-import sprite_rules
-import level
+from graphic import Graphic
+import core.sprite_rules
+#import level
 
 # Uses vertex arrays and so can be updated directly.
 # TODO: switch to VBOs for speed

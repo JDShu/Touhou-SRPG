@@ -22,12 +22,6 @@ from core.game import Game
 from touhou.touhou import Touhou
 
 def main():
-
-    #game = MainLoop(640,480,touhou.touhou.Module)
-    #running = True
-    #while running:
-    #    running = game.process()
-    #    game.draw()
     game = Game()
     game.load_module(Touhou)
     game.run()

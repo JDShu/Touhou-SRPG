@@ -15,6 +15,8 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
+
+from graphic import Graphic
 # Animates sprites by looping through graphics
 # TODO: Break up so that an animated object just does one loop.
 class Animated(Graphic):
@@ -66,8 +68,7 @@ class Animated(Graphic):
         self.w, self.h = self.current_frame_dimensions[2]*self.scale_factor, self.current_frame_dimensions[3]*self.scale_factor
         
 
-    def draw( self,x,y ):
-        glTranslatef(x + self.x, y + self.y,0.0)
+    def draw( self ):
         pix_x,pix_y,pix_w,pix_h = self.current_frame_dimensions
         x = float(pix_x)/float(self.tex_w)
         y = float(pix_y)/float(self.tex_h)
@@ -87,13 +88,13 @@ class Animated(Graphic):
         #draw
         glColor4f(*color)
         glBegin(GL_QUADS)
-        glTexCoord2f(x, y)
+        glTexCoord2f(0, 0)
         glVertex(0.0,0.0,0.0)
-        glTexCoord2f(x + w, y)
+        glTexCoord2f(w, 0)
         glVertex(self.w,0.0,0.0)
-        glTexCoord2f(x + w, y + h)
+        glTexCoord2f(w, h)
         glVertex(self.w,self.h,0.0)
-        glTexCoord2f(x, y + h)
+        glTexCoord2f(0, h)
         glVertex(0.0,self.h,0.0)
         glEnd()
         glDisable( GL_TEXTURE_2D )

@@ -27,6 +27,9 @@ class Session:
 
         self.register_event(QUIT, self.quit)
 
+    def start(self):
+        self.running = True
+
     # Assign a function to the event. Can't be overwritten.
     # e: event name, handler: function name
     def register_event(self, e_type, handler):
@@ -42,7 +45,11 @@ class Session:
                 f = self.event_catalog[e.type]
                 f(e)
             except KeyError:
-                print "Event not registered"
+                pass
+                #print e, "event not registered"
+
+    def draw(self):
+        print "draw() not implemented"
 
     def quit(self, e):
         self.running = False

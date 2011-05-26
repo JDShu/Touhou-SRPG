@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import core.objects
+import core.graphics.dynamic
 
 class StatusWindow:
     gfx = "./content/gfx/gui/"
