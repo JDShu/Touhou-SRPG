@@ -16,16 +16,19 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from OpenGL.GL import *
+import pygame
+import pickle
+
 from graphic import Graphic
 # Animates sprites by looping through graphics
 # TODO: Break up so that an animated object just does one loop.
 class Animated(Graphic):
     metafolder = "./content/metadata/"
     gfx = "./content/gfx/sprites/"
-    def __init__(self, x,y,sprite_name, scale_factor = 1.0):
+    def __init__(self, sprite_name, scale_factor = 1.0):
         self.a = 1.0
-        self.x, self.y = x,y
-        
+                
         self.set_sprite(sprite_name)
         self.current_action = "idle-s"
         self.current_frame_number = 0
@@ -88,15 +91,16 @@ class Animated(Graphic):
         #draw
         glColor4f(*color)
         glBegin(GL_QUADS)
-        glTexCoord2f(0, 0)
+        glTexCoord2f(x, y)
         glVertex(0.0,0.0,0.0)
-        glTexCoord2f(w, 0)
+        glTexCoord2f(x + w, y)
         glVertex(self.w,0.0,0.0)
-        glTexCoord2f(w, h)
+        glTexCoord2f(x + w, y + h)
         glVertex(self.w,self.h,0.0)
-        glTexCoord2f(0, h)
+        glTexCoord2f(x, y + h)
         glVertex(0.0,self.h,0.0)
         glEnd()
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
         glPopMatrix()
+

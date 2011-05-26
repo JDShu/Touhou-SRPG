@@ -19,18 +19,24 @@ from pygame.locals import *
 
 from core.input_session import IOSession
 from core.ui import UI
+from core.graphics.animated import Animated
 
 from touhou_level import TouhouLevel
 
 class TouhouPlay(IOSession):
-    SCROLL_SPEED = 3
+    SCROLL_SPEED = 5
     def __init__(self, level_state):
         IOSession.__init__(self)
         self.level_state = level_state
         self.map = self.level_state.map
         self.ui = UI()
 
+        #test code
+        self.test_reimu = Animated("reimu")
+        self.map.place_object(self.test_reimu, (6,1))
+
     def process(self, event_list):
+        self.test_reimu.update()
         self.register_draw(self.map.draw())
         self.register_draw(self.ui.draw())
         IOSession.process(self, event_list)

@@ -50,7 +50,7 @@ class Touhou(Module):
 
         #Setup OpenGL
         glOrtho(0.0, dim[0], 0.0, dim[1],-1.0,1.0)
-        glClearColor(1.0,0.0,0.0,0.0) 
+        glClearColor(0.0,0.0,0.0,0.0) 
 
         self.level_state = touhou_level.TouhouLevel()
         self.register_session(PLAY,TouhouPlay(self.level_state))
