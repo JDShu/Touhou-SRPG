@@ -22,6 +22,7 @@ from core.ui import UI
 from core.graphics.animated import Animated
 
 from touhou_level import TouhouLevel
+from touhou_ui import TouhouUI
 
 class TouhouPlay(IOSession):
     SCROLL_SPEED = 5
@@ -29,7 +30,7 @@ class TouhouPlay(IOSession):
         IOSession.__init__(self)
         self.level_state = level_state
         self.map = self.level_state.map
-        self.ui = UI()
+        self.ui = TouhouUI()
 
         #test code
         self.test_reimu = Animated("reimu")
@@ -37,6 +38,7 @@ class TouhouPlay(IOSession):
 
     def process(self, event_list):
         self.test_reimu.update()
+        self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer)
         self.register_draw(self.map.draw())
         self.register_draw(self.ui.draw())
         IOSession.process(self, event_list)

@@ -18,10 +18,11 @@
 
 import pygame
 from OpenGL.GL import *
+from collections import deque
 
 import misc.glFreeType as glFreeType
-#from objects import *
-from core.graphics.graphic import Graphic
+
+from core.graphics.graphic import Graphic, GraphicList
 
 TITLE_HEIGHT = 40
 MENU_BORDER = 10
@@ -30,14 +31,16 @@ ENTRY_HEIGHT, ENTRY_WIDTH = 40, 100
 # Container class for everything UI
 class UI:
     def __init__(self):
-        self.elements = []
+        self.elements = deque()
 
     def process(self):
         pass
 
     # gets called by the play session
     def draw(self):
-        return self.elements
+        temp = GraphicList()
+        temp.set_list(self.elements)
+        return temp
 
 def print_text(text,x,y,font):
     glPushMatrix()
@@ -45,7 +48,7 @@ def print_text(text,x,y,font):
     font.glPrint( x, y, text, [ 1.0, 1.0, 0.0 ] )
     glPopMatrix()
 
-class MenuBody( Graphic ):
+class DeprecatedMenuBody( Graphic ):
     def __init__( self, filename,scale_factor = 1.0 ):
         h = MENU_BORDER*2 + TITLE_HEIGHT
         w = MENU_BORDER*2 + ENTRY_WIDTH
@@ -57,10 +60,10 @@ class MenuBody( Graphic ):
 
     def draw(self, x, y):
         y -= self.h
-        Graphic.draw(self,x,y)
+        Graphic.draw(self)
 
 
-class MenuOptionGraphic:
+class DeprecatedMenuOptionGraphic:
     def __init__( self, place, idle, hover = None, clicked = None, scale_factor = 1.0 ): 
 
         h = ENTRY_HEIGHT
@@ -106,7 +109,7 @@ class MenuOptionGraphic:
         self.current.draw(self.x, self.y)
         #print self.place
 
-class MenuEntry:
+class DeprecatedMenuEntry:
     def __init__( self, title, place, function, idle, hover = None, clicked = None, scale_factor = 1.0 ):
         self.gfx = "./content/gfx/gui/"
 
@@ -125,7 +128,7 @@ class MenuEntry:
     def draw(self):
         self.graphic.draw()
         
-class Menu:
+class DeprecatedMenu:
     
     def __init__( self, title):
         self.font = glFreeType.font_data( "./content/font/free_sans.ttf", 30 )
@@ -134,7 +137,7 @@ class Menu:
         self.body = MenuBody("./content/gfx/gui/menu_body.png")
         self.entries = []
         self.x, self.y = 0, 0
-        self.visible = False
+        self.visible = True
         self.screen_w = pygame.display.get_surface().get_width()
         
     def menu_on(self):
@@ -190,4 +193,64 @@ class Menu:
         for entry in self.entries:
             entry.graphic.set_pos(self.x, self.y)
         
+        
+class Menu:
+    def __init__(self, title):
+        self.title = title
+        self.entries = []
+        self.body_graphic = None
+        self.entry_graphic = None
+        self.set_font("./content/font/free_sans.ttf", 12)
+        self.header_height = 0
+        self.entry_height = 0
+
+    def set_body_graphic(self, graphic):
+        self.body_graphic = Graphic(graphic)        
+
+    def set_w(self, w):
+        self.w = w
+        if self.body_graphic:
+            self.body_graphic.set_w(self.w)
+        if self.entry_graphic:
+            self.entry_graphic.set_w(self.w)
+
+    def set_header_height(self, h):
+        self.header_height = h
+        self.body_graphic.set_h(self.header_height + len(self.entries) * self.entry_height)
+
+    def set_entry_height(self, h):
+        self.entry_height = h
+        self.entry_graphic.set_h(self.entry_height)
+
+    def add_entry(self, name, function):
+        self.entries += [(name,function)]
+        self.total_height = self.header_height + len(self.entries) * self.entry_height
+        self.body_graphic.set_h(self.total_height)
+
+    def set_entry_graphic(self, graphic):
+        self.entry_graphic = Graphic(graphic)
+
+    def set_font(self,font,size):
+        self.font = glFreeType.font_data(font,size)
+
+    def draw(self):
+        glPushMatrix()
+        glTranslate(0, -self.total_height,0) #check later
+        if self.body_graphic:
+            self.body_graphic.draw()
+        for entry in self.entries:
+            if self.entry_graphic:
+                self.entry_graphic.draw()
+            glPushMatrix()
+            glTranslate(0,self.font.m_font_height/2.0,0)
+            self.print_text(entry[0])
+            glPopMatrix()
+            glTranslate(0, self.entry_height,0)
+
+        self.print_text(self.title)
+        
+        glPopMatrix()
+
+    def print_text(self, text):
+        self.font.glPrint(0,0,text)
         

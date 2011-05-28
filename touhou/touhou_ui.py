@@ -15,8 +15,40 @@
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import core.graphics.dynamic
 
+from OpenGL.GL import *
+
+from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
+from core.ui import UI, Menu
+#from core.misc.glFreeType import pushScreenCoordinateMatrix, pop_projection_matrix
+
+class TouhouUI(UI):
+    def __init__(self):
+        UI.__init__(self)
+        self.menu = Menu("Test")
+        self.left, self.middle, self.right = (0,0,0)
+        self.menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+        self.menu.set_entry_graphic("./content/gfx/gui/menu_option.png")
+        self.menu.set_w(80)
+        self.menu.set_header_height(30)
+        self.menu.set_entry_height(30)
+        
+        self.menu.add_entry("Move", None)
+        self.menu.add_entry("Attack", None)
+
+        self.menu = GraphicAbsPositioned(self.menu,(0,0))
+
+    def update(self, mouse_coords, mouse_state, keybuffer):
+        new_left, new_middle, new_right = mouse_state
+        if new_right and not self.right:
+            if not self.elements:
+                self.menu.set_pos(mouse_coords)
+                self.elements.append(self.menu)
+            else:
+                self.elements.pop()
+        self.left, self.middle, self.right = mouse_state
+        self.mouse_coords = mouse_coords        
+    
 class StatusWindow:
     gfx = "./content/gfx/gui/"
     """Collection of elements that describe character/monster"""

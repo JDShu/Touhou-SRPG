@@ -16,11 +16,12 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from OpenGL.GL import *
+from OpenGL.GLU import *
 import pygame
 
 # Basic graphic object that can be drawn
 class Graphic:
-    def __init__( self, a = 1.0, texture = None, scale_factor = 1.0, w = None, h = None):
+    def __init__( self, texture = None, a = 1.0, scale_factor = 1.0, w = None, h = None):
         self.a = a
         self.texture = texture
         texture_surface = pygame.image.load(texture)
@@ -46,7 +47,15 @@ class Graphic:
         
         self.draw_list = glGenLists(2)
         self.setup_draw()
-      
+
+    def set_w(self,w):
+        self.w = w
+        self.setup_draw()
+    
+    def set_h(self,h):
+        self.h = h
+        self.setup_draw()
+    
     def setup_draw( self ):
         
         glNewList(self.draw_list, GL_COMPILE)
@@ -81,12 +90,12 @@ class Graphic:
         glPopMatrix()
     
     # TODO: Needs to be moved to map
-    def draw_grid(self, x, y, dimensions, offsets):
-        w,h = dimensions
-        x_offset, y_offset = offsets
-        glPushMatrix()
-        self.draw(x*w + (y-x)*x_offset, -y*h + (x+y)*y_offset)
-        glPopMatrix()
+    #def draw_grid(self, x, y, dimensions, offsets):
+    #    w,h = dimensions
+    #    x_offset, y_offset = offsets
+    #    glPushMatrix()
+    #    self.draw(x*w + (y-x)*x_offset, -y*h + (x+y)*y_offset)
+    #    glPopMatrix()
 
     def process_click(self):
         pass
@@ -98,6 +107,9 @@ class GraphicList:
     def add(self, graphic):
         self.g_list += [graphic]
 
+    def set_list(self, g_list):
+        self.g_list = g_list
+
     def draw(self):
         for g in self.g_list:
             g.draw()
@@ -105,10 +117,25 @@ class GraphicList:
 class GraphicPositioned:
     def __init__(self, graphic, pos):
         self.graphic = graphic
+        self.set_pos(pos)
+
+    def set_pos(self,pos):
         self.pos = (pos[0],pos[1],0)
 
     def draw(self):
         glPushMatrix()
         glTranslate(*self.pos)
         self.graphic.draw()
+        glPopMatrix()
+
+class GraphicAbsPositioned(GraphicPositioned):
+    def __init__(self, graphic, pos):
+        GraphicPositioned.__init__(self, graphic, pos)
+        self.viewport = glGetIntegerv(GL_VIEWPORT)
+
+    def draw(self):
+	glPushMatrix()
+        glLoadIdentity()
+        glOrtho(self.viewport[0], self.viewport[2], self.viewport[1], self.viewport[3],-1.0,1.0)        
+        GraphicPositioned.draw(self)
         glPopMatrix()

@@ -245,7 +245,7 @@ class font_data:
 		# ///with freetype fonts.
 		"""
 		# We want a coordinate system where things coresponding to window pixels.
-		pushScreenCoordinateMatrix()
+		#pushScreenCoordinateMatrix()
 	
 		# //We make the height about 1.5* that of
 		h = float (self.m_font_height) / 0.63		
@@ -305,7 +305,7 @@ class font_data:
 			glPopMatrix()
 
 		glPopAttrib()
-		pop_projection_matrix()
+		#pop_projection_matrix()
 		return
 
 	def release (self):
