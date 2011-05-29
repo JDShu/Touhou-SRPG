@@ -42,11 +42,11 @@ class UI:
         temp.set_list(self.elements)
         return temp
 
-def print_text(text,x,y,font):
-    glPushMatrix()
-    glLoadIdentity()
-    font.glPrint( x, y, text, [ 1.0, 1.0, 0.0 ] )
-    glPopMatrix()
+#def print_text(text,x,y,font):
+#    glPushMatrix()
+#    glLoadIdentity()
+#    font.glPrint( x, y, text, [ 1.0, 1.0, 0.0 ] )
+#    glPopMatrix()
 
 class DeprecatedMenuBody( Graphic ):
     def __init__( self, filename,scale_factor = 1.0 ):
@@ -200,9 +200,11 @@ class Menu:
         self.entries = []
         self.body_graphic = None
         self.entry_graphic = None
+        self.entry_hover_graphic = None
         self.set_font("./content/font/free_sans.ttf", 12)
         self.header_height = 0
         self.entry_height = 0
+        self.hovering = None
 
     def set_body_graphic(self, graphic):
         self.body_graphic = Graphic(graphic)        
@@ -213,34 +215,48 @@ class Menu:
             self.body_graphic.set_w(self.w)
         if self.entry_graphic:
             self.entry_graphic.set_w(self.w)
+        if self.entry_hover_graphic:
+            self.entry_hover_graphic.set_w(self.w)
 
     def set_header_height(self, h):
         self.header_height = h
-        self.body_graphic.set_h(self.header_height + len(self.entries) * self.entry_height)
+        self.h = self.header_height + len(self.entries) * self.entry_height
+        self.body_graphic.set_h(self.h)
 
     def set_entry_height(self, h):
         self.entry_height = h
-        self.entry_graphic.set_h(self.entry_height)
+        self.h = self.header_height + len(self.entries) * self.entry_height
+        if self.entry_graphic:
+            self.entry_graphic.set_h(self.entry_height)
+        if self.entry_hover_graphic:
+            self.entry_hover_graphic.set_h(self.entry_height)
 
     def add_entry(self, name, function):
         self.entries += [(name,function)]
-        self.total_height = self.header_height + len(self.entries) * self.entry_height
-        self.body_graphic.set_h(self.total_height)
+        self.h = self.header_height + len(self.entries) * self.entry_height
+        self.body_graphic.set_h(self.h)
 
     def set_entry_graphic(self, graphic):
         self.entry_graphic = Graphic(graphic)
+        
+    def set_entry_hover_graphic(self, graphic):
+        self.entry_hover_graphic = Graphic(graphic)
 
     def set_font(self,font,size):
         self.font = glFreeType.font_data(font,size)
 
     def draw(self):
         glPushMatrix()
-        glTranslate(0, -self.total_height,0) #check later
+        glTranslate(0, -self.h,0) #check later
         if self.body_graphic:
             self.body_graphic.draw()
-        for entry in self.entries:
-            if self.entry_graphic:
-                self.entry_graphic.draw()
+        for index, entry in enumerate(self.entries):
+            if self.hovering == index:
+                if self.entry_hover_graphic:
+                    self.entry_hover_graphic.draw()
+            else:
+                if self.entry_graphic:
+                    self.entry_graphic.draw()
             glPushMatrix()
             glTranslate(0,self.font.m_font_height/2.0,0)
             self.print_text(entry[0])
@@ -254,3 +270,9 @@ class Menu:
     def print_text(self, text):
         self.font.glPrint(0,0,text)
         
+    def update(self, mouse_coords):
+        x,y = mouse_coords
+        if x < 0 or x > self.w or y >= -self.header_height or y <= -self.h:
+            self.hovering = None
+        else:
+            self.hovering = len(self.entries) - (-y/self.entry_height)

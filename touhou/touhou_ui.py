@@ -28,7 +28,7 @@ class TouhouUI(UI):
         self.menu = Menu("Test")
         self.left, self.middle, self.right = (0,0,0)
         self.menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        self.menu.set_entry_graphic("./content/gfx/gui/menu_option.png")
+        self.menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
         self.menu.set_w(80)
         self.menu.set_header_height(30)
         self.menu.set_entry_height(30)
@@ -47,8 +47,11 @@ class TouhouUI(UI):
             else:
                 self.elements.pop()
         self.left, self.middle, self.right = mouse_state
-        self.mouse_coords = mouse_coords        
-    
+        self.mouse_coords = x,y = mouse_coords
+        x2, y2, z2 = self.menu.get_pos()
+        rel_coords = (x-x2,y-y2)
+        self.menu.get_graphic().update(rel_coords)
+            
 class StatusWindow:
     gfx = "./content/gfx/gui/"
     """Collection of elements that describe character/monster"""

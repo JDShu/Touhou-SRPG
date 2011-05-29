@@ -122,6 +122,12 @@ class GraphicPositioned:
     def set_pos(self,pos):
         self.pos = (pos[0],pos[1],0)
 
+    def get_pos(self):
+        return self.pos
+
+    def get_graphic(self):
+        return self.graphic
+
     def draw(self):
         glPushMatrix()
         glTranslate(*self.pos)
