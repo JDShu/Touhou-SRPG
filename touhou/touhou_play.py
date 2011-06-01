@@ -26,6 +26,7 @@ from core.misc import astar
 
 from touhou_level import TouhouLevel
 from touhou_ui import TouhouUI
+from touhou_graphic import Character
 
 class TouhouPlay(IOSession):
     SCROLL_SPEED = 5
@@ -36,13 +37,14 @@ class TouhouPlay(IOSession):
         self.ui = TouhouUI(self.map)
 
         #test code
-        self.test_reimu = Animated("reimu")
-        self.map.place_object(self.test_reimu, (6,1))
-        self.map.grid[6][1].move_path([(7,1),(7,2),(7,3)])
+        test_reimu = Animated("reimu")
+        reimu_info = Character("reimu",5)
+        self.map.place_object(test_reimu, (6,1), reimu_info)
+        #self.map.grid[6][1].move_path([(7,1),(7,2),(7,3)])
 
         pygame.time.set_timer(USEREVENT+1,200)
         pygame.time.set_timer(USEREVENT+2,100)
-        self.register_event(USEREVENT+1,self.test_reimu.update)
+        self.register_event(USEREVENT+1,test_reimu.update)
         
         self.register_event(USEREVENT+2,self.map.update)
         

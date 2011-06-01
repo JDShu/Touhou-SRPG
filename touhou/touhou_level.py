@@ -87,8 +87,8 @@ class TouhouMap:
                     temp.add(self.grid[self.w-x-1][self.h-y-1])
         return temp
     
-    def place_object(self, obj, pos):
-        self.grid[pos[0]][pos[1]] = MapGraphic(obj,pos)
+    def place_object(self, obj, pos, details=None):
+        self.grid[pos[0]][pos[1]] = MapGraphic(obj,pos,details)
         
     def remove_object(self, tup):
         self.grid[tup[0]][tup[0]] = None

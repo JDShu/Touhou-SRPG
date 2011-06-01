@@ -27,9 +27,12 @@ from core.ui import UI, Menu
 from touhou_graphic import MapGraphic
 #from core.misc.glFreeType import pushScreenCoordinateMatrix, pop_projection_matrix
 
+BROWSE, MOVE, ATTACK = range(3)
+
 class TouhouUI(UI):
     def __init__(self, touhou_map):
 
+        self.map = touhou_map.grid
         # Constants we need to calculate mouse position and hovering highlight
         self.map_x, self.map_y = touhou_map.w, touhou_map.h
         self.off_x, self.off_y = touhou_map.TILE_OFFSET[0], touhou_map.TILE_OFFSET[1]
@@ -60,7 +63,7 @@ class TouhouUI(UI):
         self.reimu_menu.set_w(80)
         self.reimu_menu.set_header_height(30)
         self.reimu_menu.set_entry_height(30)
-        self.reimu_menu.add_entry("Quit", self.option_quit)
+        self.reimu_menu.add_entry("Move", self.option_move)
         self.reimu_menu_placed = GraphicAbsPositioned(self.reimu_menu,(0,0))
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
@@ -73,12 +76,15 @@ class TouhouUI(UI):
         #One menu showing at any time
         self.current_menu = None
 
+        self.mode = BROWSE
+
     # Quit program for now.
     def option_quit(self):
         pygame.event.post(pygame.event.Event(QUIT))
 
     def option_move(self):
-        pass
+        print "Move"
+        self.mode = MOVE
 
     def option_attack(self):
         print "Attack"
@@ -95,6 +101,16 @@ class TouhouUI(UI):
             hov_y = int(new_y/self.hyp)
             self.hover_tile.set_pos((hov_x, hov_y))
         
+    def object_has_menu(self, pos):
+        x,y,z = pos
+        if self.map[x][y]:
+            return True
+        return False
+
+    # Get the information we need from the map
+    def get_object_info(self, pos):
+        pass
+
     def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
         new_left, new_middle, new_right = mouse_state
         #what to execute depends on the previous and current mouse states
@@ -113,14 +129,18 @@ class TouhouUI(UI):
                             
         if new_left and not self.left:
             if not self.current_menu:
-                self.hover_tile.make_invisible()
-                self.current_menu = self.reimu_menu_placed
-                
-            if not self.current_menu.visible:
-                self.current_menu.make_visible()
-                self.current_menu.set_pos(mouse_coords)
+                print self.hover_tile.pos
+                if self.object_has_menu(self.hover_tile.pos):
+                    self.hover_tile.make_invisible()
+                    self.current_menu = self.reimu_menu_placed
+                    self.current_menu.make_visible()
+                    self.current_menu.set_pos(mouse_coords)
             else:
-                self.current_menu.obj.log_pending()
+                if not self.current_menu.visible:
+                    self.current_menu.make_visible()
+                    self.current_menu.set_pos(mouse_coords)
+                else:
+                    self.current_menu.obj.log_pending()
         
         if not new_left and self.left:
             if self.current_menu and self.current_menu.obj.pending != None:
