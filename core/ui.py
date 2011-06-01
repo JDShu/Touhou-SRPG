@@ -31,22 +31,16 @@ ENTRY_HEIGHT, ENTRY_WIDTH = 40, 100
 # Container class for everything UI
 class UI:
     def __init__(self):
-        self.elements = deque()
+        self.elements = []
 
-    def process(self):
-        pass
+    def add(self, obj):
+        self.elements += [obj]
 
     # gets called by the play session
     def draw(self):
         temp = GraphicList()
         temp.set_list(self.elements)
         return temp
-
-#def print_text(text,x,y,font):
-#    glPushMatrix()
-#    glLoadIdentity()
-#    font.glPrint( x, y, text, [ 1.0, 1.0, 0.0 ] )
-#    glPopMatrix()
 
 class DeprecatedMenuBody( Graphic ):
     def __init__( self, filename,scale_factor = 1.0 ):
@@ -276,3 +270,12 @@ class Menu:
             self.hovering = None
         else:
             self.hovering = len(self.entries) - (-y/self.entry_height)
+
+    # figure out which entry will be executed upon mouse release
+    def log_pending(self):
+        self.pending = self.hovering
+
+    def execute_entry(self):
+        if self.pending != None and self.hovering != None:
+            f = self.entries[self.hovering][1]
+            f()

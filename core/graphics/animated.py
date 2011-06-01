@@ -61,7 +61,8 @@ class Animated(Graphic):
         # OpenGL >= 2.0
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self.tex_w, self.tex_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data )
 
-    def update(self):
+    #event handler for updating frame
+    def update(self, e):
         self.current_frame_number += 1
         try:
             self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]

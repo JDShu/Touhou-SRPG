@@ -44,6 +44,7 @@ class IOSession(Session):
         self.mouse_coords = 0,0
         self.mouse_state = pygame.mouse.get_pressed()
 
+        self.x, self.y = 0,0
 
     def new_keybuffer(self):
         keybuffer = []
@@ -69,10 +70,13 @@ class IOSession(Session):
 
     def draw(self):
         glClear(GL_COLOR_BUFFER_BIT)
+        glPushMatrix()
+        glTranslate(self.x,self.y,0)
         while self.draw_pending:
             graphic = self.draw_pending.popleft()
             graphic.draw()
+        glPopMatrix()
         pygame.display.flip()
     
     def shift(self,value):
-        glTranslate(value[0],value[1],0)
+        self.x, self.y = self.x+value[0], self.y+value[1]

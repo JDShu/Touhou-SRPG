@@ -115,9 +115,16 @@ class GraphicList:
             g.draw()
 
 class GraphicPositioned:
-    def __init__(self, graphic, pos):
-        self.graphic = graphic
+    def __init__(self, obj, pos):
+        self.obj = obj
         self.set_pos(pos)
+        self.visible = False
+
+    def make_visible(self):
+        self.visible = True
+
+    def make_invisible(self):
+        self.visible = False
 
     def set_pos(self,pos):
         self.pos = (pos[0],pos[1],0)
@@ -125,18 +132,16 @@ class GraphicPositioned:
     def get_pos(self):
         return self.pos
 
-    def get_graphic(self):
-        return self.graphic
-
     def draw(self):
-        glPushMatrix()
-        glTranslate(*self.pos)
-        self.graphic.draw()
-        glPopMatrix()
+        if self.visible:
+            glPushMatrix()
+            glTranslate(*self.pos)
+            self.obj.draw()
+            glPopMatrix()
 
 class GraphicAbsPositioned(GraphicPositioned):
-    def __init__(self, graphic, pos):
-        GraphicPositioned.__init__(self, graphic, pos)
+    def __init__(self, obj, pos):
+        GraphicPositioned.__init__(self, obj, pos)
         self.viewport = glGetIntegerv(GL_VIEWPORT)
 
     def draw(self):
