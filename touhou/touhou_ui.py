@@ -16,6 +16,8 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import pygame
+from pygame.locals import *
 from OpenGL.GL import *
 from math import *
 
@@ -27,39 +29,45 @@ from touhou_graphic import MapGraphic
 
 class TouhouUI(UI):
     def __init__(self, touhou_map):
+
+        # Constants we need to calculate mouse position and hovering highlight
         self.map_x, self.map_y = touhou_map.w, touhou_map.h
         self.off_x, self.off_y = touhou_map.TILE_OFFSET[0], touhou_map.TILE_OFFSET[1]
-        
         self.off_x = float(self.off_x)
         self.off_y = float(self.off_y)
-                
         self.theta_x = atan(self.off_x/self.off_y)
-        
         self.theta_y = atan(self.off_y/self.off_x)
-        self.hyp = hypot(self.off_x, self.off_y)
-        
-        UI.__init__(self)
-        self.menu = Menu("Test")
-        self.left, self.middle, self.right = (0,0,0)
-        self.menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        self.menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
-        self.menu.set_w(80)
-        self.menu.set_header_height(30)
-        self.menu.set_entry_height(30)
-        
-        self.menu.add_entry("Move", self.option_move)
-        self.menu.add_entry("Attack", self.option_attack)
+        self.hyp = hypot(self.off_x-3, self.off_y-3) #dirty adjustment for select highlight precision
+        self.max_x, self.max_y = self.map_x*self.hyp, self.map_y*self.hyp
 
-        self.menu_placed = GraphicAbsPositioned(self.menu,(0,0))
+        UI.__init__(self)
+
+        #Test code - sample menu and hovering tile
+        self.main_menu = Menu("Main")
+        self.left, self.middle, self.right = (0,0,0)
+        self.main_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+        self.main_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+        self.main_menu.set_w(80)
+        self.main_menu.set_header_height(30)
+        self.main_menu.set_entry_height(30)
+        self.main_menu.add_entry("Quit", self.option_quit)
+        self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
+
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
         self.hover_tile = MapGraphic(hover_graphic, (0,0))
-        self.hover_tile.make_visible()
-        self.add(self.menu_placed)
+        
+        self.add(self.main_menu_placed)
         self.add(self.hover_tile)
         
+        #One menu showing at any time
+        self.current_menu = None
+
+    # Quit program for now.
+    def option_quit(self):
+        pygame.event.post(pygame.event.Event(QUIT))
 
     def option_move(self):
-        print "Move"
+        pass
 
     def option_attack(self):
         print "Attack"
@@ -71,37 +79,42 @@ class TouhouUI(UI):
         new_x = x*cos(self.theta_x) + y*sin(self.theta_x)
         new_y = -x*sin(self.theta_y) + y*cos(self.theta_y)
         
-        hov_x = int(new_x/self.hyp)
-        hov_y = int(new_y/self.hyp)
-
-        self.hover_tile.set_pos((hov_x, hov_y))
-
+        if 0 < new_x < self.max_x and 0 < new_y < self.max_y:
+            hov_x = int(new_x/self.hyp)
+            hov_y = int(new_y/self.hyp)
+            self.hover_tile.set_pos((hov_x, hov_y))
+        
     def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
         new_left, new_middle, new_right = mouse_state
-
         #what to execute depends on the previous and current mouse states
         if new_right and not self.right:
-            if not self.menu_placed.visible:
-                self.menu_placed.set_pos(mouse_coords)
-                self.menu_placed.make_visible()
+            if not self.current_menu:
+               self.current_menu = self.main_menu_placed
+               self.hover_tile.make_invisible()
+               
+            if not self.current_menu.visible:
+                self.current_menu.set_pos(mouse_coords)
+                self.current_menu.make_visible()
             else:
-                self.menu_placed.make_invisible()
-                
+                self.current_menu.make_invisible()
+                self.hover_tile.make_visible()
+                self.current_menu = None
+            
         if new_left and not self.left:
-            self.menu.log_pending()
+            self.current_menu.obj.log_pending()
 
         if not new_left and self.left:
-            self.menu.execute_entry()
+            self.current_menu.obj.execute_entry()
 
         self.determine_hover_square(mouse_coords, map_offset)
 
         # now we can update the mouse state
         self.left, self.middle, self.right = mouse_state
         self.mouse_coords = x,y = mouse_coords
-        x2, y2, z2 = self.menu_placed.get_pos()
+        x2, y2, z2 = self.main_menu_placed.get_pos()
         rel_coords = (x-x2,y-y2)
         
-        self.menu.update(rel_coords)
+        self.main_menu.update(rel_coords)
 
 class StatusWindow:
     gfx = "./content/gfx/gui/"
