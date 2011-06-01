@@ -199,6 +199,7 @@ class Menu:
         self.header_height = 0
         self.entry_height = 0
         self.hovering = None
+        self.pending = None
 
     def set_body_graphic(self, graphic):
         self.body_graphic = Graphic(graphic)        
@@ -274,6 +275,9 @@ class Menu:
     # figure out which entry will be executed upon mouse release
     def log_pending(self):
         self.pending = self.hovering
+
+    def clear_pending(self):
+        self.pending = None
 
     def execute_entry(self):
         if self.pending != None and self.hovering != None:

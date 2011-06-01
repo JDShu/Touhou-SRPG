@@ -41,10 +41,10 @@ class TouhouUI(UI):
         self.max_x, self.max_y = self.map_x*self.hyp, self.map_y*self.hyp
 
         UI.__init__(self)
+        self.left, self.middle, self.right = (0,0,0)
 
         #Test code - sample menu and hovering tile
         self.main_menu = Menu("Main")
-        self.left, self.middle, self.right = (0,0,0)
         self.main_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
         self.main_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
         self.main_menu.set_w(80)
@@ -53,10 +53,21 @@ class TouhouUI(UI):
         self.main_menu.add_entry("Quit", self.option_quit)
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
 
+        #sample character menu
+        self.reimu_menu = Menu("Reimu")
+        self.reimu_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+        self.reimu_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+        self.reimu_menu.set_w(80)
+        self.reimu_menu.set_header_height(30)
+        self.reimu_menu.set_entry_height(30)
+        self.reimu_menu.add_entry("Quit", self.option_quit)
+        self.reimu_menu_placed = GraphicAbsPositioned(self.reimu_menu,(0,0))
+
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
         self.hover_tile = MapGraphic(hover_graphic, (0,0))
         
         self.add(self.main_menu_placed)
+        self.add(self.reimu_menu_placed)
         self.add(self.hover_tile)
         
         #One menu showing at any time
@@ -97,24 +108,36 @@ class TouhouUI(UI):
                 self.current_menu.make_visible()
             else:
                 self.current_menu.make_invisible()
-                self.hover_tile.make_visible()
                 self.current_menu = None
-            
+                self.hover_tile.make_visible()
+                            
         if new_left and not self.left:
-            self.current_menu.obj.log_pending()
-
+            if not self.current_menu:
+                self.hover_tile.make_invisible()
+                self.current_menu = self.reimu_menu_placed
+                
+            if not self.current_menu.visible:
+                self.current_menu.make_visible()
+                self.current_menu.set_pos(mouse_coords)
+            else:
+                self.current_menu.obj.log_pending()
+        
         if not new_left and self.left:
-            self.current_menu.obj.execute_entry()
-
+            if self.current_menu and self.current_menu.obj.pending != None:
+                    self.current_menu.obj.execute_entry()
+                    self.current_menu.obj.clear_pending()
+                    #self.current_menu = None
+                
         self.determine_hover_square(mouse_coords, map_offset)
 
         # now we can update the mouse state
         self.left, self.middle, self.right = mouse_state
         self.mouse_coords = x,y = mouse_coords
-        x2, y2, z2 = self.main_menu_placed.get_pos()
-        rel_coords = (x-x2,y-y2)
         
-        self.main_menu.update(rel_coords)
+        if self.current_menu:
+            x2, y2, z2 = self.current_menu.get_pos()
+            rel_coords = (x-x2,y-y2)
+            self.current_menu.obj.update(rel_coords)
 
 class StatusWindow:
     gfx = "./content/gfx/gui/"
