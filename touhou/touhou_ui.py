@@ -42,6 +42,7 @@ class TouhouUI(UI):
         self.theta_y = atan(self.off_y/self.off_x)
         self.hyp = hypot(self.off_x-3, self.off_y-3) #dirty adjustment for select highlight precision
         self.max_x, self.max_y = self.map_x*self.hyp, self.map_y*self.hyp
+        self.menus = {}
 
         UI.__init__(self)
         self.left, self.middle, self.right = (0,0,0)
@@ -56,21 +57,10 @@ class TouhouUI(UI):
         self.main_menu.add_entry("Quit", self.option_quit)
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
 
-        #sample character menu
-        self.reimu_menu = Menu("Reimu")
-        self.reimu_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        self.reimu_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
-        self.reimu_menu.set_w(80)
-        self.reimu_menu.set_header_height(30)
-        self.reimu_menu.set_entry_height(30)
-        self.reimu_menu.add_entry("Move", self.option_move)
-        self.reimu_menu_placed = GraphicAbsPositioned(self.reimu_menu,(0,0))
-
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
         self.hover_tile = MapGraphic(hover_graphic, (0,0))
         
         self.add(self.main_menu_placed)
-        self.add(self.reimu_menu_placed)
         self.add(self.hover_tile)
         
         #One menu showing at any time
@@ -78,6 +68,11 @@ class TouhouUI(UI):
 
         self.mode = BROWSE
 
+    # Attach a name to a menu and add to ui list.
+    def add_menu(self, obj, menu):
+        self.menus[obj.name] = menu #register
+        self.add(menu) #add to graphics queue
+        
     # Quit program for now.
     def option_quit(self):
         pygame.event.post(pygame.event.Event(QUIT))
@@ -101,11 +96,13 @@ class TouhouUI(UI):
             hov_y = int(new_y/self.hyp)
             self.hover_tile.set_pos((hov_x, hov_y))
         
-    def object_has_menu(self, pos):
+    def set_current_menu(self, pos):
         x,y,z = pos
         if self.map[x][y]:
-            return True
-        return False
+            obj = self.map[x][y].details.name
+            self.current_menu = self.menus[obj]
+        else:
+            self.current_menu = None
 
     # Get the information we need from the map
     def get_object_info(self, pos):
@@ -129,10 +126,9 @@ class TouhouUI(UI):
                             
         if new_left and not self.left:
             if not self.current_menu:
-                print self.hover_tile.pos
-                if self.object_has_menu(self.hover_tile.pos):
+                self.set_current_menu(self.hover_tile.pos)
+                if self.current_menu:
                     self.hover_tile.make_invisible()
-                    self.current_menu = self.reimu_menu_placed
                     self.current_menu.make_visible()
                     self.current_menu.set_pos(mouse_coords)
             else:

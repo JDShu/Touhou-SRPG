@@ -41,6 +41,7 @@ class TouhouMap:
     TILE_DIMENSIONS = (90.0,60.0)
     TILE_DATA = (TILE_OFFSET, TILE_DIMENSIONS)
     def __init__(self):
+        self.obj_list = []
         self.grid = []
         self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
         
@@ -71,13 +72,25 @@ class TouhouMap:
                 temp += [None]
             self.grid += [temp]
 
+    # update the data for each game object first, then update the new map
     def update(self,e):
+        #update each object
         for x in xrange(self.w):
             for y in xrange(self.h):
-                if self.grid[self.w-x-1][self.h-y-1]:
-                    self.grid[self.w-x-1][self.h-y-1].update(e)
-        
-
+                old_x, old_y = self.w-x-1, self.h-y-1
+                obj = self.grid[old_x][old_y]
+                if obj:
+                    self.update_obj(obj, e, (old_x, old_y))
+                    
+    # update the map position for an object if its position has changed
+    def update_obj(self, obj, e, old_coords):
+        obj.update(e)
+        if obj.pos != old_coords:
+            x, y = obj.pos
+            self.grid[x][y] = obj
+            x2, y2 = old_coords
+            self.grid[x2][y2] = None
+                        
     def draw(self):
         temp = GraphicList()
         temp.add(self.ground)
@@ -88,16 +101,15 @@ class TouhouMap:
         return temp
     
     def place_object(self, obj, pos, details=None):
-        self.grid[pos[0]][pos[1]] = MapGraphic(obj,pos,details)
+        temp = MapGraphic(obj,pos,details)
+        self.grid[pos[0]][pos[1]] = temp
+        self.obj_list += [temp]
         
     def remove_object(self, tup):
         self.grid[tup[0]][tup[0]] = None
 
-    def teleport_object(self, obj_tup, pos):
+    def relocate_object(self, obj_tup, pos):
         self.place_object(obj_tup[0], pos)
         self.remove_object(obj_tup[1])
 
-    #move object smoothly to new location
-    def move_object(self, obj_tup, pos):
-        pass
 

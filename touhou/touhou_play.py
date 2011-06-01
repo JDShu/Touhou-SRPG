@@ -20,8 +20,9 @@ import pygame
 from pygame.locals import *
 
 from core.input_session import IOSession
-from core.ui import UI
+from core.ui import UI, Menu
 from core.graphics.animated import Animated
+from core.graphics.graphic import GraphicAbsPositioned
 from core.misc import astar
 
 from touhou_level import TouhouLevel
@@ -40,6 +41,20 @@ class TouhouPlay(IOSession):
         test_reimu = Animated("reimu")
         reimu_info = Character("reimu",5)
         self.map.place_object(test_reimu, (6,1), reimu_info)
+        p = [(6,2),(6,3),(7,3)]
+        self.map.grid[6][1].move_path(p)
+
+        #sample character menu
+        reimu_menu = Menu("Reimu")
+        reimu_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+        reimu_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+        reimu_menu.set_w(80)
+        reimu_menu.set_header_height(30)
+        reimu_menu.set_entry_height(30)
+        reimu_menu.add_entry("Move", self.ui.option_move)
+        reimu_menu_placed = GraphicAbsPositioned(reimu_menu,(0,0))
+        self.ui.add_menu(reimu_info, reimu_menu_placed)
+
         #self.map.grid[6][1].move_path([(7,1),(7,2),(7,3)])
 
         pygame.time.set_timer(USEREVENT+1,200)
@@ -56,10 +71,6 @@ class TouhouPlay(IOSession):
         self.register_draw(self.ui.draw())
         IOSession.process(self, event_list)
         self.scroll_map()
-
-    #helper isometric movement function
-    def move_object_single(self):
-        pass
 
     def scroll_map(self):
         if self.keybuffer[K_UP]:
