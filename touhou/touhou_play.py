@@ -63,14 +63,21 @@ class TouhouPlay(IOSession):
         
         self.register_event(USEREVENT+2,self.map.update)
         
-
+    # get
+    #def move_character
+    
     def process(self, event_list):
         #self.test_reimu.update()
         self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.x,self.y))
+        self.process_ui(self)
         self.register_draw(self.map.draw())
         self.register_draw(self.ui.draw())
         IOSession.process(self, event_list)
         self.scroll_map()
+
+    # Respond to changes in UI interface
+    def process_ui(self):
+        info = self.ui.data
 
     def scroll_map(self):
         if self.keybuffer[K_UP]:
