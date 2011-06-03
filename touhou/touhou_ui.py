@@ -153,7 +153,9 @@ class TouhouUI(UI):
 
     def move_left_release(self, mouse_coords):
         x,y,z = self.hover_tile.pos
-        self.data.dest = (x,y)
+        obj = self.map[x][y]
+        if not obj:
+            self.data.dest = (x,y)
         
     def set_browse(self):
         self.data.dest = None
@@ -172,7 +174,6 @@ class TouhouUI(UI):
             if self.data.mode == BROWSE:
                 self.browse_left_click(mouse_coords)
         
-
         if not new_left and self.left:
             if self.data.mode == BROWSE:
                 self.browse_left_release(mouse_coords)
