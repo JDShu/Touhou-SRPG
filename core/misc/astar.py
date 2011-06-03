@@ -64,7 +64,6 @@ class Grid():
             self.grid += [temp]
         
         self.width, self.height = touhou_map.w, touhou_map.h
-#        self.print_grid()
 
     def insert_block( self, x, y ):
         self.grid[x][y] = BLOCKED
@@ -167,3 +166,9 @@ class Path():
             x, y = current
        
         return path
+
+def path(grid, start, goal):
+    G = Grid(grid)
+    P = Path(G,start,[goal])
+    P.path.reverse()
+    return P.path

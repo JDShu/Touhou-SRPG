@@ -23,10 +23,10 @@ from core.input_session import IOSession
 from core.ui import UI, Menu
 from core.graphics.animated import Animated
 from core.graphics.graphic import GraphicAbsPositioned
-from core.misc import astar
+import core.misc.astar as astar
 
 from touhou_level import TouhouLevel
-from touhou_ui import TouhouUI
+from touhou_ui import *
 from touhou_graphic import Character
 
 class TouhouPlay(IOSession):
@@ -41,9 +41,7 @@ class TouhouPlay(IOSession):
         test_reimu = Animated("reimu")
         reimu_info = Character("reimu",5)
         self.map.place_object(test_reimu, (6,1), reimu_info)
-        p = [(6,2),(6,3),(7,3)]
-        self.map.grid[6][1].move_path(p)
-
+        
         #sample character menu
         reimu_menu = Menu("Reimu")
         reimu_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
@@ -54,8 +52,6 @@ class TouhouPlay(IOSession):
         reimu_menu.add_entry("Move", self.ui.option_move)
         reimu_menu_placed = GraphicAbsPositioned(reimu_menu,(0,0))
         self.ui.add_menu(reimu_info, reimu_menu_placed)
-
-        #self.map.grid[6][1].move_path([(7,1),(7,2),(7,3)])
 
         pygame.time.set_timer(USEREVENT+1,200)
         pygame.time.set_timer(USEREVENT+2,100)
@@ -77,8 +73,15 @@ class TouhouPlay(IOSession):
 
     # Respond to changes in UI interface
     def process_ui(self):
-        #info = self.ui.data
-        pass
+        data = self.ui.data
+        if data.mode == BROWSE:
+            pass
+        elif data.mode == MOVE:
+            if data.dest:
+                path = astar.path(self.map, data.selected.pos, data.dest)
+                self.ui.set_browse()
+                x,y = self.ui.data.selected.pos
+                self.map.grid[x][y].move_path(path)
 
     def scroll_map(self):
         if self.keybuffer[K_UP]:

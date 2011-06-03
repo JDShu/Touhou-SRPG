@@ -44,6 +44,7 @@ class TouhouUI(UI):
         self.max_x, self.max_y = self.map_x*self.hyp, self.map_y*self.hyp
        
         self.menus = {}
+        self.data = UIData()
 
         UI.__init__(self)
         self.left, self.middle, self.right = (0,0,0)
@@ -67,10 +68,10 @@ class TouhouUI(UI):
         #One menu showing at any time
         self.current_menu = None
 
-        self.mode = BROWSE
+        #self.data.mode = BROWSE
 
     def set_mode(self, mode):
-        self.mode = mode
+        self.data.mode = mode
 
     # Attach a name to a menu and add to ui list.
     def add_menu(self, obj, menu):
@@ -82,8 +83,7 @@ class TouhouUI(UI):
         pygame.event.post(pygame.event.Event(QUIT))
 
     def option_move(self):
-        print "Move"
-        self.mode = MOVE
+        self.data.mode = MOVE
 
     def option_attack(self):
         print "Attack"
@@ -98,19 +98,17 @@ class TouhouUI(UI):
         if 0 < new_x < self.max_x and 0 < new_y < self.max_y:
             hov_x = int(new_x/self.hyp)
             hov_y = int(new_y/self.hyp)
-            self.hover_tile.set_pos((hov_x, hov_y))
-        
-    def set_current_menu(self, pos):
+            self.data.hover = hov_x, hov_y
+            self.hover_tile.set_pos(self.data.hover)            
+
+    def set_selected_object(self, pos):
         x,y,z = pos
         if self.map[x][y]:
-            obj = self.map[x][y].details.name
-            self.current_menu = self.menus[obj]
+            obj = self.map[x][y]
+            self.data.selected = obj
+            self.current_menu = self.menus[obj.details.name]
         else:
             self.current_menu = None
-
-    # Get the information we need from the map
-    def get_object_info(self, pos):
-        pass
 
     def browse_right_click(self, mouse_coords):
         if not self.current_menu:
@@ -127,7 +125,7 @@ class TouhouUI(UI):
 
     def browse_left_click(self, mouse_coords):
         if not self.current_menu:
-            self.set_current_menu(self.hover_tile.pos)
+            self.set_selected_object(self.hover_tile.pos)
             if self.current_menu:
                 self.hover_tile.make_invisible()
                 self.current_menu.make_visible()
@@ -143,34 +141,44 @@ class TouhouUI(UI):
         if self.current_menu and self.current_menu.obj.pending != None:
             self.current_menu.obj.execute_entry()
             self.current_menu.obj.clear_pending()
-                    #self.current_menu = None
+            self.current_menu.make_invisible()
+            self.hover_tile.make_visible()
+            #self.current_menu = None
     
     def move_right_click(self, mouse_coords):
-        self.mode = BROWSE
+        self.data.mode = BROWSE
 
     def move_left_click(self, mouse_coords):
-        #self.target
         pass
+
+    def move_left_release(self, mouse_coords):
+        x,y,z = self.hover_tile.pos
+        self.data.dest = (x,y)
+        
+    def set_browse(self):
+        self.data.dest = None
+        self.data.mode = BROWSE
 
     def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
         new_left, new_middle, new_right = mouse_state
         #what to execute depends on the previous and current mouse states
         if new_right and not self.right:
-            if self.mode == BROWSE:
+            if self.data.mode == BROWSE:
                 self.browse_right_click(mouse_coords)
-            elif self.mode == MOVE:
+            elif self.data.mode == MOVE:
                 self.move_right_click(mouse_coords)
 
         if new_left and not self.left:
-            if self.mode == BROWSE:
+            if self.data.mode == BROWSE:
                 self.browse_left_click(mouse_coords)
-            if self.mode == MOVE:
-                self.move_left_click(mouse_coords)
+        
 
         if not new_left and self.left:
-            if self.mode == BROWSE:
+            if self.data.mode == BROWSE:
                 self.browse_left_release(mouse_coords)
-
+            elif self.data.mode == MOVE:
+                self.move_left_release(mouse_coords)
+        
         self.determine_hover_square(mouse_coords, map_offset)
 
         # now we can update the mouse state
@@ -184,7 +192,14 @@ class TouhouUI(UI):
 
 class UIData:
     def __init__(self):
-        pass
+        self.mode = BROWSE
+        self.hover = None
+
+        self.selected = None
+        self.dest = None
+
+    def clear_dest(self):
+        self.dest = None
 
 class StatusWindow:
     gfx = "./content/gfx/gui/"
