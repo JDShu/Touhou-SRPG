@@ -27,9 +27,16 @@ from core.ui import UI, Menu
 from touhou_graphic import MapGraphic
 #from core.misc.glFreeType import pushScreenCoordinateMatrix, pop_projection_matrix
 
-BROWSE, MOVE, ATTACK = range(3)
+#Interface modes
+I_BROWSE, I_MOVE, I_ATTACK = range(3)
+
+# UI Event subtypes
+MOVETO, ATTACK = range(2)
+
+UI_EVENT = USEREVENT+3
 
 class TouhouUI(UI):
+    
     def __init__(self, touhou_map):
 
         self.map = touhou_map.grid
@@ -60,7 +67,7 @@ class TouhouUI(UI):
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
-        self.hover_tile = MapGraphic(hover_graphic, (0,0))
+        self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
         
         self.add(self.main_menu_placed)
         self.add(self.hover_tile)
@@ -83,7 +90,7 @@ class TouhouUI(UI):
         pygame.event.post(pygame.event.Event(QUIT))
 
     def option_move(self):
-        self.data.mode = MOVE
+        self.data.mode = I_MOVE
 
     def option_attack(self):
         print "Attack"
@@ -101,6 +108,7 @@ class TouhouUI(UI):
             self.data.hover = hov_x, hov_y
             self.hover_tile.set_pos(self.data.hover)            
 
+    #set selected and current menu to the one specified by given coordinates.
     def set_selected_object(self, pos):
         x,y,z = pos
         if self.map[x][y]:
@@ -146,7 +154,7 @@ class TouhouUI(UI):
             #self.current_menu = None
     
     def move_right_click(self, mouse_coords):
-        self.data.mode = BROWSE
+        self.data.mode = I_BROWSE
 
     def move_left_click(self, mouse_coords):
         pass
@@ -155,30 +163,37 @@ class TouhouUI(UI):
         x,y,z = self.hover_tile.pos
         obj = self.map[x][y]
         if not obj:
-            self.data.dest = (x,y)
-        
+            pygame.event.post(Move_Event(self.data.selected, (x,y)))
+            self.data.locked = True
+            self.current_menu = None
+
     def set_browse(self):
         self.data.dest = None
-        self.data.mode = BROWSE
+        self.data.mode = I_BROWSE
+        self.data.locked = False
+
+    def unlock(self):
+        self.data.locked = True
 
     def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
         new_left, new_middle, new_right = mouse_state
         #what to execute depends on the previous and current mouse states
-        if new_right and not self.right:
-            if self.data.mode == BROWSE:
-                self.browse_right_click(mouse_coords)
-            elif self.data.mode == MOVE:
-                self.move_right_click(mouse_coords)
+        if not self.data.locked:
+            if new_right and not self.right:
+                if self.data.mode == I_BROWSE:
+                    self.browse_right_click(mouse_coords)
+                elif self.data.mode == I_MOVE:
+                    self.move_right_click(mouse_coords)
 
-        if new_left and not self.left:
-            if self.data.mode == BROWSE:
-                self.browse_left_click(mouse_coords)
+            if new_left and not self.left:
+                if self.data.mode == I_BROWSE:
+                    self.browse_left_click(mouse_coords)
         
-        if not new_left and self.left:
-            if self.data.mode == BROWSE:
-                self.browse_left_release(mouse_coords)
-            elif self.data.mode == MOVE:
-                self.move_left_release(mouse_coords)
+            if not new_left and self.left:
+                if self.data.mode == I_BROWSE:
+                    self.browse_left_release(mouse_coords)
+                elif self.data.mode == I_MOVE:
+                    self.move_left_release(mouse_coords)
         
         self.determine_hover_square(mouse_coords, map_offset)
 
@@ -191,10 +206,22 @@ class TouhouUI(UI):
             rel_coords = (x-x2,y-y2)
             self.current_menu.obj.update(rel_coords)
 
+def UI_Event(self, subtype=None):
+    e = pygame.event.Event(UI_EVENT)
+    e.subtype = subtype
+    return e
+
+# thing: the thing thats moving
+# position: destination to move to
+def Move_Event(thing=None, destination=None):
+    e = pygame.event.Event(UI_EVENT, subtype=MOVETO, obj=thing, dest=destination)
+    return e
+        
 class UIData:
     def __init__(self):
-        self.mode = BROWSE
+        self.mode = I_BROWSE
         self.hover = None
+        self.locked = False
 
         self.selected = None
         self.dest = None

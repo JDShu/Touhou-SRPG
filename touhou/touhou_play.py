@@ -27,7 +27,7 @@ import core.misc.astar as astar
 
 from touhou_level import TouhouLevel
 from touhou_ui import *
-from touhou_graphic import Character
+from touhou_graphic import Character, OBJECTEVENT
 
 class TouhouPlay(IOSession):
     SCROLL_SPEED = 5
@@ -36,11 +36,11 @@ class TouhouPlay(IOSession):
         self.level_state = level_state
         self.map = self.level_state.map
         self.ui = TouhouUI(self.map)
-
+        
         #test code
         test_reimu = Animated("reimu")
         reimu_info = Character("reimu",5)
-        self.map.place_object(test_reimu, (6,1), reimu_info)
+        self.map.place_object(test_reimu, (6,1), "reimu", reimu_info)
         
         #sample character menu
         reimu_menu = Menu("Reimu")
@@ -54,11 +54,13 @@ class TouhouPlay(IOSession):
         self.ui.add_menu(reimu_info, reimu_menu_placed)
 
         pygame.time.set_timer(USEREVENT+1,200)
-        pygame.time.set_timer(USEREVENT+2,100)
-        self.register_event(USEREVENT+1,test_reimu.update)
+        pygame.time.set_timer(USEREVENT+2,50)
         
-        self.register_event(USEREVENT+2,self.map.update)
-        
+        self.register_event(USEREVENT+1,test_reimu.update) #frame graphics
+        self.register_event(USEREVENT+2,self.map.update_objects) #movement
+        self.register_event(USEREVENT+3,self.ui_events)#UI events
+        self.register_event(USEREVENT+4,self.object_events)#obj events
+
     # get
     #def move_character
     
@@ -74,14 +76,28 @@ class TouhouPlay(IOSession):
     # Respond to changes in UI interface
     def process_ui(self):
         data = self.ui.data
-        if data.mode == BROWSE:
+        if data.mode == I_BROWSE:
             pass
-        elif data.mode == MOVE:
+        elif data.mode == I_MOVE:
             if data.dest:
                 path = astar.path(self.map, data.selected.pos, data.dest)
-                self.ui.set_browse()
                 x,y = self.ui.data.selected.pos
                 self.map.grid[x][y].move_path(path)
+
+    def ui_events(self, e):
+        if e.subtype == MOVETO:
+            self.move_character(e)
+
+    def object_events(self, e):
+        if e.subtype == OBJECTEVENT:
+            self.map.update_obj_pos(e.obj)
+            if not e.obj.moving:
+                self.ui.set_browse()
+
+    def move_character(self, e):
+        path = astar.path(self.map, e.obj.pos, e.dest)
+        x,y = e.obj.pos
+        self.map.grid[x][y].move_path(path)
 
     def scroll_map(self):
         if self.keybuffer[K_UP]:

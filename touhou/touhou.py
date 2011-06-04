@@ -259,7 +259,6 @@ class DeprecatedTouhouPlay:
         clicked_object = self.determine_clicked(mouse_coords)
                 #What to do given the current state and what got clicked
         if self.mode == self.MOVE:
-            #print "move"
             if right:
                 self.mode = self.BROWSE
             elif left:
@@ -276,14 +275,12 @@ class DeprecatedTouhouPlay:
                 defender = clicked_object
                 if defender and defender.type == touhou_objects.MONSTER:
                     self.process_combat(self.selected, defender)
-                    #print self.selected, "attacks", defender
                     self.selected.menu_off
                     self.menu_on = False
                     self.mode = self.BROWSE
             elif right:
                 self.mode = self.BROWSE
         elif self.mode == self.BROWSE:
-            #print "browse"
             if left:
                 if not self.menu_on and clicked_object in self.active:
                     self.selected = clicked_object
@@ -339,7 +336,6 @@ class DeprecatedTouhouPlay:
             self.wait_timeleft -= 100
             if self.mode == self.TURNCHANGE and self.wait_timeleft <= 0:
                 #should start whoever's turn it is
-                print "turn start"
                 self.mode = self.BROWSE
                 self.menu_on = False
                 self.new_turn()
