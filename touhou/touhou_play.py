@@ -61,9 +61,6 @@ class TouhouPlay(IOSession):
         self.register_event(USEREVENT+3,self.ui_events)#UI events
         self.register_event(USEREVENT+4,self.object_events)#obj events
 
-    # get
-    #def move_character
-    
     def process(self, event_list):
         #self.test_reimu.update()
         self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.x,self.y))

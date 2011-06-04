@@ -69,8 +69,8 @@ class MapGraphic(GraphicPositioned):
                     direction = (self.path[0][0]-self.pos[0], self.path[0][1]-self.pos[1])
                     self.signs = self.calculate_signs(*direction)
                     self.start_moving(direction)
-                pygame.event.post(Update_Map(self))
-                                
+                    
+                pygame.event.post(Update_Map(self))                
             else:
                 self.increments_moved += 1
         
@@ -119,5 +119,4 @@ class Character(MapObject):
 #signal that the map needs to be updated
 def Update_Map(map_obj):
     e = pygame.event.Event(OBJECTEVENT, subtype=OBJECTEVENT, obj=map_obj)
-    #print map_obj.pos
     return e

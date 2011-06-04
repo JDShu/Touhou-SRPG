@@ -25,7 +25,6 @@ from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPosition
 from core.ui import UI, Menu
 
 from touhou_graphic import MapGraphic
-#from core.misc.glFreeType import pushScreenCoordinateMatrix, pop_projection_matrix
 
 #Interface modes
 I_BROWSE, I_MOVE, I_ATTACK = range(3)

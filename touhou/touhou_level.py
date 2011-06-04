@@ -79,25 +79,6 @@ class TouhouMap:
         for obj in self.obj_list:
             x,y = self.obj_list[obj]
             self.grid[x][y].update(e)
-        #update each object
-        #for x in xrange(self.w):
-        #    for y in xrange(self.h):
-        #        old_x, old_y = self.w-x-1, self.h-y-1
-        #        obj = self.grid[old_x][old_y]
-        #        if obj:
-        #            self.update_obj(obj, e, (old_x, old_y))
-                    
-    # update the map position for an object if its position has changed
-    #def update_obj(self, obj, e, old_coords):
-    #    obj.update(e)
-    #    if obj.pos != old_coords:
-    #        x, y = obj.pos
-    #        self.grid[x][y] = obj
-    #        x2, y2 = old_coords
-    #        self.grid[x2][y2] = None
-
-#    def update(self, obj):
-#        obj.
                         
     def draw(self):
         temp = GraphicList()
