@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 '''
 * This file is part of Touhou SRPG.
 * Copyright (c) Hans Lo
@@ -16,25 +18,10 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-N,S,E,W = range(4)
+from tools.editor import * 
 
-class Sprite:
-    def __init__(self, filename):
-        self.filename = filename
-        self.frame = {}
+def main():
+    run()
 
-    def new_action(self, action):
-        direction = {}
-        direction[N] = [None]
-        direction[S] = [None]
-        direction[E] = [None]
-        direction[W] = [None]
-        self.frame[action] = direction
-
-    #TODO: don't clear it all out when called. Append instead.
-    def set_number_of_frames(self, action, direction, number):
-        #L = len(self.frame[action][direction])
-        self.frame[action][direction] = [None]*number
-
-    def set_frame(self, action, direction, frame_number, data):
-        self.frame[action][direction][frame_number] = data
+if __name__ == "__main__":
+    main()
