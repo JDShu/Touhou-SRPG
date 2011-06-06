@@ -27,6 +27,9 @@ class EditorWindow:
         builder.connect_signals(self)
         self.window = builder.get_object("window")
         self.drawing_area = builder.get_object("drawingarea")
+
+        self.x_button = builder.get_object("X")
+
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
         self.drawing_area.set_events(gtk.gdk.BUTTON_PRESS_MASK|gtk.gdk.POINTER_MOTION_MASK|
                                      gtk.gdk.BUTTON_RELEASE_MASK)
@@ -93,6 +96,7 @@ class EditorWindow:
                 glFlush()
             self.gldrawable.gl_end()
             self.x2, self.y2 = x2,y2
+            self.x_button.set_value(x)
 
     def load_sprite(self, data):
         self.image_file = data.get_preview_filename()

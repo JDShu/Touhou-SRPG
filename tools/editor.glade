@@ -77,17 +77,29 @@
                 <property name="position">3</property>
               </packing>
             </child>
-            <child>
+	  </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+	<child>
+	  <object class="GtkHBox" id="box3">
+	    <property name="visible">True</property>
+            <property name="can_focus">False</property>
+	    <child>
               <object class="GtkSpinButton" id="X">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Frame X Coordinate</property>
                 <property name="invisible_char">●</property>
+		
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -100,7 +112,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -113,7 +125,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">7</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -126,16 +138,44 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">8</property>
+                <property name="position">4</property>
               </packing>
             </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
+	    <child>
+              <object class="GtkSpinButton" id="frame_number">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Frame Number</property>
+                <property name="invisible_char">●</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+	    <child>
+              <object class="GtkButton" id="new_frame">
+                <property name="label" translatable="yes">Save Frame</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                #<signal name="clicked" handler="test" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+	  </object>
+	  <packing>
+	    <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
+            <property name="position">3</property>
+	  </packing>
+	</child>
       </object>
     </child>
   </object>
