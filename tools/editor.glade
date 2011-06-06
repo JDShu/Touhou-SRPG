@@ -12,9 +12,9 @@
         <property name="can_focus">False</property>
         <child>
           <object class="GtkDrawingArea" id="drawingarea">
-            <property name="visible">True</property>
+	    <property name="visible">True</property>
             <property name="can_focus">False</property>
-          </object>
+	  </object>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>

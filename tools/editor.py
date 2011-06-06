@@ -19,6 +19,7 @@ class EditorWindow:
         self.glconfig = gtk.gdkgl.Config(mode=self.display_mode)
 
         self.image_file = None
+        self.make_rect = False
 
         builder = gtk.Builder()
         builder.add_from_file("tools/editor.glade") 
@@ -27,28 +28,71 @@ class EditorWindow:
         self.window = builder.get_object("window")
         self.drawing_area = builder.get_object("drawingarea")
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
-        self.drawing_area.set_events(gtk.gdk.BUTTON_PRESS_MASK|gtk.gdk.POINTER_MOTION_MASK)
+        self.drawing_area.set_events(gtk.gdk.BUTTON_PRESS_MASK|gtk.gdk.POINTER_MOTION_MASK|
+                                     gtk.gdk.BUTTON_RELEASE_MASK)
         self.drawing_area.connect_after("realize", self.setup_gl, None)
+        
         self.drawing_area.connect("expose_event", self.expose, None)
-        self.drawing_area.connect("button_press_event", self.mouse_test, None)
-        self.drawing_area.connect("motion_notify_event", self.mouse_test, None)
-               
+        self.drawing_area.connect("button_press_event", self.mouse_button_down, None)
+        self.drawing_area.connect("motion_notify_event", self.mouse_move, None)
+        self.drawing_area.connect("button_release_event", self.mouse_button_release, None)               
         self.spritesheet = None
         #gtk.timeout_add(1000, self.test, None)
 
-    def change_orientation(self, data):
+    def test(self, button):
+        print "clicked"
+
+    def change_orientation(self, combobox):
         print "changed"
+
+    def mouse_button_down(self, drawing, event, data):
+        self.make_rect = True
+        self.x, self.y = event.x, event.y
+        self.x2, self.y2 = event.x, event.y
         
-    def test(self, data):
-        print "data"
-        return True
+    def mouse_button_release(self, drawing, event, data):
+        self.make_rect = False
+        x,y = self.x, self.y
+        x2,y2 = self.x2, self.y2
+        if x < x2:
+            self.frame_x = x
+            self.frame_w = x2-x
+        else:
+            self.frame_x = x2
+            self.frame_w = x-x2
 
-    def test2(self, data,a,b):
-        print "data"
-        return True
+        if y < y2:
+            self.frame_y = y
+            self.frame_h = y2-y
+        else:
+            self.frame_y = y2
+            self.frame_h = y-y2
 
-    def mouse_test(self, drawing, event, data):
-        print "mouse position: ", event.x, event.y
+    def mouse_move(self, drawing, event, data):
+        if self.make_rect:
+            x2, y2 = event.x, event.y
+            x,y = self.x,self.y
+            self.gldrawable.gl_begin(self.glcontext)
+            glClear(GL_COLOR_BUFFER_BIT)
+            
+            if self.spritesheet:
+                self.spritesheet.draw()
+            y = self.h - y
+            y2 = self.h - y2
+            
+            glBegin(GL_LINE_LOOP)
+            glVertex(x, y, 0)
+            glVertex(x2, y, 0)
+            glVertex(x2, y2, 0)
+            glVertex(x, y2, 0)
+            glEnd()        
+            
+            if self.gldrawable.is_double_buffered():
+                self.gldrawable.swap_buffers()
+            else:
+                glFlush()
+            self.gldrawable.gl_end()
+            self.x2, self.y2 = x2,y2
 
     def load_sprite(self, data):
         self.image_file = data.get_preview_filename()
@@ -57,9 +101,8 @@ class EditorWindow:
             self.image_file = None
         else:
             self.spritesheet = Graphic("./tools/reimu.png")
-            print self.image_file
-            print self.spritesheet
             self.gldrawable.gl_begin(self.glcontext)
+            glClear(GL_COLOR_BUFFER_BIT)
             self.spritesheet.draw()
             if self.gldrawable.is_double_buffered():
                 self.gldrawable.swap_buffers()
@@ -67,34 +110,39 @@ class EditorWindow:
                 glFlush()
 
             self.gldrawable.gl_end()
-            print "drawn"
-    
+                
     def setup_gl(self, drawing, event):
-        print "init"
         self.glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
         self.gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
-        
+
         self.gldrawable.gl_begin(self.glcontext)
-        glOrtho(0.0, 800.0, 0.0, 600.0,-1.0,1.0)
-        glClearColor(0.0,1.0,0.0,0.0)
         
+        glClearColor(0.0,0.0,0.0,0.0)
+        glClear(GL_COLOR_BUFFER_BIT)
         self.gldrawable.gl_end()
 
     def expose(self, drawing, event, data):
-        print "expose"
-        glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
-        gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
-        gldrawable.gl_begin(glcontext)
+        w, h = drawing.get_window().get_size()
+        
+        self.gldrawable.gl_begin(self.glcontext)
+        
         glClear(GL_COLOR_BUFFER_BIT)
-        #print self.spritesheet
+        glViewport (0, 0, w, h)
+        glMatrixMode (GL_PROJECTION)
+        glLoadIdentity ()
+        glOrtho (0.0, w, 0.0, h, -1.0, 1.0)
+        glMatrixMode (GL_MODELVIEW)
+        glLoadIdentity ()
+
         if self.spritesheet:
             self.spritesheet.draw()
-        if gldrawable.is_double_buffered():
-            gldrawable.swap_buffers()
+        if self.gldrawable.is_double_buffered():
+            self.gldrawable.swap_buffers()
         else:
             glFlush()
-        gldrawable.gl_end()
-        #return True
+        self.gldrawable.gl_end()
+        self.w, self.h = w,h
+        return True
 
 def run():
     editor = EditorWindow()
