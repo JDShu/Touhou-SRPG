@@ -44,7 +44,8 @@ class EditorWindow:
         self.drawing_area.connect("button_release_event", self.mouse_button_release, None)               
         self.spritesheet = None
         #gtk.timeout_add(1000, self.test, None)
-
+        self.sprite_dialog = builder.get_object("sprite_dialog")
+        
     def test(self, button):
         print "clicked"
 
@@ -169,6 +170,13 @@ class EditorWindow:
         self.w, self.h = w,h
         return True
 
+    def open_sprite_dialog(self, event):
+        self.sprite_dialog.run()
+
+    def close_sprite_dialog(self, event):
+        self.sprite_dialog.response(gtk.RESPONSE_CANCEL)
+        self.sprite_dialog.destroy()
+        
 def run():
     editor = EditorWindow()
     editor.window.show()

@@ -70,6 +70,7 @@
 			<property name="use_action_appearance">False</property>
 			<property name="use_underline">True</property>
 			<property name="use_stock">True</property>
+			<signal name="activate" handler="open_sprite_dialog"/>
 		      </object>
 		    </child>
 		    <child>
@@ -289,6 +290,46 @@
 	  </packing>
 	</child>
       </object>
+    </child>
+  </object>
+  <object class="GtkFileChooserDialog" id="sprite_dialog">
+    <property name="title" translatable="yes">Load Spritesheet</property>
+    <property name="action">open</property>
+    <child internal-child="action_area">
+          <object class="GtkButtonBox" id="filechooserdialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="cancel_sprite">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+		<signal name="clicked" handler="close_sprite_dialog"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+	    <child>
+              <object class="GtkButton" id="load_sprite">
+                <property name="label" translatable="yes">Open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+		<signal name="clicked" handler="close_sprite_dialog"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+	  </object>
     </child>
   </object>
 </interface>
