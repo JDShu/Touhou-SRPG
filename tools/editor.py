@@ -5,7 +5,7 @@ import pickle
 
 from OpenGL.GL import *
 
-#import sprite_rules
+from sprite_rules import Sprite
 #import objects
 from core.graphics.graphic import Graphic
 	
@@ -45,8 +45,13 @@ class EditorWindow:
         self.spritesheet = None
         self.sprite_dialog = builder.get_object("sprite_dialog")
         self.load_sprdata_dialog = builder.get_object("load_sprdata_dialog")
-        #gtk.timeout_add(1000, self.test, None)
+ 
+        self.new_action_dialog = builder.get_object("new_action_dialog")
+        self.new_action_name = builder.get_object("action_name_entry")
+ #gtk.timeout_add(1000, self.test, None)
        
+        self.sprite_data = Sprite(None)
+
     def test(self, button):
         print "clicked"
 
@@ -184,6 +189,16 @@ class EditorWindow:
             print "no"
         self.load_sprdata_dialog.hide()
 
+    def new_action_dialog(self, event):
+        print "action"
+        r = self.new_action_dialog.run()
+        if r == gtk.RESPONSE_ACCEPT:
+            action_name = self.new_action_name.get_text()
+            print action_name
+        else:
+            print "no"
+        self.new_action_dialog.hide()
+
     def close_sprite_dialog(self, event):
         self.sprite_dialog.response(gtk.RESPONSE_CANCEL)
 
@@ -195,6 +210,9 @@ class EditorWindow:
 
     def close_sprdata_dialog(self, event):
         self.load_sprdata_dialog.response(gtk.RESPONSE_CANCEL)
+
+    #def new_action_dialog(self, event):
+        
 
 def run():
     editor = EditorWindow()

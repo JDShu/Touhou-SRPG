@@ -124,6 +124,7 @@
 			<property name="use_action_appearance">False</property>
 			<property name="use_underline">True</property>
 			<property name="use_stock">True</property>
+			<signal name="activate" handler="new_action_dialog"/>
 		      </object>
 		    </child>
 		    <child>
@@ -171,7 +172,6 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -307,7 +307,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-		<signal name="clicked" handler="close_sprite_dialog"/>
+		
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -322,7 +322,6 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-		<signal name="clicked" handler="load_sprite"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -332,6 +331,10 @@
             </child>
 	  </object>
     </child>
+    <action-widgets>
+      <action-widget response="-3">open_spr_dialog</action-widget>
+      <action-widget response="0">close_spr_dialog</action-widget>
+    </action-widgets>	     
   </object>
     <object class="GtkFileChooserDialog" id="load_sprdata_dialog">
     <property name="title" translatable="yes">Load Data</property>
@@ -347,7 +350,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-		<signal name="clicked" handler="close_sprdata_dialog"/>
+		
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -362,7 +365,6 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-		<signal name="clicked" handler="load_sprdata_dialog"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -372,5 +374,78 @@
             </child>
 	  </object>
     </child>
+    <action-widgets>
+      <action-widget response="-3">open_sprdata_dialog</action-widget>
+      <action-widget response="0">close_sprdata_dialog</action-widget>
+    </action-widgets>	     
+  </object>
+  <object class="GtkDialog" id="new_action_dialog">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="type_hint">dialog</property>
+    <property name="title">New Action</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox1">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="create_action_button_ok">
+                <property name="label" translatable="yes">Create</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="create_action_button_cancel">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="action_name_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="invisible_char">●</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-3">create_action_button_ok</action-widget>
+      <action-widget response="0">create_action_button_cancel</action-widget>
+    </action-widgets>
   </object>
 </interface>

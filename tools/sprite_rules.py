@@ -16,17 +16,37 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+N,S,E,W = range(4)
+
 class Sprite:
     def __init__(self, filename):
-        self.filenmae
-        self.actions = {}
+        self.filename = filename
+        self.frames = {}
         
-    def set_frame(self, name, frame, dimensions):
-        if name not in self.actions:
-            self.actions[name] = []
-    
-        length = len(self.actions[name])
-        while frame >= length:
-            length += 1
-            self.actions[name] += [None]
-        self.actions[name][frame] = dimensions
+    def new_action(self, action_name):
+        action = {}
+        action[N] = []
+        action[S] = []
+        action[E] = []
+        action[W] = []
+        self.frames[action_name] = action
+
+    def add_frame(self,action, facing):
+        self.frames[action][facing] += [None]
+
+    def remove_frame(self,action,facing,frame):
+        self.frames[action][facing].pop(frame)
+
+    def set_frame(self, action, facing, frame, data):
+        self.frames[action][facing][frame] = data
+        
+class FrameData:
+    def __init__(self):
+        self.x, self.y = None, None
+        self.w, self.h = None, None
+
+    def set_pos(self, pos):
+        self.x, self.y = pos
+        
+    def set_dim(self, dim):
+        self.w, self.h = dim
