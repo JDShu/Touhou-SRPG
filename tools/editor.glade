@@ -50,6 +50,101 @@
       <object class="GtkVBox" id="box1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+	<child>
+	  <object class="GtkMenuBar" id="menu">
+	    <property name="visible">True</property>
+	    <property name="can_focus">False</property>
+	    <child>
+	      <object class="GtkMenuItem" id="file">
+		<property name="label" translatable="yes">File</property>
+		<property name="visible">True</property>
+		<child type="submenu">
+		  <object class="GtkMenu" id="menu1">
+		    <property name="visible">True</property>
+		    <property name="can_focus">False</property>
+		    <child>
+		      <object class="GtkImageMenuItem" id="imagemenuitem1">
+			<property name="label">Open Spritesheet</property>
+			<property name="visible">True</property>
+			<property name="can_focus">False</property>
+			<property name="use_action_appearance">False</property>
+			<property name="use_underline">True</property>
+			<property name="use_stock">True</property>
+		      </object>
+		    </child>
+		    <child>
+		      <object class="GtkImageMenuItem" id="imagemenuitem_open">
+			<property name="label">Open Data File</property>
+			<property name="visible">True</property>
+			<property name="can_focus">False</property>
+			<property name="use_action_appearance">False</property>
+			<property name="use_underline">True</property>
+			<property name="use_stock">True</property>
+		      </object>
+		    </child>
+		    <child>
+		      <object class="GtkImageMenuItem" id="imagemenuitem_save">
+			<property name="label">Save</property>
+			<property name="visible">True</property>
+			<property name="can_focus">False</property>
+			<property name="use_action_appearance">False</property>
+			<property name="use_underline">True</property>
+			<property name="use_stock">True</property>
+		      </object>
+		    </child>
+		    <child>
+		      <object class="GtkImageMenuItem" id="imagemenuitem_saveas">
+			<property name="label">Save As...</property>
+			<property name="visible">True</property>
+			<property name="can_focus">False</property>
+			<property name="use_action_appearance">False</property>
+			<property name="use_underline">True</property>
+			<property name="use_stock">True</property>
+		      </object>
+		    </child>
+		  </object>
+		</child>
+	      </object>
+	    </child>
+	    <child>
+	      <object class="GtkMenuItem" id="action">
+		<property name="label" translatable="yes">Action</property>
+		<property name="visible">True</property>
+		<child type="submenu">
+		  <object class="GtkMenu" id="menu2">
+		    <property name="visible">True</property>
+		    <property name="can_focus">False</property>
+		    <child>
+		      <object class="GtkImageMenuItem" id="imagemenuitem_new">
+			<property name="label">New</property>
+			<property name="visible">True</property>
+			<property name="can_focus">False</property>
+			<property name="use_action_appearance">False</property>
+			<property name="use_underline">True</property>
+			<property name="use_stock">True</property>
+		      </object>
+		    </child>
+		    <child>
+		      <object class="GtkImageMenuItem" id="imagemenuitem_delete">
+			<property name="label">Delete</property>
+			<property name="visible">True</property>
+			<property name="can_focus">False</property>
+			<property name="use_action_appearance">False</property>
+			<property name="use_underline">True</property>
+			<property name="use_stock">True</property>
+		      </object>
+		    </child>
+		  </object>
+		</child>
+	      </object>
+	    </child>
+	  </object>
+	  <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+	</child>
         <child>
           <object class="GtkDrawingArea" id="drawingarea">
 	    <property name="visible">True</property>
@@ -66,18 +161,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkFileChooserButton" id="select_file">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <signal name="file-set" handler="load_sprite" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkComboBox" id="select_action ">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -87,21 +170,6 @@
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="new_action">
-                <property name="label" translatable="yes">New Action</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="test" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
               </packing>
             </child>
             <child>
