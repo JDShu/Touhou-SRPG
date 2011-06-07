@@ -43,9 +43,10 @@ class EditorWindow:
         self.drawing_area.connect("motion_notify_event", self.mouse_move, None)
         self.drawing_area.connect("button_release_event", self.mouse_button_release, None)               
         self.spritesheet = None
-        #gtk.timeout_add(1000, self.test, None)
         self.sprite_dialog = builder.get_object("sprite_dialog")
-        
+        self.load_sprdata_dialog = builder.get_object("load_sprdata_dialog")
+        #gtk.timeout_add(1000, self.test, None)
+       
     def test(self, button):
         print "clicked"
 
@@ -120,13 +121,9 @@ class EditorWindow:
             self.w_button.set_value(self.frame_w)
             self.h_button.set_value(self.frame_h)
 
-    def load_sprite(self, data):
-        self.image_file = data.get_preview_filename()
-        
-        if self.image_file[-4:] != ".png":
-            self.image_file = None
-        else:
-            self.spritesheet = Graphic("./tools/reimu.png")
+    def load_spritesheet(self, filename):
+        if filename[-4:] == ".png":
+            self.spritesheet = Graphic(filename)
             self.gldrawable.gl_begin(self.glcontext)
             glClear(GL_COLOR_BUFFER_BIT)
             self.spritesheet.draw()
@@ -171,12 +168,34 @@ class EditorWindow:
         return True
 
     def open_sprite_dialog(self, event):
-        self.sprite_dialog.run()
+        r = self.sprite_dialog.run()
+        if r == gtk.RESPONSE_ACCEPT:
+            f = self.sprite_dialog.get_filename()
+            self.load_spritesheet(f)
+        else:
+            print "no"
+        self.sprite_dialog.hide()
+
+    def open_sprdata_dialog(self, event):
+        r = self.load_sprdata_dialog.run()
+        if r == gtk.RESPONSE_ACCEPT:
+            print "yes"
+        else:
+            print "no"
+        self.load_sprdata_dialog.hide()
 
     def close_sprite_dialog(self, event):
         self.sprite_dialog.response(gtk.RESPONSE_CANCEL)
-        self.sprite_dialog.destroy()
+
+    def load_sprite(self, event):
+        self.sprite_dialog.response(gtk.RESPONSE_ACCEPT)
         
+    def load_sprdata_dialog(self, event):
+        self.load_sprdata_dialog.response(gtk.RESPONSE_ACCEPT)
+
+    def close_sprdata_dialog(self, event):
+        self.load_sprdata_dialog.response(gtk.RESPONSE_CANCEL)
+
 def run():
     editor = EditorWindow()
     editor.window.show()

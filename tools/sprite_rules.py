@@ -14,11 +14,11 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
-
 '''
+
 class Sprite:
     def __init__(self, filename):
-        self.filename = filename
+        self.filenmae
         self.actions = {}
         
     def set_frame(self, name, frame, dimensions):
