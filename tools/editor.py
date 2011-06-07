@@ -22,13 +22,15 @@ class EditorWindow:
         self.make_rect = False
 
         builder = gtk.Builder()
-        builder.add_from_file("tools/editor.glade") 
-        
+        builder.add_from_file("tools/editor.glade")         
         builder.connect_signals(self)
         self.window = builder.get_object("window")
         self.drawing_area = builder.get_object("drawingarea")
 
         self.x_button = builder.get_object("X")
+        self.y_button = builder.get_object("Y")
+        self.w_button = builder.get_object("W")
+        self.h_button = builder.get_object("H")
 
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
         self.drawing_area.set_events(gtk.gdk.BUTTON_PRESS_MASK|gtk.gdk.POINTER_MOTION_MASK|
@@ -95,8 +97,26 @@ class EditorWindow:
             else:
                 glFlush()
             self.gldrawable.gl_end()
+
+            if x < x2:
+                self.frame_x = x
+                self.frame_w = x2-x
+            else:
+                self.frame_x = x2
+                self.frame_w = x-x2
+    
+            if y < y2:
+                self.frame_y = y
+                self.frame_h = y2-y
+            else:
+                self.frame_y = y2
+                self.frame_h = y-y2
+
             self.x2, self.y2 = x2,y2
-            self.x_button.set_value(x)
+            self.x_button.set_value(self.frame_x)
+            self.y_button.set_value(self.frame_y)
+            self.w_button.set_value(self.frame_w)
+            self.h_button.set_value(self.frame_h)
 
     def load_sprite(self, data):
         self.image_file = data.get_preview_filename()
