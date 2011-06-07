@@ -31,6 +31,7 @@ class EditorWindow:
         self.y_button = builder.get_object("Y")
         self.w_button = builder.get_object("W")
         self.h_button = builder.get_object("H")
+        self.frame_button = builder.get_object("frame_number")
 
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
         self.drawing_area.set_events(gtk.gdk.BUTTON_PRESS_MASK|gtk.gdk.POINTER_MOTION_MASK|
