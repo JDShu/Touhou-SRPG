@@ -163,30 +163,6 @@
           <object class="GtkHBox" id="box2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <child>
-              <object class="GtkComboBox" id="select_action ">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Action</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBox" id="select_orientation">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Orientation</property>
-                <signal name="changed" handler="change_orientation" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
 	  </object>
           <packing>
             <property name="expand">False</property>
@@ -269,13 +245,13 @@
               </packing>
             </child>
 	    <child>
-              <object class="GtkButton" id="new_frame">
+              <object class="GtkButton" id="save_frame">
                 <property name="label" translatable="yes">Save Frame</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="test" swapped="no"/>
+                <signal name="clicked" handler="save_frame" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -306,8 +282,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-		
+                <property name="use_action_appearance">False</property>		
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -447,5 +422,28 @@
       <action-widget response="-3">create_action_button_ok</action-widget>
       <action-widget response="0">create_action_button_cancel</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkWindow" id="preview">
+    <property name="width_request">150</property>
+    <property name="height_request">200</property>
+    <property name="can_focus">False</property>
+    <signal name="destroy" handler="on_window_destroy" swapped="no"/>
+    <child>
+      <object class="GtkVBox" id="preview_vbox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+	<child>
+	  <object class="GtkDrawingArea" id="preview_gl">
+	    <property name="visible">True</property>
+            <property name="can_focus">False</property>
+	  </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>	    
+	  </packing>
+	</child>
+      </object>
+    </child>
   </object>
 </interface>

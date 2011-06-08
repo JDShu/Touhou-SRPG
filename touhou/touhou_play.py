@@ -21,7 +21,7 @@ from pygame.locals import *
 
 from core.input_session import IOSession
 from core.ui import UI, Menu
-from core.graphics.animated import Animated
+from core.graphics.animated import DeprecatedAnimated
 from core.graphics.graphic import GraphicAbsPositioned
 import core.misc.astar as astar
 
@@ -38,7 +38,7 @@ class TouhouPlay(IOSession):
         self.ui = TouhouUI(self.map)
         
         #test code
-        test_reimu = Animated("reimu")
+        test_reimu = DeprecatedAnimated("reimu")
         reimu_info = Character("reimu",5)
         self.map.place_object(test_reimu, (6,1), "reimu", reimu_info)
         

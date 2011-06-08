@@ -2,13 +2,14 @@ import sys
 import gtk
 import gtk.gtkgl
 import pickle
+import gobject
 
 from OpenGL.GL import *
 
-from sprite_rules import Sprite
+from sprite_rules import *
 #import objects
 from core.graphics.graphic import Graphic
-	
+
 class EditorWindow:
 
     def on_window_destroy(self, widget, data=None):
@@ -25,19 +26,28 @@ class EditorWindow:
         builder.add_from_file("tools/editor.glade")         
         builder.connect_signals(self)
         self.window = builder.get_object("window")
+        self.window2 = builder.get_object("preview")
+        
         self.drawing_area = builder.get_object("drawingarea")
+        self.preview_gl = builder.get_object("preview_gl")
 
         self.x_button = builder.get_object("X")
         self.y_button = builder.get_object("Y")
         self.w_button = builder.get_object("W")
         self.h_button = builder.get_object("H")
         self.frame_button = builder.get_object("frame_number")
+        
+        self.save_frame = builder.get_object("save_frame")
+        self.save_frame.set_sensitive(False)
 
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
+        gtk.gtkgl.widget_set_gl_capability(self.preview_gl, self.glconfig)
         self.drawing_area.set_events(gtk.gdk.BUTTON_PRESS_MASK|gtk.gdk.POINTER_MOTION_MASK|
                                      gtk.gdk.BUTTON_RELEASE_MASK)
         self.drawing_area.connect_after("realize", self.setup_gl, None)
-        
+        self.preview_gl.connect_after("realize", self.setup_gl, None)
+        #self.preview_gl.connect("expose_event", self.expose, None)
+
         self.drawing_area.connect("expose_event", self.expose, None)
         self.drawing_area.connect("button_press_event", self.mouse_button_down, None)
         self.drawing_area.connect("motion_notify_event", self.mouse_move, None)
@@ -47,10 +57,27 @@ class EditorWindow:
         self.load_sprdata_dialog = builder.get_object("load_sprdata_dialog")
  
         self.new_action_dialog = builder.get_object("new_action_dialog")
+        
         self.new_action_name = builder.get_object("action_name_entry")
  #gtk.timeout_add(1000, self.test, None)
-       
-        self.sprite_data = Sprite(None)
+
+        hbox = builder.get_object("box2")
+
+        self.select_action = gtk.combo_box_new_text()
+        self.select_action.set_tooltip_text("Action")
+        self.select_facing = gtk.combo_box_new_text()
+        self.select_action.set_tooltip_text("Direction")
+        self.select_action.connect("changed",self.enable_save_frame, None)
+
+        self.enable_directions()
+
+        hbox.add(self.select_action)
+        hbox.add(self.select_facing)
+        
+        self.select_action.show()
+        self.select_facing.show()
+
+        self.sprite = Sprite(None)
 
     def test(self, button):
         print "clicked"
@@ -83,9 +110,12 @@ class EditorWindow:
 
     def mouse_move(self, drawing, event, data):
         if self.make_rect:
+            glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
+            gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
+
             x2, y2 = event.x, event.y
             x,y = self.x,self.y
-            self.gldrawable.gl_begin(self.glcontext)
+            gldrawable.gl_begin(glcontext)
             glClear(GL_COLOR_BUFFER_BIT)
             
             if self.spritesheet:
@@ -100,11 +130,11 @@ class EditorWindow:
             glVertex(x, y2, 0)
             glEnd()        
             
-            if self.gldrawable.is_double_buffered():
-                self.gldrawable.swap_buffers()
+            if gldrawable.is_double_buffered():
+                gldrawable.swap_buffers()
             else:
                 glFlush()
-            self.gldrawable.gl_end()
+            gldrawable.gl_end()
 
             if x < x2:
                 self.frame_x = x
@@ -129,30 +159,34 @@ class EditorWindow:
     def load_spritesheet(self, filename):
         if filename[-4:] == ".png":
             self.spritesheet = Graphic(filename)
-            self.gldrawable.gl_begin(self.glcontext)
+            glcontext = gtk.gtkgl.widget_get_gl_context(self.drawing_area)
+            gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.drawing_area)
+            gldrawable.gl_begin(glcontext)
             glClear(GL_COLOR_BUFFER_BIT)
             self.spritesheet.draw()
-            if self.gldrawable.is_double_buffered():
-                self.gldrawable.swap_buffers()
+            if gldrawable.is_double_buffered():
+                gldrawable.swap_buffers()
             else:
                 glFlush()
 
-            self.gldrawable.gl_end()
+            gldrawable.gl_end()
                 
     def setup_gl(self, drawing, event):
-        self.glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
-        self.gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
+        glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
+        gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
 
-        self.gldrawable.gl_begin(self.glcontext)
+        gldrawable.gl_begin(glcontext)
         
         glClearColor(0.0,0.0,0.0,0.0)
         glClear(GL_COLOR_BUFFER_BIT)
-        self.gldrawable.gl_end()
+        gldrawable.gl_end()
 
     def expose(self, drawing, event, data):
         w, h = drawing.get_window().get_size()
-        
-        self.gldrawable.gl_begin(self.glcontext)
+
+        glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
+        gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
+        gldrawable.gl_begin(glcontext)
         
         glClear(GL_COLOR_BUFFER_BIT)
         glViewport (0, 0, w, h)
@@ -164,11 +198,11 @@ class EditorWindow:
 
         if self.spritesheet:
             self.spritesheet.draw()
-        if self.gldrawable.is_double_buffered():
-            self.gldrawable.swap_buffers()
+        if gldrawable.is_double_buffered():
+            gldrawable.swap_buffers()
         else:
             glFlush()
-        self.gldrawable.gl_end()
+        gldrawable.gl_end()
         self.w, self.h = w,h
         return True
 
@@ -194,7 +228,9 @@ class EditorWindow:
         r = self.new_action_dialog.run()
         if r == gtk.RESPONSE_ACCEPT:
             action_name = self.new_action_name.get_text()
-            print action_name
+            self.sprite.new_action(action_name)
+            self.select_action.append_text(action_name)
+            print self.sprite.frames
         else:
             print "no"
         self.new_action_dialog.hide()
@@ -211,12 +247,30 @@ class EditorWindow:
     def close_sprdata_dialog(self, event):
         self.load_sprdata_dialog.response(gtk.RESPONSE_CANCEL)
 
-    #def new_action_dialog(self, event):
-        
+    def enable_directions(self):
+        self.select_facing.append_text("N")
+        self.select_facing.append_text("S")
+        self.select_facing.append_text("E")
+        self.select_facing.append_text("W")
+
+    def save_frame(self, button):
+        x = self.x_button.get_value()
+        y = self.x_button.get_value()
+        data = FrameData()
+        data.set_pos((x,y))
+        action = self.select_action.get_active_text()
+        facing = self.select_facing.get_active_text()
+        frame = self.frame_button.get_value_as_int()
+        print action, facing, frame
+        self.sprite.set_frame(action,facing,frame,data)
+
+    def enable_save_frame(self, cb, data):
+        self.save_frame.set_sensitive(True)
 
 def run():
     editor = EditorWindow()
     editor.window.show()
+    editor.window2.show()
     
     gtk.main()
     

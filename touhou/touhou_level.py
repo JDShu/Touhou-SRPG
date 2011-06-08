@@ -21,7 +21,6 @@ import pygame
 
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicList
 from core.graphics.common import Repeated
-from core.graphics.animated import Animated
 
 from touhou_graphic import MapGraphic
 

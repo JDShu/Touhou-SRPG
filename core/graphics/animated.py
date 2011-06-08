@@ -23,7 +23,7 @@ import pickle
 from graphic import Graphic
 # Animates sprites by looping through graphics
 # TODO: Break up so that an animated object just does one loop.
-class Animated(Graphic):
+class DeprecatedAnimated(Graphic):
     metafolder = "./content/metadata/"
     gfx = "./content/gfx/sprites/"
     def __init__(self, sprite_name, scale_factor = 1.0):
