@@ -89,13 +89,38 @@ class Graphic:
         glCallList(self.draw_list)
         glPopMatrix()
     
-    # TODO: Needs to be moved to map
-    #def draw_grid(self, x, y, dimensions, offsets):
-    #    w,h = dimensions
-    #    x_offset, y_offset = offsets
-    #    glPushMatrix()
-    #    self.draw(x*w + (y-x)*x_offset, -y*h + (x+y)*y_offset)
-    #    glPopMatrix()
+    def draw_section(self,dim):
+        pix_x,pix_y,pix_w,pix_h = dim
+        x = float(pix_x)/float(self.tex_w)
+        y = float(pix_y)/float(self.tex_h)
+        w = float(pix_w)/float(self.tex_w)
+        h = float(pix_h)/float(self.tex_h)
+        y = 1.0 - y - h
+        
+        glPushMatrix()
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        color = (1.0,1.0,1.0,1.0)
+        glEnable( GL_TEXTURE_2D )
+        glBindTexture( GL_TEXTURE_2D, self.image )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )        
+        
+        #draw
+        glColor4f(*color)
+        glBegin(GL_QUADS)
+        glTexCoord2f(x, y)
+        glVertex(0.0,0.0,0.0)
+        glTexCoord2f(x + w, y)
+        glVertex(w,0.0,0.0)
+        glTexCoord2f(x + w, y + h)
+        glVertex(w,h,0.0)
+        glTexCoord2f(x, y + h)
+        glVertex(0.0,h,0.0)
+        glEnd()
+        glDisable( GL_TEXTURE_2D )
+        glDisable( GL_BLEND)
+        glPopMatrix()
 
     def process_click(self):
         pass

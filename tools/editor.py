@@ -7,14 +7,15 @@ import gobject
 from OpenGL.GL import *
 
 from sprite_rules import *
-#import objects
+
 from core.graphics.graphic import Graphic
+from core.graphics.animated import Animated
 
 class EditorWindow:
 
     def on_window_destroy(self, widget, data=None):
         gtk.main_quit()
-             
+
     def __init__(self):
         self.display_mode = gtk.gdkgl.MODE_RGB|gtk.gdkgl.MODE_DEPTH|gtk.gdkgl.MODE_SINGLE
         self.glconfig = gtk.gdkgl.Config(mode=self.display_mode)
@@ -23,11 +24,14 @@ class EditorWindow:
         self.make_rect = False
 
         builder = gtk.Builder()
-        builder.add_from_file("tools/editor.glade")         
+        builder.add_from_file("tools/editor.glade")
+        
+        self.builder = builder
+
         builder.connect_signals(self)
         self.window = builder.get_object("window")
         self.window2 = builder.get_object("preview")
-        
+
         self.drawing_area = builder.get_object("drawingarea")
         self.preview_gl = builder.get_object("preview_gl")
 
@@ -36,9 +40,10 @@ class EditorWindow:
         self.w_button = builder.get_object("W")
         self.h_button = builder.get_object("H")
         self.frame_button = builder.get_object("frame_number")
-        
-        self.save_frame = builder.get_object("save_frame")
-        self.save_frame.set_sensitive(False)
+
+        save_frame = builder.get_object("save_frame")
+        save_frame.set_sensitive(False)
+        self.builder.get_object("action").set_sensitive(False)
 
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
         gtk.gtkgl.widget_set_gl_capability(self.preview_gl, self.glconfig)
@@ -55,11 +60,11 @@ class EditorWindow:
         self.spritesheet = None
         self.sprite_dialog = builder.get_object("sprite_dialog")
         self.load_sprdata_dialog = builder.get_object("load_sprdata_dialog")
- 
+
         self.new_action_dialog = builder.get_object("new_action_dialog")
         
         self.new_action_name = builder.get_object("action_name_entry")
- #gtk.timeout_add(1000, self.test, None)
+        gtk.timeout_add(1000, self.test, None)
 
         hbox = builder.get_object("box2")
 
@@ -77,10 +82,17 @@ class EditorWindow:
         self.select_action.show()
         self.select_facing.show()
 
-        self.sprite = Sprite(None)
+        self.sprite = Sprite()
+        self.preview = None
 
-    def test(self, button):
-        print "clicked"
+    def test(self, obj):
+        glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
+        gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
+        gldrawable.gl_begin(glcontext)        
+        glClear(GL_COLOR_BUFFER_BIT)
+        glFlush()
+        print "2"
+        gldrawable.gl_end()
 
     def change_orientation(self, combobox):
         print "changed"
@@ -117,23 +129,24 @@ class EditorWindow:
             x,y = self.x,self.y
             gldrawable.gl_begin(glcontext)
             glClear(GL_COLOR_BUFFER_BIT)
-            
+
             if self.spritesheet:
                 self.spritesheet.draw()
             y = self.h - y
             y2 = self.h - y2
-            
+
             glBegin(GL_LINE_LOOP)
             glVertex(x, y, 0)
             glVertex(x2, y, 0)
             glVertex(x2, y2, 0)
             glVertex(x, y2, 0)
             glEnd()        
-            
+
             if gldrawable.is_double_buffered():
                 gldrawable.swap_buffers()
             else:
                 glFlush()
+
             gldrawable.gl_end()
 
             if x < x2:
@@ -142,7 +155,7 @@ class EditorWindow:
             else:
                 self.frame_x = x2
                 self.frame_w = x-x2
-    
+
             if y < y2:
                 self.frame_y = y
                 self.frame_h = y2-y
@@ -157,28 +170,43 @@ class EditorWindow:
             self.h_button.set_value(self.frame_h)
 
     def load_spritesheet(self, filename):
-        if filename[-4:] == ".png":
-            self.spritesheet = Graphic(filename)
+        if filename[-4:] == ".png":            
+            
             glcontext = gtk.gtkgl.widget_get_gl_context(self.drawing_area)
             gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.drawing_area)
             gldrawable.gl_begin(glcontext)
-            glClear(GL_COLOR_BUFFER_BIT)
+
+            #construction uses OpenGL so needs to be in GL context.
+            self.spritesheet = Graphic(filename)
+            self.preview = Animated(filename)
+            
             self.spritesheet.draw()
             if gldrawable.is_double_buffered():
                 gldrawable.swap_buffers()
             else:
                 glFlush()
-
+            
             gldrawable.gl_end()
-                
+
+            action_menu = self.builder.get_object("action").set_sensitive(True)
+
     def setup_gl(self, drawing, event):
         glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
+
+        w, h = drawing.get_window().get_size()
 
         gldrawable.gl_begin(glcontext)
         
         glClearColor(0.0,0.0,0.0,0.0)
         glClear(GL_COLOR_BUFFER_BIT)
+        glViewport (0, 0, w, h)
+        glMatrixMode (GL_PROJECTION)
+        glLoadIdentity ()
+        glOrtho (0.0, w, 0.0, h, -1.0, 1.0)
+        glMatrixMode (GL_MODELVIEW)
+        glLoadIdentity ()
+
         gldrawable.gl_end()
 
     def expose(self, drawing, event, data):
@@ -202,6 +230,7 @@ class EditorWindow:
             gldrawable.swap_buffers()
         else:
             glFlush()
+            "1"
         gldrawable.gl_end()
         self.w, self.h = w,h
         return True
@@ -265,12 +294,13 @@ class EditorWindow:
         self.sprite.set_frame(action,facing,frame,data)
 
     def enable_save_frame(self, cb, data):
-        self.save_frame.set_sensitive(True)
+        save_frame = self.builder.get_object("save_frame")
+        save_frame.set_sensitive(True)
+        
 
 def run():
     editor = EditorWindow()
     editor.window.show()
     editor.window2.show()
-    
+
     gtk.main()
-    

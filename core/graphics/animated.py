@@ -21,6 +21,47 @@ import pygame
 import pickle
 
 from graphic import Graphic
+from tools.sprite_rules import Sprite
+
+R, W = range(2)
+
+class Animated:
+    def __init__(self, spritesheet, datafile=None):
+        self.spritesheet = Graphic(spritesheet)
+        self.current_frame = 0
+        if datafile:
+            self.use_datafile(datafile)
+            self.mode = R
+        else:
+            self.data = Sprite()
+            self.more = W
+
+    def use_datafile(self, datafile):
+        F = open(datafile, 'r')
+        self.data = pickle.load(F)
+
+    def set_action(self, action):
+        self.action = action
+        self.current_frame = 0
+        self.get_current_dimensions()
+
+    def set_facing(self, facing):
+        self.facing = facing
+        self.get_current_dimensions()
+
+    def update(self):
+        self.current_frame += 1
+        if len(self.data[self.action][self.facing]) >= self.current_frame:
+            self.current_frame = 0
+        self.get_current_dimensions()
+
+    def get_current_dimensions(self):
+        framedata = self.data[self.action][self.facing][self.current_frame]
+        self.current_frame_data = framedata.get_tuple()
+
+    def draw(self):
+        self.spritesheet.draw_section(self.current_frame_data)
+
 # Animates sprites by looping through graphics
 # TODO: Break up so that an animated object just does one loop.
 class DeprecatedAnimated(Graphic):
@@ -104,4 +145,3 @@ class DeprecatedAnimated(Graphic):
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
         glPopMatrix()
-

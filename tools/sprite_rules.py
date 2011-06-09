@@ -19,8 +19,7 @@
 N,S,E,W = range(4)
 
 class Sprite:
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self):
         self.frames = {}
         
     def new_action(self, action_name):
@@ -50,3 +49,6 @@ class FrameData:
         
     def set_dim(self, dim):
         self.w, self.h = dim
+
+    def get_tuple(self):
+        return self.x, self.y, self.w, self.h
