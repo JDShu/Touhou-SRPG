@@ -95,11 +95,7 @@ class Graphic:
         y = float(pix_y)/float(self.h)
         w = float(pix_w)/float(self.w)
         h = float(pix_h)/float(self.h)
-        y = 1.0 - y - h
-
-        #print dim
-        #print x,y,w,h
-
+        
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
@@ -115,11 +111,11 @@ class Graphic:
         glTexCoord2f(x, y)
         glVertex(0.0,0.0,0.0)
         glTexCoord2f(x + w, y)
-        glVertex(100.0,0.0,0.0)
+        glVertex(pix_w,0.0,0.0)
         glTexCoord2f(x + w, y + h)
-        glVertex(100.0,100.0,0.0)
+        glVertex(pix_w,pix_h,0.0)
         glTexCoord2f(x, y + h)
-        glVertex(0.0,100.0,0.0)
+        glVertex(0.0,pix_h,0.0)
         glEnd()
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)

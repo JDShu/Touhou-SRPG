@@ -56,7 +56,7 @@ class EditorWindow:
         self.drawing_area.connect("expose_event", self.expose, None)
         self.drawing_area.connect("button_press_event", self.mouse_button_down, None)
         self.drawing_area.connect("motion_notify_event", self.mouse_move, None)
-        self.drawing_area.connect("button_release_event", self.mouse_button_release, None)               
+        self.drawing_area.connect("button_release_event", self.mouse_button_release, None)
         self.spritesheet = None
         self.sprite_dialog = builder.get_object("sprite_dialog")
         self.load_sprdata_dialog = builder.get_object("load_sprdata_dialog")
@@ -128,18 +128,21 @@ class EditorWindow:
 
     def mouse_move(self, drawing, event, data):
         if self.make_rect:
+            self.w, self.h = drawing.get_window().get_size()
             glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
             gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
-
+            
             x2, y2 = event.x, event.y
+            y2 = self.h - y2
+            
             x,y = self.x,self.y
+            y = self.h - y
+
             gldrawable.gl_begin(glcontext)
             glClear(GL_COLOR_BUFFER_BIT)
 
             if self.spritesheet:
                 self.spritesheet.draw()
-            y = self.h - y
-            y2 = self.h - y2
 
             glBegin(GL_LINE_LOOP)
             glVertex(x, y, 0)
@@ -198,7 +201,8 @@ class EditorWindow:
             self.preview = Animated(filename)
             gldrawable.gl_end()
 
-            action_menu = self.builder.get_object("action").set_sensitive(True)
+            self.builder.get_object("action").set_sensitive(True)
+            
 
     def setup_gl(self, drawing, event):
         glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
@@ -242,7 +246,7 @@ class EditorWindow:
             glFlush()
 
         gldrawable.gl_end()
-        self.w, self.h = w,h
+        
         return True
 
     def open_sprite_dialog(self, event):
@@ -263,13 +267,11 @@ class EditorWindow:
         self.load_sprdata_dialog.hide()
 
     def new_action_dialog(self, event):
-        print "action"
         r = self.new_action_dialog.run()
         if r == gtk.RESPONSE_ACCEPT:
             action_name = self.new_action_name.get_text()
             self.sprite.new_action(action_name)
             self.select_action.append_text(action_name)
-            print self.sprite.frames
         else:
             print "no"
         self.new_action_dialog.hide()
@@ -294,20 +296,46 @@ class EditorWindow:
 
     def save_frame(self, button):
         x = self.x_button.get_value()
-        y = self.x_button.get_value()
+        y = self.y_button.get_value()
+        w = self.w_button.get_value()
+        h = self.h_button.get_value()
+
         data = FrameData()
         data.set_pos((x,y))
+        data.set_dim((w,h))
         action = self.select_action.get_active_text()
         facing = self.select_facing.get_active_text()
         frame = self.frame_button.get_value_as_int()
-        print action, facing, frame
+
+        facing = convert(facing)
+
         self.sprite.set_frame(action,facing,frame,data)
         self.preview.set_data(self.sprite)
+        self.preview.set_action(action)
+        self.preview.set_facing(facing)
 
     def enable_save_frame(self, cb, data):
         save_frame = self.builder.get_object("save_frame")
         save_frame.set_sensitive(True)
-        
+
+def convert(facing):
+    if facing == "N":
+        return N
+    elif facing == "S":
+        return S
+    elif facing == "E":
+        return E
+    elif facing == "W":
+        return W
+    else:
+        try:
+            raise ConvertError(facing)
+        except ConvertError as c:
+            print c.value, "not a valid direction label."
+
+class ConvertError(Exception):
+    def __init__(self, value):
+        self.value = value
 
 def run():
     editor = EditorWindow()

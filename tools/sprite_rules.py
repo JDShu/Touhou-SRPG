@@ -24,7 +24,7 @@ class Sprite:
         
     def new_action(self, action_name):
         action = {}
-        action[N] = []
+        action[N] = [None]*5
         action[S] = []
         action[E] = []
         action[W] = []

@@ -21,7 +21,7 @@ import pygame
 import pickle
 
 from graphic import Graphic
-from tools.sprite_rules import Sprite
+from tools.sprite_rules import *
 
 class Animated:
     def __init__(self, spritesheet, datafile=None):
@@ -60,8 +60,10 @@ class Animated:
             self.get_current_dimensions()
 
     def get_current_dimensions(self):
-        framedata = self.data[self.action][self.facing][self.current_frame]
-        self.current_frame_data = framedata.get_tuple()
+        if self.action and self.facing != None and self.current_frame != None:
+            framedata = self.data.frames[self.action][self.facing][self.current_frame]
+            self.current_frame_data = framedata.get_tuple()
+            "gotten dims"
 
     def draw(self):
         self.spritesheet.draw_section(self.current_frame_data)
