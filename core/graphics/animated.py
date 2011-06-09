@@ -23,18 +23,21 @@ import pickle
 from graphic import Graphic
 from tools.sprite_rules import Sprite
 
-R, W = range(2)
-
 class Animated:
     def __init__(self, spritesheet, datafile=None):
         self.spritesheet = Graphic(spritesheet)
         self.current_frame = 0
         if datafile:
             self.use_datafile(datafile)
-            self.mode = R
         else:
             self.data = Sprite()
-            self.more = W
+
+        self.action = None
+        self.facing = None
+        self.current_frame_data = (0,0,100,150)
+
+    def set_data(self, data):
+        self.data = data
 
     def use_datafile(self, datafile):
         F = open(datafile, 'r')
@@ -50,10 +53,11 @@ class Animated:
         self.get_current_dimensions()
 
     def update(self):
-        self.current_frame += 1
-        if len(self.data[self.action][self.facing]) >= self.current_frame:
-            self.current_frame = 0
-        self.get_current_dimensions()
+        if self.action:
+            self.current_frame += 1
+            if len(self.data[self.action][self.facing]) >= self.current_frame:
+                self.current_frame = 0
+            self.get_current_dimensions()
 
     def get_current_dimensions(self):
         framedata = self.data[self.action][self.facing][self.current_frame]
@@ -69,7 +73,7 @@ class DeprecatedAnimated(Graphic):
     gfx = "./content/gfx/sprites/"
     def __init__(self, sprite_name, scale_factor = 1.0):
         self.a = 1.0
-                
+
         self.set_sprite(sprite_name)
         self.current_action = "idle-s"
         self.current_frame_number = 0
@@ -79,7 +83,7 @@ class DeprecatedAnimated(Graphic):
         self.w *= scale_factor
         self.h *= scale_factor
         self.scale_factor = scale_factor
-        
+
     def set_action(self, action):
         self.current_action = action
 
@@ -88,10 +92,10 @@ class DeprecatedAnimated(Graphic):
             self.data = pickle.load(open(self.metafolder + sprite_name + ".spr"))
         except IOError:
             self.data = pickle.load(open(self.metafolder + sprite_name + ".spr", "wb"))
-            
+
         texture_surface = pygame.image.load(self.gfx+sprite_name+".png")
         texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
-        
+
         self.image = glGenTextures(1)
         glBindTexture( GL_TEXTURE_2D, self.image )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST )
@@ -111,7 +115,6 @@ class DeprecatedAnimated(Graphic):
             self.current_frame_number = 0
             self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
         self.w, self.h = self.current_frame_dimensions[2]*self.scale_factor, self.current_frame_dimensions[3]*self.scale_factor
-        
 
     def draw( self ):
         pix_x,pix_y,pix_w,pix_h = self.current_frame_dimensions
@@ -120,7 +123,7 @@ class DeprecatedAnimated(Graphic):
         w = float(pix_w)/float(self.tex_w)
         h = float(pix_h)/float(self.tex_h)
         y = 1.0 - y - h
-        
+
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
@@ -129,7 +132,7 @@ class DeprecatedAnimated(Graphic):
         glBindTexture( GL_TEXTURE_2D, self.image )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )        
-        
+
         #draw
         glColor4f(*color)
         glBegin(GL_QUADS)

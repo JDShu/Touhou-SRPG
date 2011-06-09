@@ -51,7 +51,7 @@ class EditorWindow:
                                      gtk.gdk.BUTTON_RELEASE_MASK)
         self.drawing_area.connect_after("realize", self.setup_gl, None)
         self.preview_gl.connect_after("realize", self.setup_gl, None)
-        #self.preview_gl.connect("expose_event", self.expose, None)
+        self.preview_gl.connect("expose_event", self.expose, None)
 
         self.drawing_area.connect("expose_event", self.expose, None)
         self.drawing_area.connect("button_press_event", self.mouse_button_down, None)
@@ -88,11 +88,17 @@ class EditorWindow:
     def test(self, obj):
         glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
+        #glcontext = gtk.gtkgl.widget_get_gl_context(self.drawing_area)
+        #gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.drawing_area)
         gldrawable.gl_begin(glcontext)        
         glClear(GL_COLOR_BUFFER_BIT)
+        if self.preview:
+            #self.preview.update()
+            self.preview.draw()
         glFlush()
-        print "2"
         gldrawable.gl_end()
+
+        return True
 
     def change_orientation(self, combobox):
         print "changed"
@@ -178,14 +184,18 @@ class EditorWindow:
 
             #construction uses OpenGL so needs to be in GL context.
             self.spritesheet = Graphic(filename)
-            self.preview = Animated(filename)
-            
             self.spritesheet.draw()
             if gldrawable.is_double_buffered():
                 gldrawable.swap_buffers()
             else:
                 glFlush()
             
+            gldrawable.gl_end()
+
+            glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
+            gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
+            gldrawable.gl_begin(glcontext)
+            self.preview = Animated(filename)
             gldrawable.gl_end()
 
             action_menu = self.builder.get_object("action").set_sensitive(True)
@@ -230,7 +240,7 @@ class EditorWindow:
             gldrawable.swap_buffers()
         else:
             glFlush()
-            "1"
+
         gldrawable.gl_end()
         self.w, self.h = w,h
         return True
@@ -292,6 +302,7 @@ class EditorWindow:
         frame = self.frame_button.get_value_as_int()
         print action, facing, frame
         self.sprite.set_frame(action,facing,frame,data)
+        self.preview.set_data(self.sprite)
 
     def enable_save_frame(self, cb, data):
         save_frame = self.builder.get_object("save_frame")

@@ -91,18 +91,21 @@ class Graphic:
     
     def draw_section(self,dim):
         pix_x,pix_y,pix_w,pix_h = dim
-        x = float(pix_x)/float(self.tex_w)
-        y = float(pix_y)/float(self.tex_h)
-        w = float(pix_w)/float(self.tex_w)
-        h = float(pix_h)/float(self.tex_h)
+        x = float(pix_x)/float(self.w)
+        y = float(pix_y)/float(self.h)
+        w = float(pix_w)/float(self.w)
+        h = float(pix_h)/float(self.h)
         y = 1.0 - y - h
-        
+
+        #print dim
+        #print x,y,w,h
+
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
         color = (1.0,1.0,1.0,1.0)
         glEnable( GL_TEXTURE_2D )
-        glBindTexture( GL_TEXTURE_2D, self.image )
+        glBindTexture( GL_TEXTURE_2D, self.texture )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )        
         
@@ -112,11 +115,11 @@ class Graphic:
         glTexCoord2f(x, y)
         glVertex(0.0,0.0,0.0)
         glTexCoord2f(x + w, y)
-        glVertex(w,0.0,0.0)
+        glVertex(100.0,0.0,0.0)
         glTexCoord2f(x + w, y + h)
-        glVertex(w,h,0.0)
+        glVertex(100.0,100.0,0.0)
         glTexCoord2f(x, y + h)
-        glVertex(0.0,h,0.0)
+        glVertex(0.0,100.0,0.0)
         glEnd()
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
