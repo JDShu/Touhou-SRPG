@@ -93,8 +93,8 @@ class EditorWindow:
         gldrawable.gl_begin(glcontext)        
         glClear(GL_COLOR_BUFFER_BIT)
         if self.preview:
-            #self.preview.update()
-            self.preview.draw()
+            self.preview.update()
+            self.preview.draw()            
         glFlush()
         gldrawable.gl_end()
 

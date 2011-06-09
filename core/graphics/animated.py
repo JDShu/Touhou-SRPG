@@ -53,18 +53,18 @@ class Animated:
         self.get_current_dimensions()
 
     def update(self):
-        if self.action:
+        if self.action: 
             self.current_frame += 1
-            if len(self.data[self.action][self.facing]) >= self.current_frame:
+            if len(self.data.frames[self.action][self.facing]) <= self.current_frame:
                 self.current_frame = 0
-            self.get_current_dimensions()
+            if self.data.frames[self.action][self.facing][self.current_frame]:
+                self.get_current_dimensions()
 
     def get_current_dimensions(self):
         if self.action and self.facing != None and self.current_frame != None:
             framedata = self.data.frames[self.action][self.facing][self.current_frame]
             self.current_frame_data = framedata.get_tuple()
-            "gotten dims"
-
+            
     def draw(self):
         self.spritesheet.draw_section(self.current_frame_data)
 
