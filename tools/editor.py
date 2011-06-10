@@ -11,6 +11,8 @@ from sprite_rules import *
 from core.graphics.graphic import Graphic
 from core.graphics.animated import Animated
 
+PLAY, STOP = range(2)
+
 class EditorWindow:
 
     def on_window_destroy(self, widget, data=None):
@@ -73,6 +75,7 @@ class EditorWindow:
         self.select_facing = gtk.combo_box_new_text()
         self.select_action.set_tooltip_text("Direction")
         self.select_action.connect("changed",self.enable_save_frame, None)
+        self.select_facing.connect("changed",self.enable_save_frame, None)
 
         self.enable_directions()
 
@@ -85,19 +88,19 @@ class EditorWindow:
         self.sprite = Sprite()
         self.preview = None
 
+        self.mode = STOP
+
     def test(self, obj):
         glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
-        #glcontext = gtk.gtkgl.widget_get_gl_context(self.drawing_area)
-        #gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.drawing_area)
         gldrawable.gl_begin(glcontext)        
         glClear(GL_COLOR_BUFFER_BIT)
         if self.preview:
-            self.preview.update()
+            if self.mode == PLAY:
+                self.preview.update()
             self.preview.draw()            
         glFlush()
         gldrawable.gl_end()
-
         return True
 
     def change_orientation(self, combobox):
@@ -126,6 +129,59 @@ class EditorWindow:
             self.frame_y = y2
             self.frame_h = y-y2
 
+    def set_box_coords(self,x1,y1,x2,y2):
+        if x1 < x2:
+            x = x1
+            w = x2-x1
+        else:
+            x = x2
+            w = x1-x2
+
+        if y1 < y2:
+            y = y1
+            h = y2-y1
+        else:
+            y = y2
+            h = y1-y2
+
+        self.x_button.set_value(x)
+        self.y_button.set_value(y)
+        self.w_button.set_value(w)
+        self.h_button.set_value(h)
+
+    def draw(self, button=None):
+        x = self.x_button.get_value()
+        y = self.y_button.get_value()
+        w = self.w_button.get_value()
+        h = self.h_button.get_value()
+
+        x2 = x+w
+        y2 = y+h
+
+        drawing = self.builder.get_object("drawingarea")
+        glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
+        gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
+        
+        gldrawable.gl_begin(glcontext)
+        glClear(GL_COLOR_BUFFER_BIT)
+        
+        if self.spritesheet:
+            self.spritesheet.draw()
+            
+        glBegin(GL_LINE_LOOP)
+        glVertex(x, y, 0)
+        glVertex(x2, y, 0)
+        glVertex(x2, y2, 0)
+        glVertex(x, y2, 0)
+        glEnd()        
+        
+        if gldrawable.is_double_buffered():
+            gldrawable.swap_buffers()
+        else:
+            glFlush()
+            
+        gldrawable.gl_end()
+        
     def mouse_move(self, drawing, event, data):
         if self.make_rect:
             self.w, self.h = drawing.get_window().get_size()
@@ -138,46 +194,9 @@ class EditorWindow:
             x,y = self.x,self.y
             y = self.h - y
 
-            gldrawable.gl_begin(glcontext)
-            glClear(GL_COLOR_BUFFER_BIT)
-
-            if self.spritesheet:
-                self.spritesheet.draw()
-
-            glBegin(GL_LINE_LOOP)
-            glVertex(x, y, 0)
-            glVertex(x2, y, 0)
-            glVertex(x2, y2, 0)
-            glVertex(x, y2, 0)
-            glEnd()        
-
-            if gldrawable.is_double_buffered():
-                gldrawable.swap_buffers()
-            else:
-                glFlush()
-
-            gldrawable.gl_end()
-
-            if x < x2:
-                self.frame_x = x
-                self.frame_w = x2-x
-            else:
-                self.frame_x = x2
-                self.frame_w = x-x2
-
-            if y < y2:
-                self.frame_y = y
-                self.frame_h = y2-y
-            else:
-                self.frame_y = y2
-                self.frame_h = y-y2
-
-            self.x2, self.y2 = x2,y2
-            self.x_button.set_value(self.frame_x)
-            self.y_button.set_value(self.frame_y)
-            self.w_button.set_value(self.frame_w)
-            self.h_button.set_value(self.frame_h)
-
+            self.set_box_coords(x,y,x2,y2)
+            self.draw()
+           
     def load_spritesheet(self, filename):
         if filename[-4:] == ".png":            
             
@@ -230,7 +249,6 @@ class EditorWindow:
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
         gldrawable.gl_begin(glcontext)
         
-        glClear(GL_COLOR_BUFFER_BIT)
         glViewport (0, 0, w, h)
         glMatrixMode (GL_PROJECTION)
         glLoadIdentity ()
@@ -238,8 +256,6 @@ class EditorWindow:
         glMatrixMode (GL_MODELVIEW)
         glLoadIdentity ()
 
-        if self.spritesheet:
-            self.spritesheet.draw()
         if gldrawable.is_double_buffered():
             gldrawable.swap_buffers()
         else:
@@ -270,8 +286,10 @@ class EditorWindow:
         r = self.new_action_dialog.run()
         if r == gtk.RESPONSE_ACCEPT:
             action_name = self.new_action_name.get_text()
-            self.sprite.new_action(action_name)
+            num_frames = self.builder.get_object("number_frames").get_value_as_int()
+            self.sprite.new_action(action_name, num_frames)
             self.select_action.append_text(action_name)
+            self.builder.get_object("adjustmentf").set_upper(num_frames)
         else:
             print "no"
         self.new_action_dialog.hide()
@@ -317,6 +335,15 @@ class EditorWindow:
     def enable_save_frame(self, cb, data):
         save_frame = self.builder.get_object("save_frame")
         save_frame.set_sensitive(True)
+
+    def toggle_play(self, button):
+        if self.mode == PLAY:
+            self.mode = STOP
+            button.set_label("Play")
+        else:
+            self.mode = PLAY
+            button.set_label("Stop")
+                             
 
 def convert(facing):
     if facing == "N":

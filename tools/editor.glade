@@ -41,6 +41,14 @@
     <property name="page_size">0</property>
     <property name="value">0</property>
   </object>
+    <object class="GtkAdjustment" id="adjustmentmaxf">
+    <property name="upper">20</property>
+    <property name="lower">0</property>
+    <property name="page_increment">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_size">0</property>
+    <property name="value">0</property>
+  </object>
   <object class="GtkWindow" id="window">
     <property name="width_request">800</property>
     <property name="height_request">600</property>
@@ -181,7 +189,8 @@
                 <property name="tooltip_text" translatable="yes">Frame X Coordinate</property>
                 <property name="invisible_char">●</property>
 		<property name="adjustment">adjustmentx</property>
-              </object>
+		<signal name="value_changed" handler="draw"/> 
+	      </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
@@ -195,6 +204,7 @@
                 <property name="tooltip_text" translatable="yes">Frame Y Coordinate</property>
                 <property name="invisible_char">●</property>
 		<property name="adjustment">adjustmenty</property>
+		<signal name="value_changed" handler="draw"/> 
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -209,6 +219,7 @@
                 <property name="tooltip_text" translatable="yes">Frame Width</property>
                 <property name="invisible_char">●</property>
 		<property name="adjustment">adjustmentw</property>
+		<signal name="value_changed" handler="draw"/> 
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -223,6 +234,7 @@
                 <property name="tooltip_text" translatable="yes">Frame Height</property>
                 <property name="invisible_char">●</property>
 		<property name="adjustment">adjustmenth</property>
+		<signal name="value_changed" handler="draw"/> 
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -423,6 +435,13 @@
             <property name="position">1</property>
           </packing>
         </child>
+	<child>
+	  <object class="GtkSpinButton" id="number_frames">
+	    <property name="visible">True</property>
+	    <property name="can_focus">True</property>
+	    <property name="adjustment">adjustmentmaxf</property>
+	  </object>
+	</child>
       </object>
     </child>
     <action-widgets>
@@ -458,6 +477,7 @@
 	      <object class="GtkButton" id="preview_play">
 		<property name="visible">True</property>
 		<property name="label">Play</property>
+		<signal name="clicked" handler="toggle_play" swapped="no"/>
 	      </object>
 	      <packing>
 		<property name="expand">True</property>
@@ -466,6 +486,7 @@
 	    <child>
 	      <object class="GtkSpinButton" id="preview_frame">
 		<property name="visible">True</property>
+		<property name="adjustment">adjustmentf</property>
 	      </object>
 	      <packing>
 		<property name="expand">True</property>

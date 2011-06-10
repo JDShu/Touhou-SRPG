@@ -22,12 +22,12 @@ class Sprite:
     def __init__(self):
         self.frames = {}
         
-    def new_action(self, action_name):
+    def new_action(self, action_name, num_frames):
         action = {}
-        action[N] = [None]*5
-        action[S] = []
-        action[E] = []
-        action[W] = []
+        action[N] = [None]*num_frames
+        action[S] = [None]*num_frames
+        action[E] = [None]*num_frames
+        action[W] = [None]*num_frames
         self.frames[action_name] = action
 
     def add_frame(self,action, facing):
