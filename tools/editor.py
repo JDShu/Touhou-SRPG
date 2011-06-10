@@ -77,6 +77,7 @@ class EditorWindow:
         self.select_action.set_tooltip_text("Direction")
         self.select_action.connect("changed",self.enable_save_frame, None)
         self.select_facing.connect("changed",self.enable_save_frame, None)
+        self.select_facing.connect("changed",self.change_orientation, None)
 
         self.enable_directions()
 
@@ -90,13 +91,14 @@ class EditorWindow:
         self.preview = None
 
         self.mode = STOP
+        self.show_preview = False
 
     def draw_preview(self, obj):
         glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
         gldrawable.gl_begin(glcontext)        
         glClear(GL_COLOR_BUFFER_BIT)
-        if self.preview:
+        if self.preview and self.show_preview:
             if self.mode == PLAY:
                 self.preview.update()
             self.preview.draw()            
@@ -104,9 +106,16 @@ class EditorWindow:
         gldrawable.gl_end()
         return True
 
-    def change_orientation(self, combobox):
-        print "changed"
-
+    def change_orientation(self, combobox, data):
+        if self.preview:
+            facing = convert(self.select_facing.get_active_text())
+            try:
+                self.preview.set_facing(facing)
+                self.show_preview = True
+                self.draw_preview(None)
+            except AttributeError:
+                self.show_preview = False
+    
     def mouse_button_down(self, drawing, event, data):
         self.make_rect = True
         self.x, self.y = event.x, event.y
@@ -287,10 +296,13 @@ class EditorWindow:
         r = self.new_action_dialog.run()
         if r == gtk.RESPONSE_ACCEPT:
             action_name = self.new_action_name.get_text()
-            num_frames = self.builder.get_object("number_frames").get_value_as_int()
-            self.sprite.new_action(action_name, num_frames)
-            self.select_action.append_text(action_name)
-            self.builder.get_object("adjustmentf").set_upper(num_frames-1)
+            if action_name:
+                num_frames = self.builder.get_object("number_frames").get_value_as_int()
+                self.sprite.new_action(action_name, num_frames)
+                self.select_action.append_text(action_name)
+                self.builder.get_object("adjustmentf").set_upper(num_frames-1)
+            else:
+                print "inappropriate action name"
         else:
             print "no"
         self.new_action_dialog.hide()
@@ -333,10 +345,12 @@ class EditorWindow:
         self.preview.set_action(action)
         self.preview.set_facing(facing)
         self.preview.set_current_frame(frame)
+        self.show_preview = True
 
     def enable_save_frame(self, cb, data):
-        save_frame = self.builder.get_object("save_frame")
-        save_frame.set_sensitive(True)
+        if self.select_action.get_active_text() and self.select_facing.get_active_text():
+            save_frame = self.builder.get_object("save_frame")
+            save_frame.set_sensitive(True)
 
     def toggle_play(self, button):
         if self.mode == PLAY:
@@ -351,9 +365,10 @@ class EditorWindow:
     def set_preview_frame(self, button):
         try:
             self.preview.set_current_frame(button.get_value_as_int())
+            self.show_preview = True
             self.draw_preview(None)
         except AttributeError:
-            pass
+            self.show_preview = False
 
 def convert(facing):
     if facing == "N":
