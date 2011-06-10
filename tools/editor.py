@@ -289,7 +289,7 @@ class EditorWindow:
             num_frames = self.builder.get_object("number_frames").get_value_as_int()
             self.sprite.new_action(action_name, num_frames)
             self.select_action.append_text(action_name)
-            self.builder.get_object("adjustmentf").set_upper(num_frames)
+            self.builder.get_object("adjustmentf").set_upper(num_frames-1)
         else:
             print "no"
         self.new_action_dialog.hide()
