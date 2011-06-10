@@ -67,7 +67,9 @@ class EditorWindow:
         self.new_action_dialog = builder.get_object("new_action_dialog")
         
         self.new_action_name = builder.get_object("action_name_entry")
+
         gtk.timeout_add(500, self.draw_preview, None)
+        gtk.idle_add(self.refresh, None)
 
         hbox = builder.get_object("box2")
 
@@ -93,6 +95,9 @@ class EditorWindow:
         self.mode = STOP
         self.show_preview = False
 
+    def refresh(self, data):
+        self.draw()
+    
     def draw_preview(self, obj):
         glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
@@ -273,6 +278,8 @@ class EditorWindow:
 
         gldrawable.gl_end()
         
+        self.draw()
+
         return True
 
     def open_sprite_dialog(self, event):
@@ -306,6 +313,9 @@ class EditorWindow:
         else:
             print "no"
         self.new_action_dialog.hide()
+
+    def save_as_dialog(self, event):
+        print "save as..."
 
     def close_sprite_dialog(self, event):
         self.sprite_dialog.response(gtk.RESPONSE_CANCEL)
