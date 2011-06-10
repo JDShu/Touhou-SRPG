@@ -19,8 +19,8 @@ class EditorWindow:
         gtk.main_quit()
 
     def __init__(self):
-        self.display_mode = gtk.gdkgl.MODE_RGB|gtk.gdkgl.MODE_DEPTH|gtk.gdkgl.MODE_SINGLE
-        self.glconfig = gtk.gdkgl.Config(mode=self.display_mode)
+        display_mode = gtk.gdkgl.MODE_RGB|gtk.gdkgl.MODE_DEPTH|gtk.gdkgl.MODE_SINGLE
+        self.glconfig = gtk.gdkgl.Config(mode=display_mode)
 
         self.image_file = None
         self.make_rect = False
@@ -46,6 +46,7 @@ class EditorWindow:
         save_frame = builder.get_object("save_frame")
         save_frame.set_sensitive(False)
         self.builder.get_object("action").set_sensitive(False)
+        self.builder.get_object("preview_frame").set_sensitive(False)
 
         gtk.gtkgl.widget_set_gl_capability(self.drawing_area, self.glconfig)
         gtk.gtkgl.widget_set_gl_capability(self.preview_gl, self.glconfig)
@@ -66,7 +67,7 @@ class EditorWindow:
         self.new_action_dialog = builder.get_object("new_action_dialog")
         
         self.new_action_name = builder.get_object("action_name_entry")
-        gtk.timeout_add(1000, self.test, None)
+        gtk.timeout_add(500, self.draw_preview, None)
 
         hbox = builder.get_object("box2")
 
@@ -90,7 +91,7 @@ class EditorWindow:
 
         self.mode = STOP
 
-    def test(self, obj):
+    def draw_preview(self, obj):
         glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
         gldrawable.gl_begin(glcontext)        
@@ -221,7 +222,7 @@ class EditorWindow:
             gldrawable.gl_end()
 
             self.builder.get_object("action").set_sensitive(True)
-            
+            self.builder.get_object("preview_frame").set_sensitive(True)
 
     def setup_gl(self, drawing, event):
         glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
@@ -331,6 +332,7 @@ class EditorWindow:
         self.preview.set_data(self.sprite)
         self.preview.set_action(action)
         self.preview.set_facing(facing)
+        self.preview.set_current_frame(frame)
 
     def enable_save_frame(self, cb, data):
         save_frame = self.builder.get_object("save_frame")
@@ -340,10 +342,18 @@ class EditorWindow:
         if self.mode == PLAY:
             self.mode = STOP
             button.set_label("Play")
+            self.builder.get_object("preview_frame").set_sensitive(True)
         else:
             self.mode = PLAY
+            self.builder.get_object("preview_frame").set_sensitive(False)
             button.set_label("Stop")
-                             
+
+    def set_preview_frame(self, button):
+        try:
+            self.preview.set_current_frame(button.get_value_as_int())
+            self.draw_preview(None)
+        except AttributeError:
+            pass
 
 def convert(facing):
     if facing == "N":

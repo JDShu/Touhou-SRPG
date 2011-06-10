@@ -52,6 +52,10 @@ class Animated:
         self.facing = facing
         self.get_current_dimensions()
 
+    def set_current_frame(self, frame):
+        self.current_frame = frame
+        self.get_current_dimensions()
+
     def update(self):
         if self.action: 
             self.current_frame += 1

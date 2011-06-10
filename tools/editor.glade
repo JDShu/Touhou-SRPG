@@ -487,6 +487,7 @@
 	      <object class="GtkSpinButton" id="preview_frame">
 		<property name="visible">True</property>
 		<property name="adjustment">adjustmentf</property>
+		<signal name="value_changed" handler="set_preview_frame"/>
 	      </object>
 	      <packing>
 		<property name="expand">True</property>
