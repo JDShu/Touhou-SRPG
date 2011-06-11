@@ -110,6 +110,7 @@
 			<property name="use_action_appearance">False</property>
 			<property name="use_underline">True</property>
 			<property name="use_stock">True</property>
+			<signal name="activate" handler="save_as_dialog"/>
 		      </object>
 		    </child>
 		  </object>
@@ -234,7 +235,7 @@
                 <property name="tooltip_text" translatable="yes">Frame Height</property>
                 <property name="invisible_char">●</property>
 		<property name="adjustment">adjustmenth</property>
-		<signal name="value_changed" handler="draw"/> 
+		<signal name="value_changed" handler="draw"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -341,7 +342,6 @@
 		<property name="can_default">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-		
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -369,6 +369,50 @@
     <action-widgets>
       <action-widget response="-3">open_sprdata_dialog</action-widget>
       <action-widget response="0">close_sprdata_dialog</action-widget>
+    </action-widgets>	     
+  </object>
+  <object class="GtkFileChooserDialog" id="save_as_dialog">
+    <property name="title" translatable="yes">Save Data</property>
+    <property name="action">save</property>
+    <child internal-child="action_area">
+          <object class="GtkButtonBox" id="save_as_action_area">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="close_save_as">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+		<property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+	    <child>
+              <object class="GtkButton" id="save_as">
+                <property name="label" translatable="yes">Save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+		<property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+	  </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-3">save_as</action-widget>
+      <action-widget response="0">close_save_as</action-widget>
     </action-widgets>	     
   </object>
   <object class="GtkDialog" id="new_action_dialog">

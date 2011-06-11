@@ -315,7 +315,16 @@ class EditorWindow:
         self.new_action_dialog.hide()
 
     def save_as_dialog(self, event):
-        print "save as..."
+        dialog = self.builder.get_object("save_as_dialog")
+        r = dialog.run()
+        if r == gtk.RESPONSE_ACCEPT:
+            filename = dialog.get_filename()
+            if filename[-4:] != ".spr":
+                filename = filename + ".spr"
+            save_sprite(filename, self.sprite)
+        else:
+            print "no"
+        dialog.hide()
 
     def close_sprite_dialog(self, event):
         self.sprite_dialog.response(gtk.RESPONSE_CANCEL)
@@ -328,6 +337,12 @@ class EditorWindow:
 
     def close_sprdata_dialog(self, event):
         self.load_sprdata_dialog.response(gtk.RESPONSE_CANCEL)
+
+    def close_save_as(self, event):
+        self.load_sprdata_dialog.response(gtk.RESPONSE_CANCEL)
+
+    def save_as(self, event):
+        self.load_sprdata_dialog.response(gtk.RESPONSE_ACCEPT)
 
     def enable_directions(self):
         self.select_facing.append_text("N")
@@ -394,6 +409,10 @@ def convert(facing):
             raise ConvertError(facing)
         except ConvertError as c:
             print c.value, "not a valid direction label."
+
+def save_sprite(filename, sprite):
+    F = open(filename, "w")
+    pickle.dump(sprite, F)
 
 class ConvertError(Exception):
     def __init__(self, value):
