@@ -122,7 +122,8 @@ class TouhouUI(UI):
         if self.map[x][y]:
             obj = self.map[x][y]
             self.data.selected = obj
-            self.current_menu = self.menus[obj.details.name]
+            if obj.details:
+                self.current_menu = self.menus[obj.details.name]
         else:
             self.current_menu = None
 
