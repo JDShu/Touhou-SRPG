@@ -114,12 +114,15 @@ class EditorWindow:
 
     def change_orientation(self, combobox, data):
         if self.preview:
+            action = self.select_action.get_active_text()
             facing = convert(self.select_facing.get_active_text())
             try:
                 self.preview.set_facing(facing)
                 self.show_preview = True
                 self.draw_preview(None)
                 self.copy_frame()
+                frame_length= len(self.sprite.frames[action][N]) - 1
+                self.builder.get_object("adjustmentf").set_upper(frame_length)
             except AttributeError:
                 self.show_preview = False
     
