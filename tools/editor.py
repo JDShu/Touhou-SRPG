@@ -78,6 +78,7 @@ class EditorWindow:
         self.select_facing = gtk.combo_box_new_text()
         self.select_action.set_tooltip_text("Direction")
         self.select_action.connect("changed",self.enable_save_frame, None)
+        self.select_action.connect("changed",self.change_action, None)
         self.select_facing.connect("changed",self.enable_save_frame, None)
         self.select_facing.connect("changed",self.change_orientation, None)
 
@@ -118,9 +119,25 @@ class EditorWindow:
                 self.preview.set_facing(facing)
                 self.show_preview = True
                 self.draw_preview(None)
+                self.copy_frame()
             except AttributeError:
                 self.show_preview = False
     
+    def change_action(self, combobox, data):
+        if self.preview:
+            action = self.select_action.get_active_text()
+            try:
+                self.preview.set_action(action)
+                if not self.select_facing.get_active_text():
+                    self.preview.set_facing(N)
+                self.show_preview = True
+                self.draw_preview(None)
+                frame_length= len(self.sprite.frames[action][N]) - 1
+                self.builder.get_object("adjustmentf").set_upper(frame_length)
+                self.copy_frame()
+            except AttributeError:
+                self.show_preview = False
+
     def mouse_button_down(self, drawing, event, data):
         self.make_rect = True
         self.x, self.y = event.x, event.y
@@ -288,15 +305,18 @@ class EditorWindow:
             f = self.sprite_dialog.get_filename()
             self.load_spritesheet(f)
         else:
-            print "no"
+            pass
         self.sprite_dialog.hide()
 
     def open_sprdata_dialog(self, event):
         r = self.load_sprdata_dialog.run()
         if r == gtk.RESPONSE_ACCEPT:
-            print "yes"
-        else:
-            print "no"
+            f = self.load_sprdata_dialog.get_filename()
+            self.sprite = load_data(f)
+            self.preview.set_data(self.sprite)
+            for action in self.sprite.frames:
+                self.select_action.append_text(action)
+                self.builder.get_object("adjustmentf").set_upper(len(action)-1)
         self.load_sprdata_dialog.hide()
 
     def new_action_dialog(self, event):
@@ -307,11 +327,10 @@ class EditorWindow:
                 num_frames = self.builder.get_object("number_frames").get_value_as_int()
                 self.sprite.new_action(action_name, num_frames)
                 self.select_action.append_text(action_name)
-                self.builder.get_object("adjustmentf").set_upper(num_frames-1)
             else:
                 print "inappropriate action name"
         else:
-            print "no"
+            pass
         self.new_action_dialog.hide()
 
     def save_as_dialog(self, event):
@@ -323,7 +342,7 @@ class EditorWindow:
                 filename = filename + ".spr"
             save_sprite(filename, self.sprite)
         else:
-            print "no"
+            pass
         dialog.hide()
 
     def close_sprite_dialog(self, event):
@@ -395,6 +414,19 @@ class EditorWindow:
         except AttributeError:
             self.show_preview = False
 
+    # Put frame values into the spinners
+    def copy_frame(self, button=None):
+        frame_number = self.frame_button.get_value_as_int()
+        action = self.select_action.get_active_text()
+        facing = self.select_facing.get_active_text()
+        t = self.sprite.frames[action][convert(facing)][frame_number].get_tuple()
+        if t:
+            x,y,w,h = t
+            self.x_button.set_value(x) 
+            self.y_button.set_value(y)
+            self.w_button.set_value(w)
+            self.h_button.set_value(h)
+
 def convert(facing):
     if facing == "N":
         return N
@@ -413,6 +445,10 @@ def convert(facing):
 def save_sprite(filename, sprite):
     F = open(filename, "w")
     pickle.dump(sprite, F)
+
+def load_data(filename):
+    F = open(filename, "r")
+    return pickle.load(F)
 
 class ConvertError(Exception):
     def __init__(self, value):
