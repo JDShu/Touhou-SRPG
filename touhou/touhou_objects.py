@@ -16,7 +16,7 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from OpenGL.GL import *
-from core.graphics.animated import Graphic, DeprecatedAnimated
+from core.graphics.animated import Graphic, Animated
 import core.misc.astar
 import copy
 
@@ -38,7 +38,7 @@ class Stats:
     def restor_hp(self):
         self.hp = self.MAX_HP
 
-class Actor(DeprecatedAnimated):
+class Actor(Animated):
     """An Actor is anything that influences the game, usually a character or monster"""
     MOVING, IDLE = range(2)
     TICKS = 5

@@ -21,13 +21,15 @@ from pygame.locals import *
 
 from core.input_session import IOSession
 from core.ui import UI, Menu
-from core.graphics.animated import DeprecatedAnimated
+from core.graphics.animated import Animated
 from core.graphics.graphic import GraphicAbsPositioned
 import core.misc.astar as astar
 
 from touhou_level import TouhouLevel
 from touhou_ui import *
 from touhou_graphic import Character, OBJECTEVENT
+
+from tools.sprite_rules import *
 
 class TouhouPlay(IOSession):
     SCROLL_SPEED = 5
@@ -38,7 +40,9 @@ class TouhouPlay(IOSession):
         self.ui = TouhouUI(self.map)
         
         #test code
-        test_reimu = DeprecatedAnimated("reimu")
+        test_reimu = Animated("./content/gfx/sprites/reimu.png", "./content/metadata/reimu.spr")
+        test_reimu.set_facing(S)
+        test_reimu.set_action("idle")
         reimu_info = Character("reimu",5)
         self.map.place_object(test_reimu, (6,1), "reimu", reimu_info)
         
