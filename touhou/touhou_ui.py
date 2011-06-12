@@ -71,8 +71,8 @@ class TouhouUI(UI):
         self.highlight = Highlight(hover_graphic)
         
         self.add(self.main_menu_placed)
-        self.add(self.hover_tile)
-        self.add(self.highlight)
+        self.add_under(self.hover_tile)
+        self.add_under(self.highlight)
 
         #One menu showing at any time
         self.current_menu = None

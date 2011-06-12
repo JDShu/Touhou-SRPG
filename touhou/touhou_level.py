@@ -79,15 +79,20 @@ class TouhouMap:
             x,y = self.obj_list[obj]
             self.grid[x][y].update(e)
                         
-    def draw(self):
+    def draw_ground(self):
         temp = GraphicList()
         temp.add(self.ground)
+        return temp
+
+    def draw_sprites(self):
+        temp = GraphicList()
         for x in xrange(self.w):
             for y in xrange(self.h):
                 if self.grid[self.w-x-1][self.h-y-1]:
                     temp.add(self.grid[self.w-x-1][self.h-y-1])
         return temp
     
+
     def place_object(self, obj, pos, name, details=None):
         temp = MapGraphic(obj,pos,name,details)
         self.grid[pos[0]][pos[1]] = temp

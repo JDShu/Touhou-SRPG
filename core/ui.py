@@ -29,17 +29,28 @@ MENU_BORDER = 10
 ENTRY_HEIGHT, ENTRY_WIDTH = 40, 100
 
 # Container class for everything UI
+# under_elements: displayed underneat map sprites
+# top_elements: displayed on the top
 class UI:
     def __init__(self):
-        self.elements = []
+        self.top_elements = []
+        self.under_elements = []
 
     def add(self, obj):
-        self.elements += [obj]
+        self.top_elements += [obj]
+
+    def add_under(self, obj):
+        self.under_elements += [obj]
 
     # gets called by the play session
     def draw(self):
         temp = GraphicList()
-        temp.set_list(self.elements)
+        temp.set_list(self.top_elements)
+        return temp
+
+    def draw_under(self):
+        temp = GraphicList()
+        temp.set_list(self.under_elements)
         return temp
 
 class DeprecatedMenuBody( Graphic ):
