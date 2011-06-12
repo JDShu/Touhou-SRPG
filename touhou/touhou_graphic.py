@@ -25,6 +25,7 @@ from tools.sprite_rules import *
 
 OBJECTEVENT = pygame.locals.USEREVENT+4
 
+# Todo: separate character/monster specific attributes from UI attributes.
 class MapGraphic(GraphicPositioned):
     TILE_OFFSET = (45.0,30.0)
     TILE_DIMENSIONS = (90.0,60.0)
@@ -116,6 +117,30 @@ class Character(MapObject):
 
     def set_speed(self, speed):
         self.speed = speed
+
+# Highlighted tiles object that displays all currently highlighted tiles when drawn.
+class Highlight:
+    def __init__(self, graphic):
+        self.set = None
+        self.graphic = MapGraphic(graphic, None, None, None)
+        self.visible = False
+
+    def on(self):
+        self.visible = True
+
+    def off(self):
+        self.visible = False
+
+    # new set of tiles
+    def set_tiles(self, tiles):
+        self.set = tiles
+
+    def draw(self):
+        if self.visible:
+            for tile in self.set:
+                self.graphic.pos = tile
+                self.graphic.draw()
+            
 
 #signal that the map needs to be updated
 def Update_Map(map_obj):

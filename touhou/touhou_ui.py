@@ -24,7 +24,7 @@ from math import *
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
 from core.ui import UI, Menu
 
-from touhou_graphic import MapGraphic
+from touhou_graphic import MapGraphic, Highlight
 
 #Interface modes
 I_BROWSE, I_MOVE, I_ATTACK = range(3)
@@ -39,15 +39,16 @@ class TouhouUI(UI):
     def __init__(self, touhou_map):
 
         self.map = touhou_map.grid
+        self.obj_list = touhou_map.obj_list
         # Constants we need to calculate mouse position and hovering highlight
-        self.map_x, self.map_y = touhou_map.w, touhou_map.h
+        self.map_w, self.map_h = touhou_map.w, touhou_map.h
         self.off_x, self.off_y = touhou_map.TILE_OFFSET[0], touhou_map.TILE_OFFSET[1]
         self.off_x = float(self.off_x)
         self.off_y = float(self.off_y)
         self.theta_x = atan(self.off_x/self.off_y)
         self.theta_y = atan(self.off_y/self.off_x)
         self.hyp = hypot(self.off_x-3, self.off_y-3) #dirty adjustment for select highlight precision
-        self.max_x, self.max_y = self.map_x*self.hyp, self.map_y*self.hyp
+        self.max_x, self.max_y = self.map_w*self.hyp, self.map_h*self.hyp
        
         self.menus = {}
         self.data = UIData()
@@ -67,10 +68,12 @@ class TouhouUI(UI):
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
         self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
+        self.highlight = Highlight(hover_graphic)
         
         self.add(self.main_menu_placed)
         self.add(self.hover_tile)
-        
+        self.add(self.highlight)
+
         #One menu showing at any time
         self.current_menu = None
 
@@ -90,6 +93,12 @@ class TouhouUI(UI):
 
     def option_move(self):
         self.data.mode = I_MOVE
+        map_dim = self.map_w, self.map_h
+        pos = self.obj_list[self.data.selected.name]
+        speed = self.data.selected.details.speed
+        accessible = generate_accessible(self.map, map_dim, pos, speed)
+        self.highlight.set_tiles(accessible)
+        self.highlight.on()
 
     def option_attack(self):
         print "Attack"
@@ -160,11 +169,11 @@ class TouhouUI(UI):
 
     def move_left_release(self, mouse_coords):
         x,y,z = self.hover_tile.pos
-        obj = self.map[x][y]
-        if not obj:
+        if (x,y) in self.highlight.set:
             pygame.event.post(Move_Event(self.data.selected, (x,y)))
             self.data.locked = True
             self.current_menu = None
+            self.highlight.off()
 
     def set_browse(self):
         self.data.dest = None
@@ -277,3 +286,25 @@ class HorizontalBar:
     def draw(self, x, y):
         self.image.draw(x, y)
     
+# given the map and character information, generate which tiles can be reached.
+def generate_accessible(touhou_map, map_dim, pos, speed):
+    """generate list of coordinates that the character is able to move to"""
+    w, h = map_dim
+    accessible = set()
+    accessible.add(pos)
+    for i in xrange(speed):
+        temp = set()
+        for c in accessible:
+            temp.add((c[0],c[1]-1))
+            temp.add((c[0],c[1]+1))
+            temp.add((c[0]-1,c[1]))
+            temp.add((c[0]+1,c[1]))
+        accessible = accessible.union(temp)
+        temp = set()
+        for t in accessible:
+            if not (0 <= t[0] < w and 0 <= t[1] < h):
+                temp.add(t)
+            elif touhou_map[t[0]][t[1]]:
+                temp.add(t)
+            accessible = accessible.difference(temp)
+    return accessible

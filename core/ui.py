@@ -189,8 +189,10 @@ class DeprecatedMenu:
         
         
 class Menu:
-    def __init__(self, title):
+    def __init__(self, title, data=None):
         self.title = title
+        self.data = data
+
         self.entries = []
         self.body_graphic = None
         self.entry_graphic = None
