@@ -21,6 +21,8 @@ import pygame
 
 from core.graphics.graphic import GraphicPositioned
 
+from tools.sprite_rules import *
+
 OBJECTEVENT = pygame.locals.USEREVENT+4
 
 class MapGraphic(GraphicPositioned):
@@ -42,13 +44,13 @@ class MapGraphic(GraphicPositioned):
         self.pixel_increment = self.TILE_OFFSET[0]/self.increments, self.TILE_OFFSET[1]/self.increments
         self.path = None
         self.visible = True
-        
 
     #start moving one square, internal use only
     def start_moving(self, destination):
         self.moving = True
         self.dest = destination
         self.increments_moved = 1
+        self.graphic.set_facing(convert(self.dest))
 
     #follow path of coordinates
     def move_path(self, path):
@@ -63,7 +65,6 @@ class MapGraphic(GraphicPositioned):
                 self.moving = False
                 self.pos = (self.pos[0] + self.dest[0], self.pos[1] + self.dest[1])
                 self.path = self.path[1:]
-                self.destination = None
                 self.increments_moved = 1
                 if self.path:
                     direction = (self.path[0][0]-self.pos[0], self.path[0][1]-self.pos[1])
@@ -120,3 +121,13 @@ class Character(MapObject):
 def Update_Map(map_obj):
     e = pygame.event.Event(OBJECTEVENT, subtype=OBJECTEVENT, obj=map_obj)
     return e
+
+def convert(dest):
+    if dest == (1,0):
+        return N
+    elif dest == (-1,0):
+        return S
+    elif dest == (0,1):
+        return W
+    else:
+        return E
