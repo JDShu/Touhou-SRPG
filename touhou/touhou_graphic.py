@@ -45,6 +45,17 @@ class MapGraphic(GraphicPositioned):
         self.pixel_increment = self.TILE_OFFSET[0]/self.increments, self.TILE_OFFSET[1]/self.increments
         self.path = None
         self.visible = True
+        
+        self.begin_turn_function = None
+        self.end_turn_function = None
+        
+    def begin_turn(self):
+        if self.begin_turn_function:
+            self.begin_turn_function
+
+    def end_turn(self):
+        if self.end_turn_function:
+            self.end_turn_function()
 
     #start moving one square, internal use only
     def start_moving(self, destination):

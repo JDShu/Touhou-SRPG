@@ -34,7 +34,21 @@ class TouhouLevel:
         self.monsters = {}
         # test code
         self.map = TouhouMap()
-        
+
+    # things objects do before turn begins.
+    def begin_turn(self):
+        for obj in self.map.obj_list:
+            x, y = self.map.obj_list[obj]
+            self.map.grid[x][y].end_turn()
+
+    # things objects do after turn is ended.
+    def end_turn(self):
+        for obj in self.map.obj_list:
+            x, y = self.map.obj_list[obj]
+            self.map.grid[x][y].end_turn()
+
+# obj_list: quick way to get the position of an object.
+# grid: grid full of references of to MapGraphic objects.
 class TouhouMap:
     TILE_OFFSET = (45.0,30.0)
     TILE_DIMENSIONS = (90.0,60.0)
@@ -42,9 +56,9 @@ class TouhouMap:
     def __init__(self):
         self.obj_list = {}
         self.grid = []
-        self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
-        
+
         # test code starts here
+        self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
         self.setup_map(10,10) 
         
         test_tree = Graphic(texture="./content/gfx/sprites/tree.png")

@@ -30,7 +30,7 @@ from touhou_graphic import MapGraphic, Highlight
 I_BROWSE, I_MOVE, I_ATTACK = range(3)
 
 # UI Event subtypes
-MOVETO, ATTACK = range(2)
+MOVETO, ATTACK, ENDTURN = range(3)
 
 UI_EVENT = USEREVENT+3
 
@@ -64,6 +64,7 @@ class TouhouUI(UI):
         self.main_menu.set_header_height(30)
         self.main_menu.set_entry_height(30)
         self.main_menu.add_entry("Quit", self.option_quit)
+        self.main_menu.add_entry("End Turn", self.end_turn)
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
@@ -78,6 +79,9 @@ class TouhouUI(UI):
         self.current_menu = None
 
         #self.data.mode = BROWSE
+
+    def end_turn(self):
+        pygame.event.post(End_Turn_Event())
 
     def set_mode(self, mode):
         self.data.mode = mode
@@ -226,6 +230,10 @@ def Move_Event(thing=None, destination=None):
     e = pygame.event.Event(UI_EVENT, subtype=MOVETO, obj=thing, dest=destination)
     return e
         
+def End_Turn_Event():
+    e = pygame.event.Event(UI_EVENT, subtype=ENDTURN)
+    return e
+
 class UIData:
     def __init__(self):
         self.mode = I_BROWSE

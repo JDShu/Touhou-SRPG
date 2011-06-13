@@ -35,8 +35,8 @@ class TouhouPlay(IOSession):
     SCROLL_SPEED = 5
     def __init__(self, level_state):
         IOSession.__init__(self)
-        self.level_state = level_state
-        self.map = self.level_state.map
+        self.level = level_state
+        self.map = self.level.map
         self.ui = TouhouUI(self.map)
         
         #test code
@@ -90,6 +90,8 @@ class TouhouPlay(IOSession):
     def ui_events(self, e):
         if e.subtype == MOVETO:
             self.move_character(e)
+        elif e.subtype == ENDTURN:
+            self.level.end_turn()
 
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:
