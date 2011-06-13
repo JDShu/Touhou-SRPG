@@ -24,7 +24,7 @@ from core.graphics.common import Repeated
 
 from touhou_graphic import MapGraphic
 
-#From touhou_character import Reimu
+ALIVE, DEAD = range(2)
 
 #Touhou Level State, includes information about the map, characters, monsters, etc.
 #Theoretically can be for load games, saved games, and level editors
@@ -46,6 +46,43 @@ class TouhouLevel:
         for obj in self.map.obj_list:
             x, y = self.map.obj_list[obj]
             self.map.grid[x][y].end_turn()
+
+    def add_character(self, name, stat):
+        self.characters[name] = stat
+
+    def add_monster(self, name, stat):
+        self.monster[name] = stat
+
+# Base class to hold character/monster/other attributes.
+class TouhouCreature:
+    def __init__(self):
+        self.status = ALIVE
+        self.max_hp = None
+        self.max_ap = None
+        self.hp = None
+        self.ap = None
+
+    def set_max_health(self, value):
+        self.max_hp = value
+
+    def set_max_ap(self, value):
+        self.max_ap = value
+
+    def restore_hp(self, value=None):
+        if value == None:
+            self.hp = self.max_hp
+        else:
+            self.hp += value
+            if self.hp > self.max_hp:
+                self.hp = self.max_hp
+
+    def restore_ap(self, value=None):
+        if value == None:
+            self.ap = self.max_ap
+        else:
+            self.ap += value
+            if self.ap > self.max_ap:
+                self.ap = self.max_ap
 
 # obj_list: quick way to get the position of an object.
 # grid: grid full of references of to MapGraphic objects.
