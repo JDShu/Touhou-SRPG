@@ -63,6 +63,10 @@ class TouhouCreature:
         self.hp = None
         self.ap = None
         self.speed = None
+        self.portrait = None
+
+    def set_portrait(self, filename):
+        self.portrait = Graphic(filename)
 
     def set_speed(self, value):
         self.speed = value

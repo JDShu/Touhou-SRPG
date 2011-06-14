@@ -18,13 +18,12 @@
 
 import pygame
 from pygame.locals import *
-from OpenGL.GL import *
 from math import *
 
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
 from core.ui import UI, Menu
 
-from touhou_graphic import MapGraphic, Highlight
+from touhou_graphic import MapGraphic, Highlight, NoGraphic
 
 #Interface modes
 I_BROWSE, I_MOVE, I_ATTACK = range(3)
@@ -69,10 +68,15 @@ class TouhouUI(UI):
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
+        
         self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
         self.highlight = Highlight(hover_graphic)
-        
+                
         self.add(self.main_menu_placed)
+        self.status_window = StatusWindow()
+        self.status_window = GraphicAbsPositioned(self.status_window, (20,20))
+        self.status_window.make_visible()
+        self.add(self.status_window)
         self.add_under(self.hover_tile)
         self.add_under(self.highlight)
 
@@ -126,6 +130,7 @@ class TouhouUI(UI):
         if self.map.grid[x][y]:
             name = self.map.grid[x][y].name
             self.data.selected = name
+            
             self.current_menu = self.menus[name]
         else:
             self.current_menu = None
@@ -241,18 +246,14 @@ class UIData:
         self.selected = None
         self.dest = None
 
-    def clear_dest(self):
-        self.dest = None
-
 class StatusWindow:
     gfx = "./content/gfx/gui/"
     """Collection of elements that describe character/monster"""
-    def __init__(self, coords):
-        self.portrait = None
+    def __init__(self):
+        self.portrait = Graphic("./content/gfx/sprites/reimu_portrait.png")
         self.stats = None
         self.health_bar = HorizontalBar(self.gfx+"health_bar.png")
-        self.visible = False
-        self.coords = coords
+        self.visible = True
 
     def load_stats(self, stats):
         self.stats = stats
@@ -266,21 +267,18 @@ class StatusWindow:
         self.health_bar.set_value(self.stats.hp)
 
     def draw(self):
-        x,y = self.coords
         if self.visible:
-            self.stats.portrait.draw(x,y)
-            x += 150
-            y += 70
-            self.health_bar.draw(x,y)
+            self.portrait.draw()
+            self.health_bar.draw()
 
 class HorizontalBar:
     """Bar that has a length that depends on the value, eg. a health bar"""
     def __init__(self, image):
-        self.image = core.objects.DynamicGraphic(1.0, image)
-        self.image.w = 300.0
+        self.image = Graphic(image)
+        self.image.w = 200.0
         self.image.setup_draw()
         self.max_value = None
-        self.current_calue = None
+        self.current_value = None
         
 
     def load_stats(self, current_value, max_value):
@@ -290,5 +288,5 @@ class HorizontalBar:
     def set_value(self, value):
         self.current_value = value
 
-    def draw(self, x, y):
-        self.image.draw(x, y)
+    def draw(self):
+        self.image.draw()
