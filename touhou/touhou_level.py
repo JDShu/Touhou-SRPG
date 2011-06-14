@@ -55,14 +55,19 @@ class TouhouLevel:
 
 # Base class to hold character/monster/other attributes.
 class TouhouCreature:
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.status = ALIVE
         self.max_hp = None
         self.max_ap = None
         self.hp = None
         self.ap = None
+        self.speed = None
 
-    def set_max_health(self, value):
+    def set_speed(self, value):
+        self.speed = value
+
+    def set_max_hp(self, value):
         self.max_hp = value
 
     def set_max_ap(self, value):
@@ -158,3 +163,28 @@ class TouhouMap:
         self.grid[x][y] = self.grid[old_x][old_y]
         self.grid[old_x][old_y] = None
         self.obj_list[obj.name] = (x,y)
+
+    # given the map and character information, generate which tiles can be reached.
+    def generate_accessible(self, character, speed):
+        """generate list of coordinates that the character is able to move to"""
+        w, h = self.w, self.h
+        pos = self.obj_list[character]
+        
+        accessible = set()
+        accessible.add(pos)
+        for i in xrange(speed):
+            temp = set()
+            for c in accessible:
+                temp.add((c[0],c[1]-1))
+                temp.add((c[0],c[1]+1))
+                temp.add((c[0]-1,c[1]))
+                temp.add((c[0]+1,c[1]))
+            accessible = accessible.union(temp)
+            temp = set()
+            for t in accessible:
+                if not (0 <= t[0] < w and 0 <= t[1] < h):
+                    temp.add(t)
+                elif self.grid[t[0]][t[1]]:
+                    temp.add(t)
+                accessible = accessible.difference(temp)
+        return accessible

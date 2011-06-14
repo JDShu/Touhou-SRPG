@@ -115,20 +115,6 @@ class MapGraphic(GraphicPositioned):
             self.graphic.draw()
             glPopMatrix()
 
-# Class that contains details of objects on the scenario map.
-class MapObject:
-    def __init__(self, name):
-        self.name = name
-        self.type = None
-        
-class Character(MapObject):
-    def __init__(self, name, speed=1):
-        MapObject.__init__(self, name)
-        self.speed = speed
-
-    def set_speed(self, speed):
-        self.speed = speed
-
 # Highlighted tiles object that displays all currently highlighted tiles when drawn.
 class Highlight:
     def __init__(self, graphic):

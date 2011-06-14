@@ -25,9 +25,9 @@ from core.graphics.animated import Animated
 from core.graphics.graphic import GraphicAbsPositioned
 import core.misc.astar as astar
 
-from touhou_level import TouhouLevel
+from touhou_level import TouhouLevel, TouhouCreature
 from touhou_ui import *
-from touhou_graphic import Character, OBJECTEVENT
+from touhou_graphic import OBJECTEVENT
 
 from tools.sprite_rules import *
 
@@ -37,15 +37,21 @@ class TouhouPlay(IOSession):
         IOSession.__init__(self)
         self.level = level_state
         self.map = self.level.map
-        self.ui = TouhouUI(self.map)
+        self.ui = TouhouUI(self.level)
         
         #test code
         test_reimu = Animated("./content/gfx/sprites/reimu.png", "./content/metadata/reimu.spr")
         test_reimu.set_facing(S)
         test_reimu.set_action("idle")
-        reimu_info = Character("reimu",5)
-        self.map.place_object(test_reimu, (6,1), "reimu", reimu_info)
+        #reimu_info = Character("reimu",5)
+        self.map.place_object(test_reimu, (6,1), "reimu")
         
+        reimu_data = TouhouCreature("reimu")
+        reimu_data.set_speed(4)
+        reimu_data.set_max_hp(70)
+        reimu_data.set_max_ap(100)
+        self.level.add_character("reimu", reimu_data) 
+
         #sample character menu
         reimu_menu = Menu("Reimu")
         reimu_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
@@ -55,7 +61,7 @@ class TouhouPlay(IOSession):
         reimu_menu.set_entry_height(30)
         reimu_menu.add_entry("Move", self.ui.option_move)
         reimu_menu_placed = GraphicAbsPositioned(reimu_menu,(0,0))
-        self.ui.add_menu(reimu_info, reimu_menu_placed)
+        self.ui.add_menu(reimu_data, reimu_menu_placed)
 
         pygame.time.set_timer(USEREVENT+1,200)
         pygame.time.set_timer(USEREVENT+2,50)
@@ -92,7 +98,7 @@ class TouhouPlay(IOSession):
             self.move_character(e)
         elif e.subtype == ENDTURN:
             self.level.end_turn()
-
+        
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:
             self.map.update_obj_pos(e.obj)
@@ -100,8 +106,9 @@ class TouhouPlay(IOSession):
                 self.ui.set_browse()
 
     def move_character(self, e):
-        path = astar.path(self.map, e.obj.pos, e.dest)
-        x,y = e.obj.pos
+        pos = self.map.obj_list[e.name]
+        path = astar.path(self.map, pos, e.dest)
+        x,y = pos
         self.map.grid[x][y].move_path(path)
 
     def scroll_map(self):

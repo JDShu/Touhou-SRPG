@@ -36,13 +36,14 @@ UI_EVENT = USEREVENT+3
 
 class TouhouUI(UI):
     
-    def __init__(self, touhou_map):
+    def __init__(self, level):
 
-        self.map = touhou_map.grid
-        self.obj_list = touhou_map.obj_list
+        self.level = level
+        self.map = level.map
+
+        self.map_w, self.map_h = self.map.w, self.map.h
         # Constants we need to calculate mouse position and hovering highlight
-        self.map_w, self.map_h = touhou_map.w, touhou_map.h
-        self.off_x, self.off_y = touhou_map.TILE_OFFSET[0], touhou_map.TILE_OFFSET[1]
+        self.off_x, self.off_y = self.map.TILE_OFFSET[0], self.map.TILE_OFFSET[1]
         self.off_x = float(self.off_x)
         self.off_y = float(self.off_y)
         self.theta_x = atan(self.off_x/self.off_y)
@@ -97,10 +98,9 @@ class TouhouUI(UI):
 
     def option_move(self):
         self.data.mode = I_MOVE
-        map_dim = self.map_w, self.map_h
-        pos = self.obj_list[self.data.selected.name]
-        speed = self.data.selected.details.speed
-        accessible = generate_accessible(self.map, map_dim, pos, speed)
+        character = self.data.selected
+        speed = self.level.characters[character].speed
+        accessible = self.map.generate_accessible(character, speed)
         self.highlight.set_tiles(accessible)
         self.highlight.on()
 
@@ -123,11 +123,10 @@ class TouhouUI(UI):
     #set selected and current menu to the one specified by given coordinates.
     def set_selected_object(self, pos):
         x,y,z = pos
-        if self.map[x][y]:
-            obj = self.map[x][y]
-            self.data.selected = obj
-            if obj.details:
-                self.current_menu = self.menus[obj.details.name]
+        if self.map.grid[x][y]:
+            name = self.map.grid[x][y].name
+            self.data.selected = name
+            self.current_menu = self.menus[name]
         else:
             self.current_menu = None
 
@@ -224,10 +223,9 @@ def UI_Event(self, subtype=None):
     e.subtype = subtype
     return e
 
-# thing: the thing thats moving
-# position: destination to move to
-def Move_Event(thing=None, destination=None):
-    e = pygame.event.Event(UI_EVENT, subtype=MOVETO, obj=thing, dest=destination)
+# Notify creature's intention to move to a certain destination.
+def Move_Event(creature=None, destination=None):
+    e = pygame.event.Event(UI_EVENT, subtype=MOVETO, name=creature, dest=destination)
     return e
         
 def End_Turn_Event():
@@ -294,26 +292,3 @@ class HorizontalBar:
 
     def draw(self, x, y):
         self.image.draw(x, y)
-    
-# given the map and character information, generate which tiles can be reached.
-def generate_accessible(touhou_map, map_dim, pos, speed):
-    """generate list of coordinates that the character is able to move to"""
-    w, h = map_dim
-    accessible = set()
-    accessible.add(pos)
-    for i in xrange(speed):
-        temp = set()
-        for c in accessible:
-            temp.add((c[0],c[1]-1))
-            temp.add((c[0],c[1]+1))
-            temp.add((c[0]-1,c[1]))
-            temp.add((c[0]+1,c[1]))
-        accessible = accessible.union(temp)
-        temp = set()
-        for t in accessible:
-            if not (0 <= t[0] < w and 0 <= t[1] < h):
-                temp.add(t)
-            elif touhou_map[t[0]][t[1]]:
-                temp.add(t)
-            accessible = accessible.difference(temp)
-    return accessible
