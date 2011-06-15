@@ -50,7 +50,14 @@ class TouhouPlay(IOSession):
         reimu_data.set_speed(4)
         reimu_data.set_max_hp(70)
         reimu_data.set_max_ap(100)
-        self.level.add_character("reimu", reimu_data) 
+        self.level.add_creature("reimu", reimu_data) 
+
+        monster = Graphic("./content/gfx/sprites/monster.png")
+        monster_data = TouhouCreature("monster")
+        monster_data.set_max_hp(50)
+        monster_data.set_speed(3)
+        self.level.add_creature("monster",None)
+        self.map.place_object(monster, (8,3), "monster")
 
         #sample character menu
         reimu_menu = Menu("Reimu")

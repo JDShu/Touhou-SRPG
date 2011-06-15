@@ -105,7 +105,7 @@ class TouhouUI(UI):
     def option_move(self):
         self.data.mode = I_MOVE
         character = self.data.selected
-        speed = self.level.characters[character].speed
+        speed = self.level.creatures[character].speed
         accessible = self.map.generate_accessible(character, speed)
         self.highlight.set_tiles(accessible)
         self.highlight.on()

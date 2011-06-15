@@ -30,8 +30,7 @@ ALIVE, DEAD = range(2)
 #Theoretically can be for load games, saved games, and level editors
 class TouhouLevel:
     def __init__(self):
-        self.characters = {}
-        self.monsters = {}
+        self.creatures = {}
         # test code
         self.map = TouhouMap()
 
@@ -47,11 +46,8 @@ class TouhouLevel:
             x, y = self.map.obj_list[obj]
             self.map.grid[x][y].end_turn()
 
-    def add_character(self, name, stat):
-        self.characters[name] = stat
-
-    def add_monster(self, name, stat):
-        self.monster[name] = stat
+    def add_creature(self, name, stat):
+        self.creatures[name] = stat
 
 # Base class to hold character/monster/other attributes.
 class TouhouCreature:
