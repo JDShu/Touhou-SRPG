@@ -56,7 +56,7 @@ class Animated:
         self.current_frame = frame
         self.get_current_dimensions()
 
-    def update(self, event):
+    def update(self, event=None):
         if self.action: 
             self.current_frame += 1
             if len(self.data.frames[self.action][self.facing]) <= self.current_frame:

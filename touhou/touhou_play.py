@@ -43,7 +43,6 @@ class TouhouPlay(IOSession):
         test_reimu = Animated("./content/gfx/sprites/reimu.png", "./content/metadata/reimu.spr")
         test_reimu.set_facing(S)
         test_reimu.set_action("idle")
-        #reimu_info = Character("reimu",5)
         self.map.place_object(test_reimu, (6,1), "reimu")
         
         reimu_data = TouhouCreature("reimu")
@@ -51,6 +50,18 @@ class TouhouPlay(IOSession):
         reimu_data.set_max_hp(70)
         reimu_data.set_max_ap(100)
         self.level.add_creature("reimu", reimu_data) 
+
+        #test code
+        test_suika = Animated("./content/gfx/sprites/suika.png", "./content/metadata/suika.spr")
+        test_suika.set_facing(S)
+        test_suika.set_action("idle")
+        self.map.place_object(test_suika, (6,2), "suika")
+        
+        suika_data = TouhouCreature("suika")
+        suika_data.set_speed(3)
+        suika_data.set_max_hp(70)
+        suika_data.set_max_ap(100)
+        self.level.add_creature("suika", suika_data) 
 
         monster = Graphic("./content/gfx/sprites/monster.png")
         monster_data = TouhouCreature("monster")
@@ -70,13 +81,25 @@ class TouhouPlay(IOSession):
         reimu_menu_placed = GraphicAbsPositioned(reimu_menu,(0,0))
         self.ui.add_menu(reimu_data, reimu_menu_placed)
 
+        suika_menu = Menu("Suika")
+        suika_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+        suika_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+        suika_menu.set_w(80)
+        suika_menu.set_header_height(30)
+        suika_menu.set_entry_height(30)
+        suika_menu.add_entry("Move", self.ui.option_move)
+        suika_menu_placed = GraphicAbsPositioned(suika_menu,(0,0))
+        self.ui.add_menu(suika_data, suika_menu_placed)
+
         pygame.time.set_timer(USEREVENT+1,200)
+        pygame.time.set_timer(USEREVENT+5,400)
         pygame.time.set_timer(USEREVENT+2,50)
         
         self.register_event(USEREVENT+1,test_reimu.update) #frame graphics
         self.register_event(USEREVENT+2,self.map.update_objects) #movement
         self.register_event(USEREVENT+3,self.ui_events)#UI events
         self.register_event(USEREVENT+4,self.object_events)#obj events
+        self.register_event(USEREVENT+5,test_suika.update) #frame graphics
 
     def process(self, event_list):
         #self.test_reimu.update()
