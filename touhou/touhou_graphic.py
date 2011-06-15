@@ -138,11 +138,6 @@ class Highlight:
                 self.graphic.pos = tile
                 self.graphic.draw()
             
-
-class NoGraphic:
-    def draw(self):
-        pass
-
 #signal that the map needs to be updated
 def Update_Map(map_obj):
     e = pygame.event.Event(OBJECTEVENT, subtype=OBJECTEVENT, obj=map_obj)

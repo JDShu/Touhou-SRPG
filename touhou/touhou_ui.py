@@ -16,6 +16,8 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from OpenGL.GL import *
+
 import pygame
 from pygame.locals import *
 from math import *
@@ -23,7 +25,7 @@ from math import *
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
 from core.ui import UI, Menu
 
-from touhou_graphic import MapGraphic, Highlight, NoGraphic
+from touhou_graphic import MapGraphic, Highlight
 
 #Interface modes
 I_BROWSE, I_MOVE, I_ATTACK = range(3)
@@ -74,7 +76,7 @@ class TouhouUI(UI):
                 
         self.add(self.main_menu_placed)
         self.status_window = StatusWindow()
-        self.status_window = GraphicAbsPositioned(self.status_window, (20,20))
+        self.status_window = GraphicAbsPositioned(self.status_window, (0,0))
         self.status_window.make_visible()
         self.add(self.status_window)
         self.add_under(self.hover_tile)
@@ -255,6 +257,14 @@ class StatusWindow:
         self.health_bar = HorizontalBar(self.gfx+"health_bar.png")
         self.visible = True
 
+        self.elements = []
+
+        self.add_element(self.health_bar,(120.0, 50.0))
+        self.add_element(self.portrait,(0.0,0.0))
+
+    def add_element(self, element, position):
+        self.elements += [(element, position)]
+
     def load_stats(self, stats):
         self.stats = stats
         self.health_bar.load_stats(self.stats.hp, self.stats.MAX_HP)
@@ -267,26 +277,35 @@ class StatusWindow:
         self.health_bar.set_value(self.stats.hp)
 
     def draw(self):
-        if self.visible:
-            self.portrait.draw()
-            self.health_bar.draw()
+        for e in self.elements:
+            element, position = e
+            x,y = position
+            glPushMatrix()
+            glTranslate(x,y,0)
+            element.draw()
+            glPopMatrix()
+
 
 class HorizontalBar:
     """Bar that has a length that depends on the value, eg. a health bar"""
-    def __init__(self, image):
+    def __init__(self, image, length=100.0):
         self.image = Graphic(image)
-        self.image.w = 200.0
+        self.base_length = float(length)
+        self.image.w = self.base_length
         self.image.setup_draw()
         self.max_value = None
         self.current_value = None
-        
 
     def load_stats(self, current_value, max_value):
         self.current_value = current_value
         self.max_value = max_value
 
     def set_value(self, value):
-        self.current_value = value
+        self.current_value = float(value)
+        self.image.w = self.current_value/self.max_value * self.base_length
+
+    def set_max(self, max_value):
+        self.max_value = float(max_value)
 
     def draw(self):
         self.image.draw()
