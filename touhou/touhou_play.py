@@ -28,6 +28,7 @@ import core.misc.astar as astar
 from touhou_level import TouhouLevel, TouhouCreature
 from touhou_ui import *
 from touhou_graphic import OBJECTEVENT
+from touhou_names import *
 
 from tools.sprite_rules import *
 

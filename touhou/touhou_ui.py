@@ -19,21 +19,13 @@
 from OpenGL.GL import *
 
 import pygame
-from pygame.locals import *
 from math import *
 
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
 from core.ui import UI, Menu
 
 from touhou_graphic import MapGraphic, Highlight
-
-#Interface modes
-I_BROWSE, I_MOVE, I_ATTACK = range(3)
-
-# UI Event subtypes
-MOVETO, ATTACK, ENDTURN = range(3)
-
-UI_EVENT = USEREVENT+3
+from touhou_names import *
 
 class TouhouUI(UI):
     

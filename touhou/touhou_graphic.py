@@ -21,9 +21,9 @@ import pygame
 
 from core.graphics.graphic import GraphicPositioned
 
-from tools.sprite_rules import *
+from touhou_names import *
 
-OBJECTEVENT = pygame.locals.USEREVENT+4
+from tools.sprite_rules import *
 
 # Todo: separate character/monster specific attributes from UI attributes.
 class MapGraphic(GraphicPositioned):
