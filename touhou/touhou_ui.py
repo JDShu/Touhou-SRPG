@@ -166,6 +166,8 @@ class TouhouUI(UI):
     
     def move_right_click(self, mouse_coords):
         self.data.mode = I_BROWSE
+        self.highlight.off()
+        self.current_menu = None
 
     def move_left_click(self, mouse_coords):
         pass
