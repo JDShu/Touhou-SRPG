@@ -33,24 +33,45 @@ class TouhouUI(UI):
 
         self.level = level
         self.map = level.map
-
-        self.map_w, self.map_h = self.map.w, self.map.h
-        # Constants we need to calculate mouse position and hovering highlight
-        self.off_x, self.off_y = self.map.TILE_OFFSET[0], self.map.TILE_OFFSET[1]
-        self.off_x = float(self.off_x)
-        self.off_y = float(self.off_y)
-        self.theta_x = atan(self.off_x/self.off_y)
-        self.theta_y = atan(self.off_y/self.off_x)
-        self.hyp = hypot(self.off_x-3, self.off_y-3) #dirty adjustment for select highlight precision
-        self.max_x, self.max_y = self.map_w*self.hyp, self.map_h*self.hyp
-       
+        
+        self.generate_constants()
+        
         self.menus = {}
         self.data = UIData()
 
         UI.__init__(self)
         self.left, self.middle, self.right = (0,0,0)
 
-        #Test code - sample menu and hovering tile
+        hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
+        
+        self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
+        self.highlight = Highlight(hover_graphic)
+                
+        self.status_window = StatusWindow()
+        self.status_window = GraphicAbsPositioned(self.status_window, (0,0))
+        self.status_window.make_visible()
+        
+        # Status window drawn after sprites.
+        self.add(self.status_window)
+
+        # Highlights drawn before sprites.
+        self.add_under(self.hover_tile)
+        self.add_under(self.highlight)
+
+        #One menu showing at any time
+        self.current_menu = None
+
+     # Constants we need to calculate mouse position and hovering highlight
+    def generate_constants(self):
+        self.off_x, self.off_y = self.map.TILE_OFFSET[0], self.map.TILE_OFFSET[1]
+        self.off_x = float(self.off_x)
+        self.off_y = float(self.off_y)
+        self.theta_x = atan(self.off_x/self.off_y)
+        self.theta_y = atan(self.off_y/self.off_x)
+        self.hyp = hypot(self.off_x-3, self.off_y-3) #dirty adjustment for select highlight precision
+        self.max_x, self.max_y = self.map.w*self.hyp, self.map.h*self.hyp
+       
+    def generate_menus(self):
         self.main_menu = Menu("Main")
         self.main_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
         self.main_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
@@ -60,24 +81,21 @@ class TouhouUI(UI):
         self.main_menu.add_entry("Quit", self.option_quit)
         self.main_menu.add_entry("End Turn", self.end_turn)
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
-
-        hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
-        
-        self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
-        self.highlight = Highlight(hover_graphic)
-                
         self.add(self.main_menu_placed)
-        self.status_window = StatusWindow()
-        self.status_window = GraphicAbsPositioned(self.status_window, (0,0))
-        self.status_window.make_visible()
-        self.add(self.status_window)
-        self.add_under(self.hover_tile)
-        self.add_under(self.highlight)
 
-        #One menu showing at any time
-        self.current_menu = None
-
-        #self.data.mode = BROWSE
+        for m in self.level.menus:
+            menu = Menu(m.capitalize())
+            menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+            menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+            menu.set_w(80)
+            menu.set_header_height(30)
+            menu.set_entry_height(30)
+            for option in self.level.menus[m]:
+                if option == M_MOVE:
+                    menu.add_entry("Move", self.option_move)
+            
+            menu_placed = GraphicAbsPositioned(menu,(0,0))
+            self.add_menu(m, menu_placed)
 
     def end_turn(self):
         pygame.event.post(End_Turn_Event())

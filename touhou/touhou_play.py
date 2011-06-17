@@ -41,30 +41,9 @@ class TouhouPlay(IOSession):
 
         self.map = self.level.map
         self.ui = TouhouUI(self.level)
-        
-        #sample character menu
-        reimu_menu = Menu("Reimu")
-        reimu_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        reimu_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
-        reimu_menu.set_w(80)
-        reimu_menu.set_header_height(30)
-        reimu_menu.set_entry_height(30)
-        reimu_menu.add_entry("Move", self.ui.option_move)
-        reimu_menu_placed = GraphicAbsPositioned(reimu_menu,(0,0))
-        self.ui.add_menu("reimu", reimu_menu_placed)
-
-        suika_menu = Menu("Suika")
-        suika_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        suika_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
-        suika_menu.set_w(80)
-        suika_menu.set_header_height(30)
-        suika_menu.set_entry_height(30)
-        suika_menu.add_entry("Move", self.ui.option_move)
-        suika_menu_placed = GraphicAbsPositioned(suika_menu,(0,0))
-        self.ui.add_menu("suika", suika_menu_placed)
+        self.ui.generate_menus()
 
         pygame.time.set_timer(USEREVENT+1,200)
-        pygame.time.set_timer(USEREVENT+5,400)
         pygame.time.set_timer(USEREVENT+2,50)
         
         self.register_event(USEREVENT+1,self.map.frame_update) # For animated sprites

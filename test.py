@@ -38,6 +38,10 @@ positions["reimu"] = (6,3)
 positions["suika"] = (6,4)
 positions["monster"] = (8,6)
 
+menus = {}
+menus["reimu"] = [M_MOVE]
+menus["suika"] = [M_MOVE]
+
 def make_level():
     level = TouhouLevel()
     level.new_map((10,10))    
@@ -46,6 +50,7 @@ def make_level():
         data = new_data(**c)
         level.map.place_object(None, positions[c["name"]], c["name"])
         level.creatures[c["name"]] = data
+        level.menus = menus
 
     f = open("./content/level/test.lvl", "w")
     pickle.dump(level,f)

@@ -31,6 +31,7 @@ ALIVE, DEAD = range(2)
 class TouhouLevel:
     def __init__(self):
         self.creatures = {}
+        self.menus = {}
         self.map = None
 
     def new_map(self, size):
