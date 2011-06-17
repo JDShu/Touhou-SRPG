@@ -28,7 +28,6 @@ from core.module import Module
 PLAY = 1
 class Touhou(Module):
     def __init__(self):
-        #test, TODO: Level class
         Module.__init__(self)
         self.name = "Touhou SRPG"
                 
@@ -42,6 +41,7 @@ class Touhou(Module):
         glClearColor(0.0,0.0,0.0,0.0) 
 
         self.level_state = touhou_level.TouhouLevel()
+        self.level_state.new_map((10,10))
         self.register_session(PLAY,TouhouPlay(self.level_state))
         self.load_session(PLAY)
         Module.start_session(self)

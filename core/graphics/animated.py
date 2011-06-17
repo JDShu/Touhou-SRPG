@@ -25,17 +25,20 @@ from tools.sprite_rules import *
 
 class Animated:
     def __init__(self, spritesheet, datafile=None):
+
         self.spritesheet = Graphic(spritesheet)
         self.current_frame = 0
-        if datafile:
-            self.use_datafile(datafile)
-        else:
-            self.data = Sprite()
-
         self.action = None
         self.facing = None
-        self.current_frame_data = (0,0,100,150)
 
+        if datafile:
+            self.use_datafile(datafile)
+            self.set_action("idle")
+            self.set_facing(S)
+        else:
+            self.data = Sprite()
+            self.current_frame_data = (0,0,100,150)
+        
     def set_data(self, data):
         self.data = data
 
@@ -57,7 +60,7 @@ class Animated:
         self.get_current_dimensions()
 
     def update(self, event=None):
-        if self.action: 
+        if self.action:
             self.current_frame += 1
             if len(self.data.frames[self.action][self.facing]) <= self.current_frame:
                 self.current_frame = 0

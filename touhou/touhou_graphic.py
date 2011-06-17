@@ -71,6 +71,9 @@ class MapGraphic(GraphicPositioned):
         self.signs = self.calculate_signs(*direction)
         self.start_moving(direction)
 
+    def frame_update(self, event=None):
+        self.graphic.update()
+
     def update(self, e):
         if self.moving:
             if self.increments_moved >= self.increments:
@@ -105,7 +108,6 @@ class MapGraphic(GraphicPositioned):
             tile_y = self.pos[0]*self.TILE_OFFSET[1] + self.pos[1]*self.TILE_OFFSET[1]
             glTranslate(tile_x, tile_y, 0.0)
             if self.moving:
-            #print self.signs
                 fraction = float(self.increments_moved)/self.increments
                 sx, sy = self.signs
                 inc_x = sx*self.TILE_OFFSET[0]*fraction

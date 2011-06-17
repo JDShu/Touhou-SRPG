@@ -16,10 +16,10 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from OpenGL.GL import *
 import pygame
 
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicList
+from core.graphics.animated import Animated
 from core.graphics.common import Repeated
 
 from touhou_graphic import MapGraphic
@@ -31,8 +31,10 @@ ALIVE, DEAD = range(2)
 class TouhouLevel:
     def __init__(self):
         self.creatures = {}
-        # test code
-        self.map = TouhouMap()
+        self.map = None
+
+    def new_map(self, size):
+        self.map = TouhouMap(size)
 
     # things objects do before turn begins.
     def begin_turn(self):
@@ -95,23 +97,27 @@ class TouhouMap:
     TILE_OFFSET = (45.0,30.0)
     TILE_DIMENSIONS = (90.0,60.0)
     TILE_DATA = (TILE_OFFSET, TILE_DIMENSIONS)
-    def __init__(self):
+    def __init__(self, size):
         self.obj_list = {}
         self.grid = []
 
         # test code starts here
-        self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
-        self.setup_map(10,10) 
         
-        test_tree = Graphic(texture="./content/gfx/sprites/tree.png")
-        for x in xrange(4):
-            for y in xrange(4):
-                self.place_object(test_tree,(x,y),"tree"+str(x)+str(y))
+        self.setup_map(size) 
         
         # test code ends here
         self.ground = None
-        self.setup_ground()
         
+        self.load_graphics()
+        
+    def load_graphics(self):
+        self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
+        self.setup_ground()
+        for obj in self.obj_list:
+            pos = self.obj_list[obj]
+            animation = Animated("./content/gfx/sprites/" + obj + ".png", "./content/metadata/" + obj + ".spr")
+            self.place_object(animation, pos, obj)
+
     def set_ground_tile(self, tile):
         self.ground_tile = tile
         self.setup_ground()
@@ -121,20 +127,24 @@ class TouhouMap:
         self.ground = GraphicPositioned(self.ground, (0,0))
         self.ground.make_visible()
 
-    def setup_map(self, w, h):
-        self.w, self.h = w, h
+    def setup_map(self, size):
+        self.w, self.h = size
         for y in xrange(self.h):
             temp = []
             for x in xrange(self.w):
                 temp += [None]
             self.grid += [temp]
 
-    # update the data for each game object first, then update the new map
     def update_objects(self,e):
         for obj in self.obj_list:
             x,y = self.obj_list[obj]
             self.grid[x][y].update(e)
-                        
+
+    def frame_update(self, e):
+        for obj in self.obj_list:
+            x,y = self.obj_list[obj]
+            self.grid[x][y].frame_update(e)
+          
     def draw_ground(self):
         temp = GraphicList()
         temp.add(self.ground)

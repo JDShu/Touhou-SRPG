@@ -28,3 +28,5 @@ I_BROWSE, I_MOVE, I_ATTACK = range(3)
 # UI Event subtypes
 MOVETO, ATTACK, ENDTURN = range(3)
 
+#Animation facings
+N, S, E, W = range(4)

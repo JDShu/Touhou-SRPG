@@ -86,8 +86,8 @@ class TouhouUI(UI):
         self.data.mode = mode
 
     # Attach a name to a menu and add to ui list.
-    def add_menu(self, obj, menu):
-        self.menus[obj.name] = menu #register
+    def add_menu(self, name, menu):
+        self.menus[name] = menu #register
         self.add(menu) #add to graphics queue
         
     # Quit program for now.
@@ -124,8 +124,10 @@ class TouhouUI(UI):
         if self.map.grid[x][y]:
             name = self.map.grid[x][y].name
             self.data.selected = name
-            
-            self.current_menu = self.menus[name]
+            try:
+                self.current_menu = self.menus[name]
+            except KeyError:
+                print "No Menu for", name, "."
         else:
             self.current_menu = None
 
