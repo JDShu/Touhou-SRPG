@@ -78,7 +78,7 @@ class TouhouLevel:
 
     def generate_attackable(self, character, attackable):
         attackable = set()
-        c_x, c_y = self.obj_list[character]
+        c_x, c_y = self.map.obj_list[character]
         w, h = self.map.w, self.map.h
         for x,y in [(0,1),(0,-1),(1,0),(-1,0)]:
             t_x, t_y = c_x+x, c_y+y
