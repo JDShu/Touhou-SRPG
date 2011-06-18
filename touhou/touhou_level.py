@@ -76,13 +76,15 @@ class TouhouLevel:
                 accessible = accessible.difference(temp)
         return accessible
 
-    def generate_attackable(self, character, attackable):
+    def generate_attackable(self, character, c_type):
         attackable = set()
         c_x, c_y = self.map.obj_list[character]
         w, h = self.map.w, self.map.h
         for x,y in [(0,1),(0,-1),(1,0),(-1,0)]:
             t_x, t_y = c_x+x, c_y+y
-            if 0 <= t_x < w:
+            obj = self.map.grid[t_x][t_y]
+            if ((0 <= t_x < w and 0 <= t_y < h) and
+                (not obj or self.creatures[obj.name].type == c_type)):
                 attackable.add((t_x,t_y))
         return attackable
 
