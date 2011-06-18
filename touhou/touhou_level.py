@@ -52,6 +52,41 @@ class TouhouLevel:
     def add_creature(self, name, stat):
         self.creatures[name] = stat
 
+    def generate_accessible(self, character, speed):
+        """generate list of coordinates that the character is able to move to"""
+        w, h = self.map.w, self.map.h
+        pos = self.map.obj_list[character]
+        
+        accessible = set()
+        accessible.add(pos)
+        for i in xrange(speed):
+            temp = set()
+            for c in accessible:
+                temp.add((c[0],c[1]-1))
+                temp.add((c[0],c[1]+1))
+                temp.add((c[0]-1,c[1]))
+                temp.add((c[0]+1,c[1]))
+            accessible = accessible.union(temp)
+            temp = set()
+            for t in accessible:
+                if not (0 <= t[0] < w and 0 <= t[1] < h):
+                    temp.add(t)
+                elif self.map.grid[t[0]][t[1]]:
+                    temp.add(t)
+                accessible = accessible.difference(temp)
+        return accessible
+
+    def generate_attackable(self, character, attackable):
+        attackable = set()
+        c_x, c_y = self.obj_list[character]
+        w, h = self.map.w, self.map.h
+        for x,y in [(0,1),(0,-1),(1,0),(-1,0)]:
+            t_x, t_y = c_x+x, c_y+y
+            if 0 <= t_x < w:
+                attackable.add((t_x,t_y))
+        return attackable
+
+
 # Base class to hold character/monster/other attributes.
 class TouhouCreature:
     def __init__(self, name):
@@ -63,6 +98,7 @@ class TouhouCreature:
         self.ap = None
         self.speed = None
         self.portrait = None
+        self.type = None
 
     def set_portrait(self, filename):
         self.portrait = Graphic(filename)
@@ -75,6 +111,9 @@ class TouhouCreature:
 
     def set_max_ap(self, value):
         self.max_ap = value
+
+    def set_type(self, value):
+        self.type = value
 
     def restore_hp(self, value=None):
         if value == None:
@@ -92,8 +131,7 @@ class TouhouCreature:
             if self.ap > self.max_ap:
                 self.ap = self.max_ap
 
-# obj_list: quick way to get the position of an object.
-# grid: grid full of references of to MapGraphic objects.
+# Graphical representation of the map and all the things on it.
 class TouhouMap:
     TILE_OFFSET = (45.0,30.0)
     TILE_DIMENSIONS = (90.0,60.0)
@@ -174,28 +212,3 @@ class TouhouMap:
         self.grid[x][y] = self.grid[old_x][old_y]
         self.grid[old_x][old_y] = None
         self.obj_list[obj.name] = (x,y)
-
-    # given the map and character information, generate which tiles can be reached.
-    def generate_accessible(self, character, speed):
-        """generate list of coordinates that the character is able to move to"""
-        w, h = self.w, self.h
-        pos = self.obj_list[character]
-        
-        accessible = set()
-        accessible.add(pos)
-        for i in xrange(speed):
-            temp = set()
-            for c in accessible:
-                temp.add((c[0],c[1]-1))
-                temp.add((c[0],c[1]+1))
-                temp.add((c[0]-1,c[1]))
-                temp.add((c[0]+1,c[1]))
-            accessible = accessible.union(temp)
-            temp = set()
-            for t in accessible:
-                if not (0 <= t[0] < w and 0 <= t[1] < h):
-                    temp.add(t)
-                elif self.grid[t[0]][t[1]]:
-                    temp.add(t)
-                accessible = accessible.difference(temp)
-        return accessible

@@ -29,9 +29,9 @@ spr = "./content/metadata/"
 
 creatures = []
 
-creatures += [{"name":"reimu", "speed":4, "max_hp":60, "max_ap":100 }]
-creatures += [{"name":"suika", "speed":3, "max_hp":70, "max_ap":100 }]
-creatures += [{"name":"monster", "speed":4, "max_hp":60, "max_ap":100 }]
+creatures += [{"name":"reimu", "speed":4, "max_hp":60, "max_ap":100, "creature_type":C_PLAYER }]
+creatures += [{"name":"suika", "speed":3, "max_hp":70, "max_ap":100, "creature_type":C_PLAYER }]
+creatures += [{"name":"monster", "speed":4, "max_hp":60, "max_ap":100, "creature_type":C_ENEMY }]
 
 positions = {}
 positions["reimu"] = (6,3)
@@ -39,8 +39,8 @@ positions["suika"] = (6,4)
 positions["monster"] = (8,6)
 
 menus = {}
-menus["reimu"] = [M_MOVE]
-menus["suika"] = [M_MOVE]
+menus["reimu"] = [M_MOVE, M_ATTACK]
+menus["suika"] = [M_MOVE, M_ATTACK]
 
 def make_level():
     level = TouhouLevel()
@@ -55,11 +55,12 @@ def make_level():
     f = open("./content/level/test.lvl", "w")
     pickle.dump(level,f)
 
-def new_data(name = "unnamed", speed=3, max_hp = 100, max_ap = 100):
+def new_data(name = "unnamed", speed=3, max_hp = 100, max_ap = 100, creature_type=None):
     creature = TouhouCreature(name)
     creature.set_max_hp(max_hp)
     creature.set_max_ap(max_ap)
     creature.set_speed(speed)
+    creature.set_type(creature_type)
 
     return creature
 

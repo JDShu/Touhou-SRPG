@@ -93,6 +93,8 @@ class TouhouUI(UI):
             for option in self.level.menus[m]:
                 if option == M_MOVE:
                     menu.add_entry("Move", self.option_move)
+                elif option == M_ATTACK:
+                    menu.add_entry("Attack", self.option_attack)
             
             menu_placed = GraphicAbsPositioned(menu,(0,0))
             self.add_menu(m, menu_placed)
@@ -116,12 +118,16 @@ class TouhouUI(UI):
         self.data.mode = I_MOVE
         character = self.data.selected
         speed = self.level.creatures[character].speed
-        accessible = self.map.generate_accessible(character, speed)
+        accessible = self.level.generate_accessible(character, speed)
         self.highlight.set_tiles(accessible)
         self.highlight.on()
 
     def option_attack(self):
-        print "Attack"
+        self.data.mode = I_ATTACK
+        character = self.data.selected
+        attackable = self.level.generate_attackable(character, C_ENEMY)
+        self.highlight.set_tiles(attackable)
+        self.highlight.on()
 
     def determine_hover_square(self, mouse_coords, map_offset):
         x = mouse_coords[0]-map_offset[0] - self.off_x
@@ -189,6 +195,11 @@ class TouhouUI(UI):
         self.highlight.off()
         self.current_menu = None
 
+    def attack_right_click(self, mouse_coords):
+        self.data.mode = I_BROWSE
+        self.highlight.off()
+        self.current_menu = None
+
     def move_left_click(self, mouse_coords):
         pass
 
@@ -205,9 +216,6 @@ class TouhouUI(UI):
         self.data.mode = I_BROWSE
         self.data.locked = False
 
-    def unlock(self):
-        self.data.locked = True
-
     def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
         new_left, new_middle, new_right = mouse_state
         #what to execute depends on the previous and current mouse states
@@ -217,6 +225,8 @@ class TouhouUI(UI):
                     self.browse_right_click(mouse_coords)
                 elif self.data.mode == I_MOVE:
                     self.move_right_click(mouse_coords)
+                elif self.data.mode == I_ATTACK:
+                    self.attack_right_click(mouse_coords)
 
             if new_left and not self.left:
                 if self.data.mode == I_BROWSE:
