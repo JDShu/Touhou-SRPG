@@ -88,7 +88,6 @@ class TouhouLevel:
                 attackable.add((t_x,t_y))
         return attackable
 
-
 # Base class to hold character/monster/other attributes.
 class TouhouCreature:
     def __init__(self, name):
@@ -101,6 +100,9 @@ class TouhouCreature:
         self.speed = None
         self.portrait = None
         self.type = None
+        
+        #temporary attack value
+        self.attack = 30
 
     def set_portrait(self, filename):
         self.portrait = Graphic(filename)
@@ -116,6 +118,9 @@ class TouhouCreature:
 
     def set_type(self, value):
         self.type = value
+
+    def change_hp(self, value):
+        self.hp += value
 
     def restore_hp(self, value=None):
         if value == None:
@@ -141,16 +146,11 @@ class TouhouMap:
     def __init__(self, size):
         self.obj_list = {}
         self.grid = []
-
-        # test code starts here
-        
         self.setup_map(size) 
-        
-        # test code ends here
         self.ground = None
-        
         self.load_graphics()
         
+    # Must be called in-game to load data into gpu.
     def load_graphics(self):
         self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
         self.setup_ground()

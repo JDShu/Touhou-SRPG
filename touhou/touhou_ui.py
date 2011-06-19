@@ -211,6 +211,14 @@ class TouhouUI(UI):
             self.current_menu = None
             self.highlight.off()
 
+    def attack_left_release(self, mouse_coords):
+        x,y,z = self.hover_tile.pos
+        if (x,y) in self.highlight.set:
+            pygame.event.post(Attack_Event(self.data.selected, (x,y)))
+            self.current_menu = None
+            self.highlight.off()
+            self.data.mode = I_BROWSE
+
     def set_browse(self):
         self.data.dest = None
         self.data.mode = I_BROWSE
@@ -237,7 +245,9 @@ class TouhouUI(UI):
                     self.browse_left_release(mouse_coords)
                 elif self.data.mode == I_MOVE:
                     self.move_left_release(mouse_coords)
-        
+                elif self.data.mode == I_ATTACK:
+                    self.attack_left_release(mouse_coords)
+
         self.determine_hover_square(mouse_coords, map_offset)
 
         # now we can update the mouse state
@@ -258,7 +268,11 @@ def UI_Event(self, subtype=None):
 def Move_Event(creature=None, destination=None):
     e = pygame.event.Event(UI_EVENT, subtype=MOVETO, name=creature, dest=destination)
     return e
-        
+
+def Attack_Event(a_attacker, a_target):
+    e = pygame.event.Event(UI_EVENT, subtype=ATTACK, attacker=a_attacker, target=a_target)
+    return e
+
 def End_Turn_Event():
     e = pygame.event.Event(UI_EVENT, subtype=ENDTURN)
     return e

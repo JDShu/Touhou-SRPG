@@ -61,7 +61,7 @@ def new_data(name = "unnamed", speed=3, max_hp = 100, max_ap = 100, creature_typ
     creature.set_max_ap(max_ap)
     creature.set_speed(speed)
     creature.set_type(creature_type)
-
+    creature.restore_hp()
     return creature
 
 if __name__ == "__main__":

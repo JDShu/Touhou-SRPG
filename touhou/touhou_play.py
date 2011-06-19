@@ -27,8 +27,7 @@ from core.graphics.graphic import GraphicAbsPositioned
 import core.misc.astar as astar
 
 from touhou_level import TouhouLevel, TouhouCreature
-from touhou_ui import *
-from touhou_graphic import OBJECTEVENT
+from touhou_ui import TouhouUI
 from touhou_names import *
 
 class TouhouPlay(IOSession):
@@ -78,6 +77,17 @@ class TouhouPlay(IOSession):
             self.move_character(e)
         elif e.subtype == ENDTURN:
             self.level.end_turn()
+        elif e.subtype == ATTACK:
+            x, y = e.target
+            damage = self.level.creatures[e.attacker].attack
+            target = self.level.map.grid[x][y].name
+            self.level.creatures[target].change_hp(-damage)
+            print e.attacker, "attacks", e.target, "for", damage
+            print e.target, "has", self.level.creatures[target].hp, "hp"
+            if self.level.creatures[target].hp <= 0:
+                print target, "died."
+                self.level.map.remove_object(e.target)
+                del self.level.map.obj_list[target]
         
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:
