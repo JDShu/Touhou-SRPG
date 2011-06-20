@@ -78,16 +78,14 @@ class TouhouPlay(IOSession):
         elif e.subtype == ENDTURN:
             self.level.end_turn()
         elif e.subtype == ATTACK:
-            x, y = e.target
             damage = self.level.creatures[e.attacker].attack
-            target = self.level.map.grid[x][y].name
+            target = self.level.get_object(e.target)
             self.level.creatures[target].change_hp(-damage)
-            print e.attacker, "attacks", e.target, "for", damage
-            print e.target, "has", self.level.creatures[target].hp, "hp"
+            print e.attacker, "attacks", target, "for", damage
+            print target, "has", self.level.creatures[target].hp, "hp"
             if self.level.creatures[target].hp <= 0:
                 print target, "died."
-                self.level.map.remove_object(e.target)
-                del self.level.map.obj_list[target]
+                self.level.kill_creature(target)
         
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:

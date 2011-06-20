@@ -37,6 +37,13 @@ class TouhouLevel:
     def new_map(self, size):
         self.map = TouhouMap(size)
 
+    def get_object(self, position):
+        x, y = position
+        return self.map.grid[x][y].name
+
+    def kill_creature(self, target):
+        self.map.remove_object(target)
+
     # things objects do before turn begins.
     def begin_turn(self):
         for obj in self.map.obj_list:
@@ -199,14 +206,15 @@ class TouhouMap:
                     temp.add(self.grid[self.w-x-1][self.h-y-1])
         return temp
     
-
     def place_object(self, obj, pos, name, details=None):
         temp = MapGraphic(obj,pos,name,details)
         self.grid[pos[0]][pos[1]] = temp
         self.obj_list[name] = pos
         
-    def remove_object(self, tup):
-        self.grid[tup[0]][tup[1]] = None
+    def remove_object(self, target):
+        x, y = self.obj_list[target]
+        self.grid[x][y] = None
+        del self.obj_list[target]
 
     def update_obj_pos(self, obj):
         x,y = obj.pos
