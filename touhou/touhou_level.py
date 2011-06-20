@@ -238,3 +238,15 @@ class TouhouMap:
         self.hyp = hypot(off_x-3, off_y-3)
         
         self.max_x, self.max_y = self.w*self.hyp, self.h*self.hyp
+
+    def get_square(self, mouse_coords, map_offset):
+        x = mouse_coords[0]-map_offset[0] - self.TILE_OFFSET[0]
+        y = mouse_coords[1]-map_offset[1]
+        
+        new_x = x*cos(self.theta_x) + y*sin(self.theta_x)
+        new_y = -x*sin(self.theta_y) + y*cos(self.theta_y)
+        
+        if 0 < new_x < self.max_x and 0 < new_y < self.max_y:
+            hov_x = int(new_x/self.hyp)
+            hov_y = int(new_y/self.hyp)
+            return hov_x, hov_y

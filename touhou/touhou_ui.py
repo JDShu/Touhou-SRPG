@@ -119,19 +119,6 @@ class TouhouUI(UI):
         self.highlight.set_tiles(attackable)
         self.highlight.on()
 
-    def determine_hover_square(self, mouse_coords, map_offset):
-        x = mouse_coords[0]-map_offset[0] - self.map.TILE_OFFSET[0]
-        y = mouse_coords[1]-map_offset[1]
-        
-        new_x = x*cos(self.map.theta_x) + y*sin(self.map.theta_x)
-        new_y = -x*sin(self.map.theta_y) + y*cos(self.map.theta_y)
-        
-        if 0 < new_x < self.map.max_x and 0 < new_y < self.map.max_y:
-            hov_x = int(new_x/self.map.hyp)
-            hov_y = int(new_y/self.map.hyp)
-            self.data.hover = hov_x, hov_y
-            self.hover_tile.set_pos(self.data.hover)            
-
     #set selected and current menu to the one specified by given coordinates.
     def set_selected_object(self, pos):
         x,y = pos
@@ -261,7 +248,9 @@ class TouhouUI(UI):
             elif self.data.mode == I_ATTACK:
                 self.attack_actions(action, mouse_coords)
 
-        self.determine_hover_square(mouse_coords, map_offset)
+        hover = self.map.get_square(mouse_coords, map_offset)
+        if hover:
+            self.hover_tile.set_pos(hover)
 
         # now we can update the mouse state
         self.left, self.middle, self.right = mouse_state
