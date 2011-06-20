@@ -25,6 +25,7 @@ from core.graphics.animated import Animated
 from touhou.touhou_level import TouhouLevel, TouhouCreature
 from touhou.touhou_names import *
 
+gfx = "./content/gfx/sprites/"
 spr = "./content/metadata/"
 
 creatures = []

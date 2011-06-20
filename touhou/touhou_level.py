@@ -34,6 +34,10 @@ class TouhouLevel:
         self.menus = {}
         self.map = None
 
+    def load_portraits(self):
+        for c in self.creatures:
+            self.creatures[c].portrait = Graphic("./content/gfx/sprites/"+c+".png")
+
     def new_map(self, size):
         self.map = TouhouMap(size)
 
@@ -110,9 +114,6 @@ class TouhouCreature:
         
         #temporary attack value
         self.attack = 30
-
-    def set_portrait(self, filename):
-        self.portrait = Graphic(filename)
 
     def set_speed(self, value):
         self.speed = value

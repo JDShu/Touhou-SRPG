@@ -86,7 +86,8 @@ class TouhouPlay(IOSession):
             if self.level.creatures[target].hp <= 0:
                 print target, "died."
                 self.level.kill_creature(target)
-        
+            
+
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:
             self.map.update_obj_pos(e.obj)

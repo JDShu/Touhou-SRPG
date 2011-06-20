@@ -47,7 +47,7 @@ class TouhouUI(UI):
         self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
         self.highlight = Highlight(hover_graphic)
                 
-        self.status_window = StatusWindow()
+        self.status_window = StatusWindow(self.level.creatures)
         self.status_window = GraphicAbsPositioned(self.status_window, (0,0))
         self.status_window.make_visible()
         
@@ -150,6 +150,7 @@ class TouhouUI(UI):
             self.data.selected = name
             try:
                 self.current_menu = self.menus[name]
+                self.status_window.obj.set_selected(name)
             except KeyError:
                 print "No Menu for", name, "."
         else:
@@ -289,40 +290,59 @@ class UIData:
 class StatusWindow:
     gfx = "./content/gfx/gui/"
     """Collection of elements that describe character/monster"""
-    def __init__(self):
-        self.portrait = Graphic("./content/gfx/sprites/reimu_portrait.png")
+    def __init__(self, creatures_table):
+        #test graphic
+        self.health_bar_gfx = HorizontalBar(self.gfx+"health_bar.png")
+
+        # Get data from here.
+        self.table = creatures_table
+
+        self.portrait_list = {}
+        self.setup_portraits()
+
+        self.portrait = StatusElement(None, (0.0,0.0))
+        self.health_bar = StatusElement(None, (80.0,80.0))
         self.stats = None
-        self.health_bar = HorizontalBar(self.gfx+"health_bar.png")
         self.visible = True
 
         self.elements = []
 
-        self.add_element(self.health_bar,(120.0, 50.0))
-        self.add_element(self.portrait,(0.0,0.0))
+        self.add_element(self.health_bar)
+        self.add_element(self.portrait)
 
-    def add_element(self, element, position):
-        self.elements += [(element, position)]
+    def add_element(self, element):
+        self.elements += [element]
 
-    def load_stats(self, stats):
-        self.stats = stats
-        self.health_bar.load_stats(self.stats.hp, self.stats.MAX_HP)
-        self.visible = True
+    def setup_portraits(self):
+        for c in self.table:
+            self.portrait_list[c] = Graphic("./content/gfx/sprites/"+c+"_portrait.png")
+
+    def set_selected(self, name):
+        self.portrait.element = self.portrait_list[name]
+        self.health_bar.element = self.health_bar_gfx
+        hp = self.table[name].hp
+        max_hp = self.table[name].max_hp
+        self.health_bar_gfx.set_value(hp, max_hp)
 
     def window_off(self):
         self.visible = False
 
     def update(self):
-        self.health_bar.set_value(self.stats.hp)
+        pass
 
     def draw(self):
         for e in self.elements:
-            element, position = e
-            x,y = position
-            glPushMatrix()
-            glTranslate(x,y,0)
-            element.draw()
-            glPopMatrix()
+            if e.element:
+                x,y = e.position
+                glPushMatrix()
+                glTranslate(x,y,0)
+                e.element.draw()
+                glPopMatrix()
 
+class StatusElement:
+    def __init__(self, element, position):
+        self.element = element
+        self.position = position
 
 class HorizontalBar:
     """Bar that has a length that depends on the value, eg. a health bar"""
@@ -332,15 +352,11 @@ class HorizontalBar:
         self.image.w = self.base_length
         self.image.setup_draw()
         self.max_value = None
-        self.current_value = None
-
-    def load_stats(self, current_value, max_value):
-        self.current_value = current_value
-        self.max_value = max_value
-
-    def set_value(self, value):
-        self.current_value = float(value)
-        self.image.w = self.current_value/self.max_value * self.base_length
+        
+    def set_value(self, value, max_value):
+        value = float(value)
+        max_value = float(max_value)
+        self.image.w = value/max_value * self.base_length
 
     def set_max(self, max_value):
         self.max_value = float(max_value)
