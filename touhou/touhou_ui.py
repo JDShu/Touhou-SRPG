@@ -27,6 +27,8 @@ from core.ui import UI, Menu
 from touhou_graphic import MapGraphic, Highlight
 from touhou_names import *
 
+
+L_CLICK, R_CLICK, L_RELEASE, R_RELEASE = range(4)
 class TouhouUI(UI):
     
     def __init__(self, level):
@@ -231,29 +233,46 @@ class TouhouUI(UI):
         self.data.mode = I_BROWSE
         self.data.locked = False
 
-    def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
+    def user_action(self, mouse_state):
         new_left, new_middle, new_right = mouse_state
-        #what to execute depends on the previous and current mouse states
-        if not self.data.locked:
-            if new_right and not self.right:
-                if self.data.mode == I_BROWSE:
-                    self.browse_right_click(mouse_coords)
-                elif self.data.mode == I_MOVE:
-                    self.move_right_click(mouse_coords)
-                elif self.data.mode == I_ATTACK:
-                    self.attack_right_click(mouse_coords)
+        if new_left and not self.left:
+            return L_CLICK
+        elif not new_left and self.left:
+            return L_RELEASE
+        elif new_right and not self.right:
+            return R_CLICK
+        elif not new_right and self.right:
+            return R_RELEASE
 
-            if new_left and not self.left:
-                if self.data.mode == I_BROWSE:
-                    self.browse_left_click(mouse_coords)
-        
-            if not new_left and self.left:
-                if self.data.mode == I_BROWSE:
-                    self.browse_left_release(mouse_coords)
-                elif self.data.mode == I_MOVE:
-                    self.move_left_release(mouse_coords)
-                elif self.data.mode == I_ATTACK:
-                    self.attack_left_release(mouse_coords)
+    def browse_actions(self, action, mouse_coords):
+        if action == L_CLICK:
+            self.browse_left_click(mouse_coords)
+        elif action == L_RELEASE:
+            self.browse_left_release(mouse_coords)
+        elif action == R_CLICK:
+            self.browse_right_click(mouse_coords)
+
+    def move_actions(self, action, mouse_coords):
+        if action == L_RELEASE:
+            self.move_left_release(mouse_coords)
+        elif action == R_CLICK:
+            self.move_right_click(mouse_coords)
+            
+    def attack_actions(self, action, mouse_coords):
+        if action == L_RELEASE:
+            self.attack_left_release(mouse_coords)
+        elif action == R_CLICK:
+            self.attack_right_click(mouse_coords)
+
+    def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
+        if not self.data.locked:
+            action = self.user_action(mouse_state)
+            if self.data.mode == I_BROWSE:
+                self.browse_actions(action, mouse_coords)
+            elif self.data.mode == I_MOVE:
+                self.move_actions(action, mouse_coords)
+            elif self.data.mode == I_ATTACK:
+                self.attack_actions(action, mouse_coords)
 
         self.determine_hover_square(mouse_coords, map_offset)
 
