@@ -151,15 +151,16 @@ class GraphicPositioned:
         self.visible = False
 
     def set_pos(self,pos):
-        self.pos = (pos[0],pos[1],0)
+        self.pos = pos[0],pos[1]
 
     def get_pos(self):
         return self.pos
 
     def draw(self):
         if self.visible:
+            x,y = self.pos
             glPushMatrix()
-            glTranslate(*self.pos)
+            glTranslate(x,y,0.0)
             self.obj.draw()
             glPopMatrix()
 

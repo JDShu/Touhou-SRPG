@@ -83,10 +83,11 @@ class TouhouPlay(IOSession):
             self.level.creatures[target].change_hp(-damage)
             print e.attacker, "attacks", target, "for", damage
             print target, "has", self.level.creatures[target].hp, "hp"
+            self.ui.set_selected_object(e.target)
             if self.level.creatures[target].hp <= 0:
                 print target, "died."
                 self.level.kill_creature(target)
-            
+                self.ui.unselect()
 
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:

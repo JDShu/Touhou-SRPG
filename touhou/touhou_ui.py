@@ -144,17 +144,23 @@ class TouhouUI(UI):
 
     #set selected and current menu to the one specified by given coordinates.
     def set_selected_object(self, pos):
-        x,y,z = pos
+        x,y = pos
         if self.map.grid[x][y]:
             name = self.map.grid[x][y].name
             self.data.selected = name
             try:
                 self.current_menu = self.menus[name]
-                self.status_window.obj.set_selected(name)
             except KeyError:
-                print "No Menu for", name, "."
+                pass
+           
+            self.status_window.obj.set_selected(name)                        
         else:
             self.current_menu = None
+
+    def unselect(self):
+        self.data.selected = None
+        self.current_menu = None
+        self.status_window.obj.unselect()
 
     def browse_right_click(self, mouse_coords):
         if not self.current_menu:
@@ -205,7 +211,7 @@ class TouhouUI(UI):
         pass
 
     def move_left_release(self, mouse_coords):
-        x,y,z = self.hover_tile.pos
+        x,y = self.hover_tile.pos
         if (x,y) in self.highlight.set:
             pygame.event.post(Move_Event(self.data.selected, (x,y)))
             self.data.locked = True
@@ -213,7 +219,7 @@ class TouhouUI(UI):
             self.highlight.off()
 
     def attack_left_release(self, mouse_coords):
-        x,y,z = self.hover_tile.pos
+        x,y = self.hover_tile.pos
         if (x,y) in self.highlight.set:
             pygame.event.post(Attack_Event(self.data.selected, (x,y)))
             self.current_menu = None
@@ -256,7 +262,7 @@ class TouhouUI(UI):
         self.mouse_coords = x,y = mouse_coords
         
         if self.current_menu:
-            x2, y2, z2 = self.current_menu.get_pos()
+            x2, y2 = self.current_menu.get_pos()
             rel_coords = (x-x2,y-y2)
             self.current_menu.obj.update(rel_coords)
 
@@ -324,6 +330,10 @@ class StatusWindow:
         max_hp = self.table[name].max_hp
         self.health_bar_gfx.set_value(hp, max_hp)
 
+    def unselect(self):
+        self.portrait.element = None
+        self.health_bar.element = None
+
     def window_off(self):
         self.visible = False
 
@@ -357,6 +367,7 @@ class HorizontalBar:
         value = float(value)
         max_value = float(max_value)
         self.image.w = value/max_value * self.base_length
+        self.image.setup_draw()
 
     def set_max(self, max_value):
         self.max_value = float(max_value)
