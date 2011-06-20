@@ -17,6 +17,7 @@
 '''
 
 import pygame
+from math import *
 
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicList
 from core.graphics.animated import Animated
@@ -157,7 +158,8 @@ class TouhouMap:
         self.setup_map(size) 
         self.ground = None
         self.load_graphics()
-        
+        self.generate_constants()
+
     # Must be called in-game to load data into gpu.
     def load_graphics(self):
         self.ground_tile = Graphic(texture="./content/gfx/sprites/grass.png")
@@ -223,3 +225,16 @@ class TouhouMap:
         self.grid[x][y] = self.grid[old_x][old_y]
         self.grid[old_x][old_y] = None
         self.obj_list[obj.name] = (x,y)
+        
+    # Constants we need to calculate mouse position and hovering highlight
+    def generate_constants(self):
+        off_x, off_y = self.TILE_OFFSET[0], self.TILE_OFFSET[1]
+        off_x = float(off_x)
+        off_y = float(off_y)
+        self.theta_x = atan(off_x/off_y)
+        self.theta_y = atan(off_y/off_x)
+
+        #dirty adjustment for highlight precision
+        self.hyp = hypot(off_x-3, off_y-3)
+        
+        self.max_x, self.max_y = self.w*self.hyp, self.h*self.hyp

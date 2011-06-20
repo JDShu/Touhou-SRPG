@@ -36,8 +36,6 @@ class TouhouUI(UI):
         self.level = level
         self.map = level.map
         
-        self.generate_constants()
-        
         self.menus = {}
         self.data = UIData()
 
@@ -62,16 +60,6 @@ class TouhouUI(UI):
 
         #One menu showing at any time
         self.current_menu = None
-
-     # Constants we need to calculate mouse position and hovering highlight
-    def generate_constants(self):
-        self.off_x, self.off_y = self.map.TILE_OFFSET[0], self.map.TILE_OFFSET[1]
-        self.off_x = float(self.off_x)
-        self.off_y = float(self.off_y)
-        self.theta_x = atan(self.off_x/self.off_y)
-        self.theta_y = atan(self.off_y/self.off_x)
-        self.hyp = hypot(self.off_x-3, self.off_y-3) #dirty adjustment for select highlight precision
-        self.max_x, self.max_y = self.map.w*self.hyp, self.map.h*self.hyp
        
     def generate_menus(self):
         self.main_menu = Menu("Main")
@@ -109,8 +97,8 @@ class TouhouUI(UI):
 
     # Attach a name to a menu and add to ui list.
     def add_menu(self, name, menu):
-        self.menus[name] = menu #register
-        self.add(menu) #add to graphics queue
+        self.menus[name] = menu
+        self.add(menu)
         
     # Quit program for now.
     def option_quit(self):
@@ -132,15 +120,15 @@ class TouhouUI(UI):
         self.highlight.on()
 
     def determine_hover_square(self, mouse_coords, map_offset):
-        x = mouse_coords[0]-map_offset[0] - self.off_x
+        x = mouse_coords[0]-map_offset[0] - self.map.TILE_OFFSET[0]
         y = mouse_coords[1]-map_offset[1]
         
-        new_x = x*cos(self.theta_x) + y*sin(self.theta_x)
-        new_y = -x*sin(self.theta_y) + y*cos(self.theta_y)
+        new_x = x*cos(self.map.theta_x) + y*sin(self.map.theta_x)
+        new_y = -x*sin(self.map.theta_y) + y*cos(self.map.theta_y)
         
-        if 0 < new_x < self.max_x and 0 < new_y < self.max_y:
-            hov_x = int(new_x/self.hyp)
-            hov_y = int(new_y/self.hyp)
+        if 0 < new_x < self.map.max_x and 0 < new_y < self.map.max_y:
+            hov_x = int(new_x/self.map.hyp)
+            hov_y = int(new_y/self.map.hyp)
             self.data.hover = hov_x, hov_y
             self.hover_tile.set_pos(self.data.hover)            
 
@@ -197,7 +185,6 @@ class TouhouUI(UI):
             self.current_menu.obj.clear_pending()
             self.current_menu.make_invisible()
             self.hover_tile.make_visible()
-            #self.current_menu = None
     
     def move_right_click(self, mouse_coords):
         self.data.mode = I_BROWSE
