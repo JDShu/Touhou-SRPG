@@ -18,7 +18,7 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from tools.editor import * 
+from tools.editor import *
 
 def main():
     run()

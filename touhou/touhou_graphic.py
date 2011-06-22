@@ -30,7 +30,7 @@ class MapGraphic(GraphicPositioned):
     TILE_OFFSET = (45.0,30.0)
     TILE_DIMENSIONS = (90.0,60.0)
     TILE_DATA = (TILE_OFFSET, TILE_DIMENSIONS)
-    
+
     def __init__(self, graphic, pos, name, details=None):
         GraphicPositioned.__init__(self, graphic, (0,0))
         self.pos = pos
@@ -45,10 +45,10 @@ class MapGraphic(GraphicPositioned):
         self.pixel_increment = self.TILE_OFFSET[0]/self.increments, self.TILE_OFFSET[1]/self.increments
         self.path = None
         self.visible = True
-        
+
         self.begin_turn_function = None
         self.end_turn_function = None
-        
+
     def begin_turn(self):
         if self.begin_turn_function:
             self.begin_turn_function
@@ -85,11 +85,11 @@ class MapGraphic(GraphicPositioned):
                     direction = (self.path[0][0]-self.pos[0], self.path[0][1]-self.pos[1])
                     self.signs = self.calculate_signs(*direction)
                     self.start_moving(direction)
-                    
-                pygame.event.post(Update_Map(self))                
+
+                pygame.event.post(Update_Map(self))
             else:
                 self.increments_moved += 1
-        
+
     #calculate draw coordinate signs from unit coordinate
     def calculate_signs(self,x,y):
         if x == 1:
@@ -100,7 +100,7 @@ class MapGraphic(GraphicPositioned):
             return (1,-1)
         else:
             return (-1,1)
-        
+
     def draw(self):
         if self.visible:
             glPushMatrix()
@@ -113,7 +113,7 @@ class MapGraphic(GraphicPositioned):
                 inc_x = sx*self.TILE_OFFSET[0]*fraction
                 inc_y = sy*self.TILE_OFFSET[1]*fraction
                 glTranslate(inc_x, inc_y, 0.0)
-            
+
             self.graphic.draw()
             glPopMatrix()
 
@@ -139,7 +139,7 @@ class Highlight:
             for tile in self.set:
                 self.graphic.pos = tile
                 self.graphic.draw()
-            
+
 #signal that the map needs to be updated
 def Update_Map(map_obj):
     e = pygame.event.Event(OBJECTEVENT, subtype=OBJECTEVENT, obj=map_obj)

@@ -44,13 +44,13 @@ class PlaySession(InputSession):
 
         Variables:
         session: specific module that runs on iso engine
-        
+
         """
         InputSession.__init__(self)
-                
+
     def process( self ):
         """One pass of the play session loop of the running module"""
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -64,29 +64,29 @@ class PlaySession(InputSession):
 
                 # what got clicked
                 self.session.process_click(mouse_coords, mouse_state)
-                
+
             else:
                 self.session.process_event(event, mouse_coords, mouse_state)
-                
+
         self.session.process_keybuffer(self.keybuffer)
-                
+
         return True
-    
+
     def draw( self ):
         """ Draw everything after one pass of the module loop is processed"""
-        
+
         #draw map
         glPushMatrix()
         glTranslatef(self.left_offset,self.up_offset,0.0)
         self.session.draw_relative()
-        
+
         glPopMatrix()
         glPushMatrix()
         self.session.draw_absolute()
         glPopMatrix()
 
     def get_mouse_square(self, mouse_x, mouse_y ):
-        
+
         t_offsets = self.play_state.level.tile_offsets
         t_dimensions = self.play_state.level.tile_dimensions
         mouse_x -= self.left_offset + t_offsets[0]

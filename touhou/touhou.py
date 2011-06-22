@@ -30,7 +30,7 @@ class Touhou(Module):
     def __init__(self):
         Module.__init__(self)
         self.name = "Touhou SRPG"
-                
+
     def start(self, dim):
         pygame.init()
         pygame.display.set_caption(self.name)
@@ -38,7 +38,7 @@ class Touhou(Module):
 
         #Setup OpenGL
         glOrtho(0.0, dim[0], 0.0, dim[1],-1.0,1.0)
-        glClearColor(0.0,0.0,0.0,0.0) 
+        glClearColor(0.0,0.0,0.0,0.0)
 
         self.level_state = touhou_level.TouhouLevel()
         self.level_state.new_map((10,10))

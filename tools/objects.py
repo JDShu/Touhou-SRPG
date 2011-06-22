@@ -23,7 +23,7 @@ from math import *
 
 class Graphic:
     def __init__( self, x,y,a,filename = None, scale_factor = 1.0, w = None, h = None):
-        
+
         self.a = a
         self.x, self.y = x,y
         self.filename = filename
@@ -44,13 +44,13 @@ class Graphic:
             self.w = w
         if h:
             self.h = h
-        
+
         self.w *= scale_factor
         self.h *= scale_factor
-        
+
         #pregenerate render code
         self.draw_list = glGenLists(2)
-        self.draw_list_2 = self.draw_list + 1 
+        self.draw_list_2 = self.draw_list + 1
         self.setup_draw()
         self.dimensions = self.x, self.y, self.w, self.h
 
@@ -60,7 +60,7 @@ class Graphic:
         #print "position set to", x, y
 
     def setup_draw( self ):
-        
+
         glNewList(self.draw_list, GL_COMPILE)
         glPushMatrix()
         glEnable(GL_BLEND)
@@ -87,15 +87,15 @@ class Graphic:
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
         glPopMatrix()
-        
+
         glEndList()
-        
+
     def draw( self ):
         #set up
         glCallList(self.draw_list)
         glTranslatef(self.x,self.y,0.0)
         glCallList(self.draw_list_2)
-    
+
     def process_click(self, x, y):
         pass
 

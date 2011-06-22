@@ -27,7 +27,7 @@ class EditorWindow:
 
         builder = gtk.Builder()
         builder.add_from_file("tools/editor.glade")
-        
+
         self.builder = builder
 
         builder.connect_signals(self)
@@ -65,7 +65,7 @@ class EditorWindow:
         self.load_sprdata_dialog = builder.get_object("load_sprdata_dialog")
 
         self.new_action_dialog = builder.get_object("new_action_dialog")
-        
+
         self.new_action_name = builder.get_object("action_name_entry")
 
         gtk.timeout_add(500, self.draw_preview, None)
@@ -86,7 +86,7 @@ class EditorWindow:
 
         hbox.add(self.select_action)
         hbox.add(self.select_facing)
-        
+
         self.select_action.show()
         self.select_facing.show()
 
@@ -98,16 +98,16 @@ class EditorWindow:
 
     def refresh(self, data):
         self.draw()
-    
+
     def draw_preview(self, obj):
         glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.preview_gl)
-        gldrawable.gl_begin(glcontext)        
+        gldrawable.gl_begin(glcontext)
         glClear(GL_COLOR_BUFFER_BIT)
         if self.preview and self.show_preview:
             if self.mode == PLAY:
                 self.preview.update()
-            self.preview.draw()            
+            self.preview.draw()
         glFlush()
         gldrawable.gl_end()
         return True
@@ -125,7 +125,7 @@ class EditorWindow:
                 self.builder.get_object("adjustmentf").set_upper(frame_length)
             except AttributeError:
                 self.show_preview = False
-    
+
     def change_action(self, combobox, data):
         if self.preview:
             action = self.select_action.get_active_text()
@@ -145,7 +145,7 @@ class EditorWindow:
         self.make_rect = True
         self.x, self.y = event.x, event.y
         self.x2, self.y2 = event.x, event.y
-        
+
     def mouse_button_release(self, drawing, event, data):
         self.make_rect = False
         x,y = self.x, self.y
@@ -196,45 +196,45 @@ class EditorWindow:
         drawing = self.builder.get_object("drawingarea")
         glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
-        
+
         gldrawable.gl_begin(glcontext)
         glClear(GL_COLOR_BUFFER_BIT)
-        
+
         if self.spritesheet:
             self.spritesheet.draw()
-            
+
         glBegin(GL_LINE_LOOP)
         glVertex(x, y, 0)
         glVertex(x2, y, 0)
         glVertex(x2, y2, 0)
         glVertex(x, y2, 0)
-        glEnd()        
-        
+        glEnd()
+
         if gldrawable.is_double_buffered():
             gldrawable.swap_buffers()
         else:
             glFlush()
-            
+
         gldrawable.gl_end()
-        
+
     def mouse_move(self, drawing, event, data):
         if self.make_rect:
             self.w, self.h = drawing.get_window().get_size()
             glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
             gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
-            
+
             x2, y2 = event.x, event.y
             y2 = self.h - y2
-            
+
             x,y = self.x,self.y
             y = self.h - y
 
             self.set_box_coords(x,y,x2,y2)
             self.draw()
-           
+
     def load_spritesheet(self, filename):
-        if filename[-4:] == ".png":            
-            
+        if filename[-4:] == ".png":
+
             glcontext = gtk.gtkgl.widget_get_gl_context(self.drawing_area)
             gldrawable = gtk.gtkgl.widget_get_gl_drawable(self.drawing_area)
             gldrawable.gl_begin(glcontext)
@@ -246,7 +246,7 @@ class EditorWindow:
                 gldrawable.swap_buffers()
             else:
                 glFlush()
-            
+
             gldrawable.gl_end()
 
             glcontext = gtk.gtkgl.widget_get_gl_context(self.preview_gl)
@@ -265,7 +265,7 @@ class EditorWindow:
         w, h = drawing.get_window().get_size()
 
         gldrawable.gl_begin(glcontext)
-        
+
         glClearColor(0.0,0.0,0.0,0.0)
         glClear(GL_COLOR_BUFFER_BIT)
         glViewport (0, 0, w, h)
@@ -283,7 +283,7 @@ class EditorWindow:
         glcontext = gtk.gtkgl.widget_get_gl_context(drawing)
         gldrawable = gtk.gtkgl.widget_get_gl_drawable(drawing)
         gldrawable.gl_begin(glcontext)
-        
+
         glViewport (0, 0, w, h)
         glMatrixMode (GL_PROJECTION)
         glLoadIdentity ()
@@ -297,7 +297,7 @@ class EditorWindow:
             glFlush()
 
         gldrawable.gl_end()
-        
+
         self.draw()
 
         return True
@@ -353,7 +353,7 @@ class EditorWindow:
 
     def load_sprite(self, event):
         self.sprite_dialog.response(gtk.RESPONSE_ACCEPT)
-        
+
     def load_sprdata_dialog(self, event):
         self.load_sprdata_dialog.response(gtk.RESPONSE_ACCEPT)
 
@@ -425,7 +425,7 @@ class EditorWindow:
         t = self.sprite.frames[action][convert(facing)][frame_number].get_tuple()
         if t:
             x,y,w,h = t
-            self.x_button.set_value(x) 
+            self.x_button.set_value(x)
             self.y_button.set_value(y)
             self.w_button.set_value(w)
             self.h_button.set_value(h)

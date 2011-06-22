@@ -21,7 +21,7 @@ N,S,E,W = range(4)
 class Sprite:
     def __init__(self):
         self.frames = {}
-        
+
     def new_action(self, action_name, num_frames):
         action = {}
         action[N] = [None]*num_frames
@@ -38,7 +38,7 @@ class Sprite:
 
     def set_frame(self, action, facing, frame, data):
         self.frames[action][facing][frame] = data
-        
+
 class FrameData:
     def __init__(self):
         self.x, self.y = None, None
@@ -46,7 +46,7 @@ class FrameData:
 
     def set_pos(self, pos):
         self.x, self.y = pos
-        
+
     def set_dim(self, dim):
         self.w, self.h = dim
 

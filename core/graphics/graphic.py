@@ -41,23 +41,23 @@ class Graphic:
             self.w = w
         if h:
             self.h = h
-        
+
         self.w *= scale_factor
         self.h *= scale_factor
-        
+
         self.draw_list = glGenLists(2)
         self.setup_draw()
 
     def set_w(self,w):
         self.w = w
         self.setup_draw()
-    
+
     def set_h(self,h):
         self.h = h
         self.setup_draw()
-    
+
     def setup_draw( self ):
-        
+
         glNewList(self.draw_list, GL_COMPILE)
         glPushMatrix()
         glEnable(GL_BLEND)
@@ -81,21 +81,21 @@ class Graphic:
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
         glPopMatrix()
-        
+
         glEndList()
-        
+
     def draw( self):
         glPushMatrix()
         glCallList(self.draw_list)
         glPopMatrix()
-    
+
     def draw_section(self,dim):
         pix_x,pix_y,pix_w,pix_h = dim
         x = float(pix_x)/float(self.w)
         y = float(pix_y)/float(self.h)
         w = float(pix_w)/float(self.w)
         h = float(pix_h)/float(self.h)
-        
+
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
@@ -103,8 +103,8 @@ class Graphic:
         glEnable( GL_TEXTURE_2D )
         glBindTexture( GL_TEXTURE_2D, self.texture )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )        
-        
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
+
         #draw
         glColor4f(*color)
         glBegin(GL_QUADS)
@@ -170,8 +170,8 @@ class GraphicAbsPositioned(GraphicPositioned):
         self.viewport = glGetIntegerv(GL_VIEWPORT)
 
     def draw(self):
-	glPushMatrix()
+        glPushMatrix()
         glLoadIdentity()
-        glOrtho(self.viewport[0], self.viewport[2], self.viewport[1], self.viewport[3],-1.0,1.0)        
+        glOrtho(self.viewport[0], self.viewport[2], self.viewport[1], self.viewport[3],-1.0,1.0)
         GraphicPositioned.draw(self)
         glPopMatrix()

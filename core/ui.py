@@ -83,7 +83,7 @@ class Menu:
         self.pending = None
 
     def set_body_graphic(self, graphic):
-        self.body_graphic = Graphic(graphic)        
+        self.body_graphic = Graphic(graphic)
 
     def set_w(self, w):
         self.w = w
@@ -114,7 +114,7 @@ class Menu:
 
     def set_entry_graphic(self, graphic):
         self.entry_graphic = Graphic(graphic)
-        
+
     def set_entry_hover_graphic(self, graphic):
         self.entry_hover_graphic = Graphic(graphic)
 
@@ -140,12 +140,12 @@ class Menu:
             glTranslate(0, self.entry_height,0)
 
         self.print_text(self.title)
-        
+
         glPopMatrix()
 
     def print_text(self, text):
         self.font.glPrint(0,0,text)
-        
+
     def update(self, mouse_coords):
         x,y = mouse_coords
         if x < 0 or x > self.w or y >= -self.header_height or y <= -self.h:

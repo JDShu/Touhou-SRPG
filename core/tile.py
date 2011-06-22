@@ -20,7 +20,7 @@
 class Tile(Graphic):
     def __init__(self, image_file):
         Graphic.__init__(self, 1.0, image_file)
-        
+
     def draw(self, x, y):
         """draw according to coordinate on grid"""
         glPushMatrix()

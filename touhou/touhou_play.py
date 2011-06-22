@@ -44,12 +44,12 @@ class TouhouPlay(IOSession):
 
         pygame.time.set_timer(USEREVENT+1,200)
         pygame.time.set_timer(USEREVENT+2,50)
-        
+
         self.register_event(USEREVENT+1,self.map.frame_update) # For animated sprites
         self.register_event(USEREVENT+2,self.map.update_objects) # Movement
         self.register_event(USEREVENT+3,self.ui_events)
         self.register_event(USEREVENT+4,self.object_events)
-      
+
     def process(self, event_list):
         #self.test_reimu.update()
         self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.x,self.y))

@@ -23,7 +23,7 @@ class Module:
     def __init__(self):
         self.session = None
         self.session_list = {}
-        
+
     def start_session(self):
         self.session.start()
 

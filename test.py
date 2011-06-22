@@ -45,7 +45,7 @@ menus["suika"] = [M_MOVE, M_ATTACK]
 
 def make_level():
     level = TouhouLevel()
-    level.new_map((10,10))    
+    level.new_map((10,10))
 
     for c in creatures:
         data = new_data(**c)

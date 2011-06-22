@@ -31,7 +31,7 @@ class Game:
 
     def stop(self):
         self.running = False
-        
+
     def process(self):
         while(self.running):
             self.module.process()

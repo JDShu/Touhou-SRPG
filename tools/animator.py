@@ -51,12 +51,12 @@ def f():
 def set_up(width, height):
     font = glFreeType.font_data( "free_sans.ttf", 30 )
     glOrtho(0.0, width, 0.0, height,-1.0,1.0)
-    glClearColor(0.0,0.0,0.0,0.0)    
-    
+    glClearColor(0.0,0.0,0.0,0.0)
+
     widgets_list["object_text"] = widgets.Text_Box(0,500, True, "reimu")
     widgets_list["object_button"] = widgets.Button(25, 560, "button", "button_down", load_spritesheet, (widgets_list["object_text"],))
     widgets_list["spritesheet"] = widgets.Null_Widget()
-    
+
     widgets_list["action_name"] = widgets.Text_Box(200,500, True, "idle-s")
     widgets_list["frame_number"] = widgets.Int_Box(200,480, True, "0")
     widgets_list["frame_x"] = widgets.Int_Box(200,460, True, "0")
@@ -71,7 +71,7 @@ def set_up(width, height):
     pygame.time.set_timer(pygame.USEREVENT+1, 300)
     global animated
     try:
-    
+
         animated = widgets.Animated(600,470,"reimu")
         #print animated.data.actions
         for a in animated.data.actions:
@@ -82,8 +82,8 @@ def set_up(width, height):
 
     except:
         print "Load Failed"
-        
-    
+
+
 
 def process():
     for event in pygame.event.get():
@@ -102,13 +102,13 @@ def process():
             global animated
             if animated:
                 animated.update()
-    
-    
+
+
     return True
-    
+
 def draw():
     glClear(GL_COLOR_BUFFER_BIT)
-        
+
     for w in widgets_list:
         widgets_list[w].draw()
 
@@ -119,9 +119,9 @@ def draw():
     pygame.display.flip()
 
 def load_spritesheet(spritesheet):
-    
+
     filename = spritesheet.text()
-    
+
     try:
         open(filename + ".png")
     except IOError:
@@ -130,13 +130,13 @@ def load_spritesheet(spritesheet):
     try:
         open(filename + ".spr")
         print "sprite file found"
-        
+
     except IOError:
         print "No sprite file, creating new one"
         F = open(filename + ".spr", "wb")
         pickle.dump(sprite_rules.Sprite(filename))
         F.close()
-    
+
     widgets_list["spritesheet"] = objects.Graphic(0,0,1.0, filename,1.0)
     print widgets_list["spritesheet"].filename
 

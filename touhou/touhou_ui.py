@@ -30,12 +30,12 @@ from touhou_names import *
 
 L_CLICK, R_CLICK, L_RELEASE, R_RELEASE = range(4)
 class TouhouUI(UI):
-    
+
     def __init__(self, level):
 
         self.level = level
         self.map = level.map
-        
+
         self.menus = {}
         self.data = UIData()
 
@@ -43,14 +43,14 @@ class TouhouUI(UI):
         self.left, self.middle, self.right = (0,0,0)
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
-        
+
         self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
         self.highlight = Highlight(hover_graphic)
-                
+
         self.status_window = StatusWindow(self.level.creatures)
         self.status_window = GraphicAbsPositioned(self.status_window, (0,0))
         self.status_window.make_visible()
-        
+
         # Status window drawn after sprites.
         self.add(self.status_window)
 
@@ -60,7 +60,7 @@ class TouhouUI(UI):
 
         #One menu showing at any time
         self.current_menu = None
-       
+
     def generate_menus(self):
         self.main_menu = Menu("Main")
         self.main_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
@@ -85,7 +85,7 @@ class TouhouUI(UI):
                     menu.add_entry("Move", self.option_move)
                 elif option == M_ATTACK:
                     menu.add_entry("Attack", self.option_attack)
-            
+
             menu_placed = GraphicAbsPositioned(menu,(0,0))
             self.add_menu(m, menu_placed)
 
@@ -99,7 +99,7 @@ class TouhouUI(UI):
     def add_menu(self, name, menu):
         self.menus[name] = menu
         self.add(menu)
-        
+
     # Quit program for now.
     def option_quit(self):
         pygame.event.post(pygame.event.Event(QUIT))
@@ -129,8 +129,8 @@ class TouhouUI(UI):
                 self.current_menu = self.menus[name]
             except KeyError:
                 pass
-           
-            self.status_window.obj.set_selected(name)                        
+
+            self.status_window.obj.set_selected(name)
         else:
             self.current_menu = None
 
@@ -143,7 +143,7 @@ class TouhouUI(UI):
         if not self.current_menu:
             self.current_menu = self.main_menu_placed
             self.hover_tile.make_invisible()
-               
+
         if not self.current_menu.visible:
             self.current_menu.set_pos(mouse_coords)
             self.current_menu.make_visible()
@@ -172,7 +172,7 @@ class TouhouUI(UI):
             self.current_menu.obj.clear_pending()
             self.current_menu.make_invisible()
             self.hover_tile.make_visible()
-    
+
     def move_right_click(self, mouse_coords):
         self.data.mode = I_BROWSE
         self.highlight.off()
@@ -231,7 +231,7 @@ class TouhouUI(UI):
             self.move_left_release(mouse_coords)
         elif action == R_CLICK:
             self.move_right_click(mouse_coords)
-            
+
     def attack_actions(self, action, mouse_coords):
         if action == L_RELEASE:
             self.attack_left_release(mouse_coords)
@@ -255,7 +255,7 @@ class TouhouUI(UI):
         # now we can update the mouse state
         self.left, self.middle, self.right = mouse_state
         self.mouse_coords = x,y = mouse_coords
-        
+
         if self.current_menu:
             x2, y2 = self.current_menu.get_pos()
             rel_coords = (x-x2,y-y2)
@@ -357,7 +357,7 @@ class HorizontalBar:
         self.image.w = self.base_length
         self.image.setup_draw()
         self.max_value = None
-        
+
     def set_value(self, value, max_value):
         value = float(value)
         max_value = float(max_value)

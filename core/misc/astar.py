@@ -24,13 +24,13 @@ class Node():
         self.x = x
         self.y = y
         self.open = True
-        
+
     def open_node( self ):
         self.open = True
 
     def close_node( self ):
         self.open = False
-        
+
     def set_parent( self, parent ):
         self.parent = parent
 
@@ -52,7 +52,7 @@ BLOCKED = 1
 class Grid():
     def __init__( self , touhou_map):
         self.grid = []
-        
+
         for row in touhou_map.grid:
             temp = []
             for element in row:
@@ -60,9 +60,9 @@ class Grid():
                     temp += [None]
                 else:
                     temp += [1]
-            
+
             self.grid += [temp]
-        
+
         self.width, self.height = touhou_map.w, touhou_map.h
 
     def insert_block( self, x, y ):
@@ -70,7 +70,7 @@ class Grid():
 
     def insert_node( self, x, y, node):
         self.grid[x][y] = node
-        
+
     def print_grid( self ):
         for y in xrange(self.width):
             for x in xrange(self.height):
@@ -83,7 +83,7 @@ class Grid():
                 else:
                     print "?",
             print " "
-            
+
     def draw_path( self, path ):
         for sq in path:
             self.grid[sq[0]][sq[1]] = "X"
@@ -94,7 +94,7 @@ class Path():
     def __init__( self, input_grid, start, goal ):
         if start == goal:
             self.path = []
-            
+
         self.start = start
         self.goal = goal
         self.grid = copy.deepcopy(input_grid)
@@ -135,7 +135,7 @@ class Path():
                     self.grid.insert_node(g[0], g[1], goal_node)
                     reached_goal = True
         self.path = self._construct_path( current )
-                
+
     def _find_adjacents ( self, current ):
         adjacents = []
         if current[0] > 0:
@@ -164,7 +164,7 @@ class Path():
             path.append( current )
             current = self.grid.grid[x][y].parent
             x, y = current
-       
+
         return path
 
 def path(grid, start, goal):

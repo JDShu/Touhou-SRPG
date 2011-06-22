@@ -38,4 +38,3 @@ M_ATTACK = 1
 # Creature Types
 C_PLAYER = 0
 C_ENEMY = 1
-

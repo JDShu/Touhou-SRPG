@@ -34,7 +34,7 @@ def print_text(text,x,y,font):
 class Widget:
     def __init__(self):
         pass
-    
+
     def process_key(self, event):
         pass
 
@@ -53,7 +53,7 @@ class Input_Box(Widget):
         self.selected = False
         self.x, self.y = x, y
         self.modable = modable
-        
+
     def draw(self):
         pass
 
@@ -66,14 +66,14 @@ class Input_Box(Widget):
             self.selected = False
         if self.selected:
             print self, "selected"
-    
+
 class Int_Box(Input_Box):
     def __init__(self, x, y, modable = False, default = "0"):
-        
+
         Input_Box.__init__(self,x,y,modable)
         self.num = list(default)
         self.current = int(default)
-        
+
     def process_key(self, event):
         key = event.key
         if self.selected and self.modable:
@@ -139,12 +139,12 @@ class Button(Widget):
         self.gfx_current = self.gfx_idle
         self.function = function
         self.args = args
-        
+
     def process_click(self, mouse_x, mouse_y):
         mouse_y = 600 - mouse_y
         if self.x < mouse_x < self.x + self.w and self.y < mouse_y < self.y + self.h:
             self.gfx_current = self.gfx_pressed
-            
+
     def process_release(self, mouse_x, mouse_y):
         mouse_y = 600 - mouse_y
         if self.x < mouse_x < self.x + self.w and self.y < mouse_y < self.y + self.h:
@@ -153,7 +153,7 @@ class Button(Widget):
 
     def set_args(self, args):
         self.args = args
-                 
+
     def draw(self):
         self.gfx_current.draw()
 
@@ -188,7 +188,7 @@ class Selection_Box(Widget):
         glVertex(self.x + self.w, self.y, 0)
         glVertex(self.x + self.w, self.y + self.h, 0)
         glVertex(self.x, self.y + self.h, 0)
-        glEnd()        
+        glEnd()
 
 class Animated:
     def __init__(self, x,y,sprite_name):
@@ -202,7 +202,7 @@ class Animated:
         self.current_frame_dimensions = self.data.actions[self.current_action][self.current_frame_number]
         self.action = None
         self.w, self.h = self.current_frame_dimensions[2], self.current_frame_dimensions[3]
-        
+
         #self.image = None
 
     def set_sprite(self, sprite_name):
@@ -210,10 +210,10 @@ class Animated:
             self.data = pickle.load(open(sprite_name + ".spr"))
         except IOError:
             self.data = pickle.load(open(sprite_name + ".spr", "wb"))
-            
+
         texture_surface = pygame.image.load(sprite_name + ".png")
         texture_data = pygame.image.tostring( texture_surface, "RGBA", 1 )
-        
+
         self.image = glGenTextures(1)
         glBindTexture( GL_TEXTURE_2D, self.image )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST )
@@ -244,7 +244,7 @@ class Animated:
         w = float(pix_w)/float(self.tex_w)
         h = float(pix_h)/float(self.tex_h)
         y = 1.0 - y - h
-        
+
         glPushMatrix()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
@@ -253,8 +253,8 @@ class Animated:
         glBindTexture( GL_TEXTURE_2D, self.image )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
-        
-        
+
+
         #draw
         glTranslatef(self.x,self.y,0.0)
         glColor4f(*color)
@@ -271,4 +271,3 @@ class Animated:
         glDisable( GL_TEXTURE_2D )
         glDisable( GL_BLEND)
         glPopMatrix()
-        

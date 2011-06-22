@@ -68,7 +68,7 @@ class TouhouLevel:
         """generate list of coordinates that the character is able to move to"""
         w, h = self.map.w, self.map.h
         pos = self.map.obj_list[character]
-        
+
         accessible = set()
         accessible.add(pos)
         for i in xrange(speed):
@@ -112,7 +112,7 @@ class TouhouCreature:
         self.speed = None
         self.portrait = None
         self.type = None
-        
+
         #temporary attack value
         self.attack = 30
 
@@ -155,7 +155,7 @@ class TouhouMap:
     def __init__(self, size):
         self.obj_list = {}
         self.grid = []
-        self.setup_map(size) 
+        self.setup_map(size)
         self.ground = None
         self.load_graphics()
         self.generate_constants()
@@ -195,7 +195,7 @@ class TouhouMap:
         for obj in self.obj_list:
             x,y = self.obj_list[obj]
             self.grid[x][y].frame_update(e)
-          
+
     def draw_ground(self):
         temp = GraphicList()
         temp.add(self.ground)
@@ -208,12 +208,12 @@ class TouhouMap:
                 if self.grid[self.w-x-1][self.h-y-1]:
                     temp.add(self.grid[self.w-x-1][self.h-y-1])
         return temp
-    
+
     def place_object(self, obj, pos, name, details=None):
         temp = MapGraphic(obj,pos,name,details)
         self.grid[pos[0]][pos[1]] = temp
         self.obj_list[name] = pos
-        
+
     def remove_object(self, target):
         x, y = self.obj_list[target]
         self.grid[x][y] = None
@@ -225,7 +225,7 @@ class TouhouMap:
         self.grid[x][y] = self.grid[old_x][old_y]
         self.grid[old_x][old_y] = None
         self.obj_list[obj.name] = (x,y)
-        
+
     # Constants we need to calculate mouse position and hovering highlight
     def generate_constants(self):
         off_x, off_y = self.TILE_OFFSET[0], self.TILE_OFFSET[1]
@@ -236,16 +236,16 @@ class TouhouMap:
 
         #dirty adjustment for highlight precision
         self.hyp = hypot(off_x-3, off_y-3)
-        
+
         self.max_x, self.max_y = self.w*self.hyp, self.h*self.hyp
 
     def get_square(self, mouse_coords, map_offset):
         x = mouse_coords[0]-map_offset[0] - self.TILE_OFFSET[0]
         y = mouse_coords[1]-map_offset[1]
-        
+
         new_x = x*cos(self.theta_x) + y*sin(self.theta_x)
         new_y = -x*sin(self.theta_y) + y*cos(self.theta_y)
-        
+
         if 0 < new_x < self.max_x and 0 < new_y < self.max_y:
             hov_x = int(new_x/self.hyp)
             hov_y = int(new_y/self.hyp)

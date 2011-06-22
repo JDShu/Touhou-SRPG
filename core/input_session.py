@@ -40,7 +40,7 @@ class IOSession(Session):
         self.register_event(MOUSEBUTTONDOWN, self.update_mouse)
         self.register_event(MOUSEBUTTONUP, self.update_mouse)
         self.register_event(MOUSEMOTION, self.update_mouse)
-                
+
         self.mouse_coords = 0,0
         self.mouse_state = pygame.mouse.get_pressed()
 
@@ -77,6 +77,6 @@ class IOSession(Session):
             graphic.draw()
         glPopMatrix()
         pygame.display.flip()
-    
+
     def shift(self,value):
         self.x, self.y = self.x+value[0], self.y+value[1]

@@ -38,7 +38,7 @@ class Animated:
         else:
             self.data = Sprite()
             self.current_frame_data = (0,0,100,150)
-        
+
     def set_data(self, data):
         self.data = data
 
@@ -71,6 +71,6 @@ class Animated:
         if self.action and self.facing != None and self.current_frame != None:
             framedata = self.data.frames[self.action][self.facing][self.current_frame]
             self.current_frame_data = framedata.get_tuple()
-            
+
     def draw(self):
         self.spritesheet.draw_section(self.current_frame_data)

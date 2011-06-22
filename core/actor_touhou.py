@@ -21,7 +21,7 @@ import objects
 class Animation:
     def __init__(self):
         pass
-    
+
     def draw(self, x, y):
         pass
 
