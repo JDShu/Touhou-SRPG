@@ -29,6 +29,7 @@ from touhou_names import *
 
 
 L_CLICK, R_CLICK, L_RELEASE, R_RELEASE = range(4)
+
 class TouhouUI:
 
     def __init__(self, level):
@@ -60,25 +61,24 @@ class TouhouUI:
         #One menu showing at any time
         self.current_menu = None
 
+    def _create_menu(self, name=None):
+        menu = Menu(name)
+        menu.set_body_graphic("./content/gfx/gui/menu_body.png")
+        menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+        menu.set_w(80)
+        menu.set_header_height(30)
+        menu.set_entry_height(30)
+        return menu
+
     def generate_menus(self):
-        self.main_menu = Menu("Main")
-        self.main_menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        self.main_menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
-        self.main_menu.set_w(80)
-        self.main_menu.set_header_height(30)
-        self.main_menu.set_entry_height(30)
+        self.main_menu = self._create_menu("Main")
         self.main_menu.add_entry("Quit", self.option_quit)
         self.main_menu.add_entry("End Turn", self.end_turn)
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
         self.ui.add(self.main_menu_placed)
 
         for m in self.level.menus:
-            menu = Menu(m.capitalize())
-            menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-            menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
-            menu.set_w(80)
-            menu.set_header_height(30)
-            menu.set_entry_height(30)
+            menu = self._create_menu(m.capitalize())
             for option in self.level.menus[m]:
                 if option == M_MOVE:
                     menu.add_entry("Move", self.option_move)
