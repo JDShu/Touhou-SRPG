@@ -30,6 +30,10 @@ from touhou_names import *
 
 L_CLICK, R_CLICK, L_RELEASE, R_RELEASE = range(4)
 
+GFX_TILE_HOVER = "./content/gfx/sprites/hover.png"
+GFX_MENU_BODY = "./content/gfx/gui/menu_body.png"
+GFX_MENU_HOVER = "./content/gfx/gui/menu_option.png"
+
 class TouhouUI:
 
     def __init__(self, level):
@@ -42,7 +46,7 @@ class TouhouUI:
 
         self.left, self.middle, self.right = (0,0,0)
 
-        hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
+        hover_graphic = Graphic(GFX_TILE_HOVER, 0.5)
 
         self.hover_tile = MapGraphic(hover_graphic, (0,0), "hover")
         self.highlight = Highlight(hover_graphic)
@@ -63,8 +67,8 @@ class TouhouUI:
 
     def _create_menu(self, name=None):
         menu = Menu(name)
-        menu.set_body_graphic("./content/gfx/gui/menu_body.png")
-        menu.set_entry_hover_graphic("./content/gfx/gui/menu_option.png")
+        menu.set_body_graphic(GFX_MENU_BODY)
+        menu.set_entry_hover_graphic(GFX_MENU_HOVER)
         menu.set_w(80)
         menu.set_header_height(30)
         menu.set_entry_height(30)
