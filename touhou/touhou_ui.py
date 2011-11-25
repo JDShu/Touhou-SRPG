@@ -29,17 +29,16 @@ from touhou_names import *
 
 
 L_CLICK, R_CLICK, L_RELEASE, R_RELEASE = range(4)
-class TouhouUI(UI):
+class TouhouUI:
 
     def __init__(self, level):
-
+        self.ui = UI()
         self.level = level
         self.map = level.map
 
         self.menus = {}
         self.data = UIData()
 
-        UI.__init__(self)
         self.left, self.middle, self.right = (0,0,0)
 
         hover_graphic = Graphic("./content/gfx/sprites/hover.png", 0.5)
@@ -52,11 +51,11 @@ class TouhouUI(UI):
         self.status_window.make_visible()
 
         # Status window drawn after sprites.
-        self.add(self.status_window)
+        self.ui.add(self.status_window)
 
         # Highlights drawn before sprites.
-        self.add_under(self.hover_tile)
-        self.add_under(self.highlight)
+        self.ui.add_under(self.hover_tile)
+        self.ui.add_under(self.highlight)
 
         #One menu showing at any time
         self.current_menu = None
@@ -71,7 +70,7 @@ class TouhouUI(UI):
         self.main_menu.add_entry("Quit", self.option_quit)
         self.main_menu.add_entry("End Turn", self.end_turn)
         self.main_menu_placed = GraphicAbsPositioned(self.main_menu,(0,0))
-        self.add(self.main_menu_placed)
+        self.ui.add(self.main_menu_placed)
 
         for m in self.level.menus:
             menu = Menu(m.capitalize())
@@ -98,7 +97,7 @@ class TouhouUI(UI):
     # Attach a name to a menu and add to ui list.
     def add_menu(self, name, menu):
         self.menus[name] = menu
-        self.add(menu)
+        self.ui.add(menu)
 
     # Quit program for now.
     def option_quit(self):

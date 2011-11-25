@@ -55,9 +55,9 @@ class TouhouPlay(IOSession):
         self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.x,self.y))
         self.process_ui()
         self.register_draw(self.map.draw_ground())
-        self.register_draw(self.ui.draw_under())
+        self.register_draw(self.ui.ui.draw_under())
         self.register_draw(self.map.draw_sprites())
-        self.register_draw(self.ui.draw())
+        self.register_draw(self.ui.ui.draw())
         IOSession.process(self, event_list)
         self.scroll_map()
 
