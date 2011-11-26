@@ -53,20 +53,6 @@ class UI:
         temp.set_list(self.under_elements)
         return temp
 
-class DeprecatedMenuBody( Graphic ):
-    def __init__( self, filename,scale_factor = 1.0 ):
-        h = MENU_BORDER*2 + TITLE_HEIGHT
-        w = MENU_BORDER*2 + ENTRY_WIDTH
-        Graphic.__init__( self, 0.8,filename,scale_factor,w,h)
-
-    def add_entry( self ):
-        self.h += ENTRY_HEIGHT
-        self.setup_draw()
-
-    def draw(self, x, y):
-        y -= self.h
-        Graphic.draw(self)
-
 class Menu:
     def __init__(self, title, data=None):
         self.title = title
