@@ -19,6 +19,7 @@
 from OpenGL.GL import *
 
 import pygame
+from pygame.locals import *
 from math import *
 
 from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
@@ -64,6 +65,31 @@ class TouhouUI:
 
         #One menu showing at any time
         self.current_menu = None
+        
+        self.keybuffer = self.new_keybuffer()
+        self.mouse_coords = (0,0)
+        self.mouse_state = pygame.mouse.get_pressed()
+
+        display = pygame.display.get_surface()
+        self.h = display.get_height()
+
+    def new_keybuffer(self):
+        keybuffer = []
+        for i in range(320):
+            keybuffer.append( False )
+        return keybuffer
+
+    def key_down(self, e):
+        self.keybuffer[e.key] = True
+
+    def key_up(self, e):
+        self.keybuffer[e.key] = False
+
+    def update_mouse(self, e):
+        x, y = e.pos
+        y = self.h - y
+        self.mouse_coords = x, y
+        self.mouse_state = pygame.mouse.get_pressed()
 
     def _create_menu(self, name=None):
         menu = Menu(name)
@@ -247,23 +273,23 @@ class TouhouUI:
         elif action == R_CLICK:
             self.attack_right_click(mouse_coords)
 
-    def update(self, mouse_coords, mouse_state, keybuffer, map_offset):
+    def update(self, map_offset):
         if not self.data.locked:
-            action = self.user_action(mouse_state)
+            action = self.user_action(self.mouse_state)
             if self.data.mode == I_BROWSE:
-                self.browse_actions(action, mouse_coords)
+                self.browse_actions(action, self.mouse_coords)
             elif self.data.mode == I_MOVE:
-                self.move_actions(action, mouse_coords)
+                self.move_actions(action, self.mouse_coords)
             elif self.data.mode == I_ATTACK:
-                self.attack_actions(action, mouse_coords)
+                self.attack_actions(action, self.mouse_coords)
 
-        hover = self.map.get_square(mouse_coords, map_offset)
+        hover = self.map.get_square(self.mouse_coords, map_offset)
         if hover:
             self.hover_tile.set_pos(hover)
 
         # now we can update the mouse state
-        self.left, self.middle, self.right = mouse_state
-        self.mouse_coords = x,y = mouse_coords
+        self.left, self.middle, self.right = self.mouse_state
+        x,y = self.mouse_coords
 
         if self.current_menu:
             x2, y2 = self.current_menu.get_pos()

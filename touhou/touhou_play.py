@@ -19,7 +19,6 @@
 import pygame
 from pygame.locals import *
 
-from core.input_session import IOSession
 from core.ui import UI, Menu
 from core.graphics.animated import Animated
 from core.graphics.graphic import GraphicAbsPositioned
@@ -30,35 +29,63 @@ from touhou_ui import TouhouUI
 from gfx_manager import GfxManager
 from touhou_names import *
 
-class TouhouPlay(IOSession):
+class TouhouPlay:
     SCROLL_SPEED = 5
     def __init__(self, level_state):
-        IOSession.__init__(self)
         self.level = level_state
         self.level.map.load_graphics()
 
         self.map = self.level.map
         self.gfx_manager = GfxManager()
 
+        pygame.time.set_timer(USEREVENT+1,200)
+        pygame.time.set_timer(USEREVENT+2,50)
+
         self.ui = TouhouUI(self.level)
         self.ui.generate_menus()
 
-        pygame.time.set_timer(USEREVENT+1,200)
-        pygame.time.set_timer(USEREVENT+2,50)
+        self.event_catalog = {}
+        self.register_event(QUIT, self.quit)
 
         self.register_event(USEREVENT+1,self.map.frame_update) # For animated sprites
         self.register_event(USEREVENT+2,self.map.update_objects) # Movement
         self.register_event(USEREVENT+3,self.ui_events)
         self.register_event(USEREVENT+4,self.object_events)
+        self.register_event(KEYDOWN, self.ui.key_down)
+        self.register_event(KEYUP, self.ui.key_up)
+        self.register_event(MOUSEBUTTONDOWN, self.ui.update_mouse)
+        self.register_event(MOUSEBUTTONUP, self.ui.update_mouse)
+        self.register_event(MOUSEMOTION, self.ui.update_mouse)
+
+    def start(self):
+        self.running = True
+
+    def quit(self, e):
+        self.running = False
+
+        # Assign a function to the event. Can't be overwritten.
+    # e: event name, handler: function name
+    def register_event(self, e_type, handler):
+        if e_type not in self.event_catalog:
+            self.event_catalog[e_type] = handler
+        else:
+            raise OverwriteError(e_type, self.event_catalog[e_type])
 
     def process(self, event_list):
-        self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.gfx_manager.x,self.gfx_manager.y))
+        self.ui.update((self.gfx_manager.x,self.gfx_manager.y))
         self.process_ui()
         self.gfx_manager.register_draw(self.map.draw_ground())
         self.gfx_manager.register_draw(self.ui.ui.draw_under())
         self.gfx_manager.register_draw(self.map.draw_sprites())
         self.gfx_manager.register_draw(self.ui.ui.draw())
-        IOSession.process(self, event_list)
+        
+        for e in event_list:
+            try:
+                f = self.event_catalog[e.type]
+                f(e)
+            except KeyError:
+                pass
+                #print e, "event not registered"
         self.scroll_map()
 
     # Respond to changes in UI interface
@@ -93,10 +120,13 @@ class TouhouPlay(IOSession):
         elif ui_command == ENDTURN:
             self.level.end_turn()
         elif ui_command == ATTACK:
-            attacker = e.attacker
-            defender = self.level.get_object(e.target)
-            self.ui.set_selected_object(e.target)
-            self._attack(attacker, defender)
+            try:
+                attacker = e.attacker
+                defender = self.level.get_object(e.target)
+                self.ui.set_selected_object(e.target)
+                self._attack(attacker, defender)
+            except:
+                print "Invalid Attack Command"
 
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:
@@ -111,11 +141,19 @@ class TouhouPlay(IOSession):
         self.map.grid[x][y].move_path(path)
 
     def scroll_map(self):
-        if self.keybuffer[K_UP]:
+        if self.ui.keybuffer[K_UP]:
             self.gfx_manager.shift((0,-self.SCROLL_SPEED))
-        elif self.keybuffer[K_DOWN]:
+        elif self.ui.keybuffer[K_DOWN]:
             self.gfx_manager.shift((0,self.SCROLL_SPEED))
-        if self.keybuffer[K_LEFT]:
+        if self.ui.keybuffer[K_LEFT]:
             self.gfx_manager.shift((self.SCROLL_SPEED,0))
-        elif self.keybuffer[K_RIGHT]:
+        elif self.ui.keybuffer[K_RIGHT]:
             self.gfx_manager.shift((-self.SCROLL_SPEED,0))
+
+class OverwriteError(Exception):
+    def __init__(self, signal, handler):
+        self.signal = signal
+        self.handler = handler
+
+    def __str__(self):
+        print "Event ", self.signal, "already assigned to ", self.handler, "."

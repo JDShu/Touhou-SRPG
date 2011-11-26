@@ -45,7 +45,7 @@ class TouhouLevel:
     def get_object(self, position):
         x, y = position
         return self.map.grid[x][y].name
-
+        
     def kill_creature(self, target):
         self.map.remove_object(target)
 
