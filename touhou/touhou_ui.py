@@ -95,9 +95,6 @@ class TouhouUI:
     def end_turn(self):
         pygame.event.post(End_Turn_Event())
 
-    def set_mode(self, mode):
-        self.data.mode = mode
-
     # Attach a name to a menu and add to ui list.
     def add_menu(self, name, menu):
         self.menus[name] = menu
@@ -142,21 +139,30 @@ class TouhouUI:
         self.current_menu = None
         self.status_window.obj.unselect()
 
+    def _visible_menu_exists(self):
+        if self.current_menu:
+            return True
+        return False
+
+    def _open_main_menu(self, coords):
+        self.current_menu = self.main_menu_placed
+        self.current_menu.set_pos(coords)
+        self.current_menu.make_visible()
+
+    def _close_current_menu(self):
+        self.current_menu.make_invisible()
+        self.current_menu = None
+
     def browse_right_click(self, mouse_coords):
-        if not self.current_menu:
-            self.current_menu = self.main_menu_placed
+        if self._visible_menu_exists():
+            self._close_current_menu()
+            self.hover_tile.make_visible()
+        else:
+            self._open_main_menu(mouse_coords)
             self.hover_tile.make_invisible()
 
-        if not self.current_menu.visible:
-            self.current_menu.set_pos(mouse_coords)
-            self.current_menu.make_visible()
-        else:
-            self.current_menu.make_invisible()
-            self.current_menu = None
-            self.hover_tile.make_visible()
-
     def browse_left_click(self, mouse_coords):
-        if not self.current_menu:
+        if not self._visible_menu_exists():
             self.set_selected_object(self.hover_tile.pos)
             if self.current_menu:
                 self.hover_tile.make_invisible()
