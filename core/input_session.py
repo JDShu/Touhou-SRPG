@@ -24,9 +24,11 @@ from OpenGL.GL import *
 from session import Session
 
 # Handles keyboard/mouse and basic drawing
-class IOSession(Session):
+class IOSession:
     def __init__(self):
-        Session.__init__(self)
+        self.event_catalog = {}
+        self.running = False
+        self.register_event(QUIT, self.quit)
 
         display = pygame.display.get_surface()
         self.h = display.get_height()
@@ -45,6 +47,12 @@ class IOSession(Session):
         self.mouse_state = pygame.mouse.get_pressed()
 
         self.x, self.y = 0,0
+
+    def start(self):
+        self.running = True
+
+    def quit(self, e):
+        self.running = False
 
     def new_keybuffer(self):
         keybuffer = []
@@ -80,3 +88,29 @@ class IOSession(Session):
 
     def shift(self,value):
         self.x, self.y = self.x+value[0], self.y+value[1]
+
+    # Assign a function to the event. Can't be overwritten.
+    # e: event name, handler: function name
+    def register_event(self, e_type, handler):
+        if e_type not in self.event_catalog:
+            self.event_catalog[e_type] = handler
+        else:
+            raise OverwriteError(e_type, self.event_catalog[e_type])
+
+    # Process everything!
+    def process(self, event_list):
+        for e in event_list:
+            try:
+                f = self.event_catalog[e.type]
+                f(e)
+            except KeyError:
+                pass
+                #print e, "event not registered"
+
+class OverwriteError(Exception):
+    def __init__(self, signal, handler):
+        self.signal = signal
+        self.handler = handler
+
+    def __str__(self):
+        print "Event ", self.signal, "already assigned to ", self.handler, "."
