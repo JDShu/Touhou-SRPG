@@ -29,6 +29,11 @@ from touhou_ui import TouhouUI
 from gfx_manager import GfxManager
 from touhou_names import *
 
+E_UPDATE_SPRITE_FRAMES = USEREVENT+1
+E_UPDATE_SPRITE_POSITIONS = USEREVENT+2
+E_USER_INPUT = USEREVENT+3
+E_OBJECT_SIGNAL = USEREVENT+4
+
 class TouhouPlay:
     SCROLL_SPEED = 5
     def __init__(self, level_state):
@@ -38,24 +43,24 @@ class TouhouPlay:
         self.map = self.level.map
         self.gfx_manager = GfxManager()
 
-        pygame.time.set_timer(USEREVENT+1,200)
-        pygame.time.set_timer(USEREVENT+2,50)
+        pygame.time.set_timer(E_UPDATE_SPRITE_FRAMES,200)
+        pygame.time.set_timer(E_UPDATE_SPRITE_POSITIONS,50)
 
         self.ui = TouhouUI(self.level)
         self.ui.generate_menus()
 
         self.event_catalog = {}
-        self.register_event(QUIT, self.quit)
+        self.assign_event_handler(QUIT, self.quit)
 
-        self.register_event(USEREVENT+1,self.map.frame_update) # For animated sprites
-        self.register_event(USEREVENT+2,self.map.update_objects) # Movement
-        self.register_event(USEREVENT+3,self.ui_events)
-        self.register_event(USEREVENT+4,self.object_events)
-        self.register_event(KEYDOWN, self.ui.key_down)
-        self.register_event(KEYUP, self.ui.key_up)
-        self.register_event(MOUSEBUTTONDOWN, self.ui.update_mouse)
-        self.register_event(MOUSEBUTTONUP, self.ui.update_mouse)
-        self.register_event(MOUSEMOTION, self.ui.update_mouse)
+        self.assign_event_handler(E_UPDATE_SPRITE_FRAMES,self.map.frame_update) # For animated sprites
+        self.assign_event_handler(E_UPDATE_SPRITE_POSITIONS,self.map.update_objects) # Movement
+        self.assign_event_handler(E_USER_INPUT,self.ui_events)
+        self.assign_event_handler(E_OBJECT_SIGNAL,self.object_events)
+        self.assign_event_handler(KEYDOWN, self.ui.key_down)
+        self.assign_event_handler(KEYUP, self.ui.key_up)
+        self.assign_event_handler(MOUSEBUTTONDOWN, self.ui.update_mouse)
+        self.assign_event_handler(MOUSEBUTTONUP, self.ui.update_mouse)
+        self.assign_event_handler(MOUSEMOTION, self.ui.update_mouse)
 
     def start(self):
         self.running = True
@@ -65,11 +70,11 @@ class TouhouPlay:
 
         # Assign a function to the event. Can't be overwritten.
     # e: event name, handler: function name
-    def register_event(self, e_type, handler):
-        if e_type not in self.event_catalog:
-            self.event_catalog[e_type] = handler
+    def assign_event_handler(self, event_type, handler):
+        if event_type not in self.event_catalog:
+            self.event_catalog[event_type] = handler
         else:
-            raise OverwriteError(e_type, self.event_catalog[e_type])
+            raise OverwriteError(event_type, self.event_catalog[event_type])
 
     def process(self, event_list):
         self.ui.update((self.gfx_manager.x,self.gfx_manager.y))
