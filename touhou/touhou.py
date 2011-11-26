@@ -19,6 +19,7 @@
 import pygame
 from OpenGL.GL import *
 from pygame.locals import *
+import pickle
 
 import touhou_level
 from touhou_play import TouhouPlay
@@ -40,8 +41,8 @@ class Touhou(Module):
         glOrtho(0.0, dim[0], 0.0, dim[1],-1.0,1.0)
         glClearColor(0.0,0.0,0.0,0.0)
 
-        self.level_state = touhou_level.TouhouLevel()
-        self.level_state.new_map((10,10))
+        f = open("./content/level/test.lvl", "r")
+        self.level_state = pickle.load(f)
         self.register_session(PLAY,TouhouPlay(self.level_state))
         self.load_session(PLAY)
         Module.start_session(self)

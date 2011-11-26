@@ -17,7 +17,6 @@
 '''
 
 import pygame
-import pickle
 from pygame.locals import *
 
 from core.input_session import IOSession
@@ -34,8 +33,7 @@ class TouhouPlay(IOSession):
     SCROLL_SPEED = 5
     def __init__(self, level_state):
         IOSession.__init__(self)
-        f = open("./content/level/test.lvl", "r")
-        self.level = pickle.load(f)
+        self.level = level_state
         self.level.map.load_graphics()
 
         self.map = self.level.map
