@@ -71,6 +71,10 @@ class TouhouPlay(IOSession):
                 path = astar.path(self.map, data.selected.pos, data.dest)
                 x,y = self.ui.data.selected.pos
                 self.map.grid[x][y].move_path(path)
+        elif data.mode == I_ATTACK:
+            pass
+        else:
+            print "Unexpected Mode"
 
     def _attack(self, attacker, defender):
         damage = self.level.creatures[attacker].attack
