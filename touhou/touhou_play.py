@@ -87,11 +87,12 @@ class TouhouPlay(IOSession):
             self.ui.unselect()
 
     def ui_events(self, e):
-        if e.subtype == MOVETO:
+        ui_command = e.subtype
+        if ui_command == MOVETO:
             self.move_character(e)
-        elif e.subtype == ENDTURN:
+        elif ui_command == ENDTURN:
             self.level.end_turn()
-        elif e.subtype == ATTACK:
+        elif ui_command == ATTACK:
             attacker = e.attacker
             defender = self.level.get_object(e.target)
             self.ui.set_selected_object(e.target)
