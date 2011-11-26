@@ -27,6 +27,7 @@ import core.misc.astar as astar
 
 from touhou_level import TouhouLevel, TouhouCreature
 from touhou_ui import TouhouUI
+from gfx_manager import GfxManager
 from touhou_names import *
 
 class TouhouPlay(IOSession):
@@ -37,6 +38,8 @@ class TouhouPlay(IOSession):
         self.level.map.load_graphics()
 
         self.map = self.level.map
+        self.gfx_manager = GfxManager()
+
         self.ui = TouhouUI(self.level)
         self.ui.generate_menus()
 
@@ -49,13 +52,12 @@ class TouhouPlay(IOSession):
         self.register_event(USEREVENT+4,self.object_events)
 
     def process(self, event_list):
-        #self.test_reimu.update()
-        self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.x,self.y))
+        self.ui.update(self.mouse_coords, self.mouse_state, self.keybuffer,(self.gfx_manager.x,self.gfx_manager.y))
         self.process_ui()
-        self.register_draw(self.map.draw_ground())
-        self.register_draw(self.ui.ui.draw_under())
-        self.register_draw(self.map.draw_sprites())
-        self.register_draw(self.ui.ui.draw())
+        self.gfx_manager.register_draw(self.map.draw_ground())
+        self.gfx_manager.register_draw(self.ui.ui.draw_under())
+        self.gfx_manager.register_draw(self.map.draw_sprites())
+        self.gfx_manager.register_draw(self.ui.ui.draw())
         IOSession.process(self, event_list)
         self.scroll_map()
 
@@ -110,10 +112,10 @@ class TouhouPlay(IOSession):
 
     def scroll_map(self):
         if self.keybuffer[K_UP]:
-            self.shift((0,-self.SCROLL_SPEED))
+            self.gfx_manager.shift((0,-self.SCROLL_SPEED))
         elif self.keybuffer[K_DOWN]:
-            self.shift((0,self.SCROLL_SPEED))
+            self.gfx_manager.shift((0,self.SCROLL_SPEED))
         if self.keybuffer[K_LEFT]:
-            self.shift((self.SCROLL_SPEED,0))
+            self.gfx_manager.shift((self.SCROLL_SPEED,0))
         elif self.keybuffer[K_RIGHT]:
-            self.shift((-self.SCROLL_SPEED,0))
+            self.gfx_manager.shift((-self.SCROLL_SPEED,0))

@@ -18,7 +18,6 @@
 
 import pygame
 from pygame.locals import *
-from collections import deque
 from OpenGL.GL import *
 
 from session import Session
@@ -35,8 +34,7 @@ class IOSession:
 
         self.keybuffer = self.new_keybuffer()
         self.mouse_coords = None
-        self.draw_pending = deque()
-
+        
         self.register_event(KEYDOWN, self.key_down)
         self.register_event(KEYUP, self.key_up)
         self.register_event(MOUSEBUTTONDOWN, self.update_mouse)
@@ -45,8 +43,6 @@ class IOSession:
 
         self.mouse_coords = 0,0
         self.mouse_state = pygame.mouse.get_pressed()
-
-        self.x, self.y = 0,0
 
     def start(self):
         self.running = True
@@ -71,23 +67,6 @@ class IOSession:
         y = self.h - y
         self.mouse_coords = x, y
         self.mouse_state = pygame.mouse.get_pressed()
-
-    def register_draw(self, graphic):
-        if graphic:
-            self.draw_pending.append(graphic)
-
-    def draw(self):
-        glClear(GL_COLOR_BUFFER_BIT)
-        glPushMatrix()
-        glTranslate(self.x,self.y,0)
-        while self.draw_pending:
-            graphic = self.draw_pending.popleft()
-            graphic.draw()
-        glPopMatrix()
-        pygame.display.flip()
-
-    def shift(self,value):
-        self.x, self.y = self.x+value[0], self.y+value[1]
 
     # Assign a function to the event. Can't be overwritten.
     # e: event name, handler: function name
