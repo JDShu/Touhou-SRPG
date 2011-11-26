@@ -72,22 +72,26 @@ class TouhouPlay(IOSession):
                 x,y = self.ui.data.selected.pos
                 self.map.grid[x][y].move_path(path)
 
+    def _attack(self, attacker, defender):
+        damage = self.level.creatures[attacker].attack
+        self.level.creatures[defender].change_hp(-damage)
+        print attacker, "attacks", defender, "for", damage
+        print defender, "has", self.level.creatures[defender].hp, "hp"
+        if self.level.creatures[defender].hp <= 0:
+            print defender, "died."
+            self.level.kill_creature(defender)
+            self.ui.unselect()
+
     def ui_events(self, e):
         if e.subtype == MOVETO:
             self.move_character(e)
         elif e.subtype == ENDTURN:
             self.level.end_turn()
         elif e.subtype == ATTACK:
-            damage = self.level.creatures[e.attacker].attack
-            target = self.level.get_object(e.target)
-            self.level.creatures[target].change_hp(-damage)
-            print e.attacker, "attacks", target, "for", damage
-            print target, "has", self.level.creatures[target].hp, "hp"
+            attacker = e.attacker
+            defender = self.level.get_object(e.target)
             self.ui.set_selected_object(e.target)
-            if self.level.creatures[target].hp <= 0:
-                print target, "died."
-                self.level.kill_creature(target)
-                self.ui.unselect()
+            self._attack(attacker, defender)
 
     def object_events(self, e):
         if e.subtype == OBJECTEVENT:
