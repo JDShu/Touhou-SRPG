@@ -18,12 +18,12 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from core.game import Game
 from touhou.touhou import Touhou
 
+RESOLUTION = (650,480)
+
 def main():
-    game = Game()
-    game.load_module(Touhou)
+    game = Touhou(RESOLUTION)
     game.run()
 
 if __name__ == "__main__":

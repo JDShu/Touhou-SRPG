@@ -24,13 +24,34 @@ import pickle
 import touhou_level
 from touhou_play import TouhouPlay
 
-from core.module import Module
-
 PLAY = 1
-class Touhou(Module):
-    def __init__(self):
-        Module.__init__(self)
+class Touhou:
+    def __init__(self, screen_resolution):
         self.name = "Touhou SRPG"
+        self.session = None
+        self.session_list = {}
+        self.running = True
+
+        self.start(screen_resolution)
+
+    def run(self):
+        while self.running:
+            self.process()
+            self.draw()
+            self.running = self.session.running
+
+    def load_session(self, s_name):
+        self.session = self.session_list[s_name]
+
+    def process(self):
+        events = pygame.event.get()
+        self.session.process(events)
+
+    def draw(self):
+        self.session.gfx_manager.draw()
+
+    def register_session(self,s_name, session):
+        self.session_list[s_name] = session
 
     def start(self, dim):
         pygame.init()
@@ -45,4 +66,4 @@ class Touhou(Module):
         self.level_state = pickle.load(f)
         self.register_session(PLAY,TouhouPlay(self.level_state))
         self.load_session(PLAY)
-        Module.start_session(self)
+        self.session.start()
