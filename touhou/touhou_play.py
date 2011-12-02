@@ -19,7 +19,7 @@
 import pygame
 from pygame.locals import *
 
-from core.ui import UI, Menu
+from core.ui import UI
 from core.graphics.animated import Animated
 from core.graphics.graphic import GraphicAbsPositioned
 import core.misc.astar as astar
@@ -28,6 +28,7 @@ from touhou_level import TouhouLevel, TouhouCreature
 from touhou_ui import TouhouUI
 from gfx_manager import GfxManager
 from touhou_names import *
+from touhou_menu import Menu
 
 E_UPDATE_SPRITE_FRAMES = USEREVENT+1
 E_UPDATE_SPRITE_POSITIONS = USEREVENT+2
