@@ -22,7 +22,7 @@ import pygame
 from pygame.locals import *
 from math import *
 
-from core.graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
+from graphics.graphic import Graphic, GraphicPositioned, GraphicAbsPositioned
 from touhou_ui_manager import UI
 from touhou_menu import Menu
 from touhou_graphic import MapGraphic, Highlight

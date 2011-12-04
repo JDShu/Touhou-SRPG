@@ -20,7 +20,7 @@ import pygame
 from OpenGL.GL import *
 from collections import deque
 
-from core.graphics.graphic import Graphic, GraphicList
+from graphics.graphic import Graphic, GraphicList
 
 TITLE_HEIGHT = 40
 MENU_BORDER = 10

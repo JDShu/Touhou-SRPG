@@ -48,7 +48,7 @@ p19
 F49.92995093127971
 sS'ground_tile'
 p20
-(icore.graphics.graphic
+(itouhou.graphics.graphic
 Graphic
 p21
 (dp22
@@ -187,14 +187,14 @@ p64
 F0.982793723247329
 sS'ground'
 p65
-(icore.graphics.graphic
+(itouhou.graphics.graphic
 GraphicPositioned
 p66
 (dp67
 g45
 I01
 sg40
-(icore.graphics.common
+(itouhou.graphics.common
 Repeated
 p68
 (dp69

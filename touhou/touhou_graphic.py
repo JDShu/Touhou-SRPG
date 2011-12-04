@@ -19,7 +19,7 @@
 from OpenGL.GL import *
 import pygame
 
-from core.graphics.graphic import GraphicPositioned
+from graphics.graphic import GraphicPositioned
 
 from touhou_names import *
 

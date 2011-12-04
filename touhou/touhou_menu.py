@@ -19,7 +19,7 @@
 from OpenGL.GL import *
 
 import misc.glFreeType as glFreeType
-from core.graphics.graphic import Graphic, GraphicList
+from graphics.graphic import Graphic, GraphicList
 
 class Menu:
     def __init__(self, title, data=None):

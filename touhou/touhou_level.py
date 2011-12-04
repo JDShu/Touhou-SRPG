@@ -19,9 +19,9 @@
 import pygame
 from math import *
 
-from core.graphics.graphic import Graphic, GraphicPositioned, GraphicList
-from core.graphics.animated import Animated
-from core.graphics.common import Repeated
+from graphics.graphic import Graphic, GraphicPositioned, GraphicList
+from graphics.animated import Animated
+from graphics.common import Repeated
 
 from touhou_graphic import MapGraphic
 

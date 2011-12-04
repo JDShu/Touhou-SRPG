@@ -19,9 +19,9 @@
 import pygame
 from pygame.locals import *
 
-from core.graphics.animated import Animated
-from core.graphics.graphic import GraphicAbsPositioned
-import core.misc.astar as astar
+from graphics.animated import Animated
+from graphics.graphic import GraphicAbsPositioned
+import misc.astar as astar
 
 from touhou_level import TouhouLevel, TouhouCreature
 from touhou_ui import TouhouUI

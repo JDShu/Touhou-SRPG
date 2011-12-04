@@ -20,7 +20,7 @@
 
 import pickle
 
-from core.graphics.animated import Animated
+from touhou.graphics.animated import Animated
 
 from touhou.touhou_level import TouhouLevel, TouhouCreature
 from touhou.touhou_names import *
