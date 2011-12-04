@@ -16,22 +16,19 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import pygame
-from OpenGL.GL import *
-from pygame.locals import *
 import pickle
 
 import touhou_level
 from touhou_play import TouhouPlay
+import screen
 
 PLAY = 1
 class Touhou:
     def __init__(self, screen_resolution):
-        self.name = "Touhou SRPG"
+        self.title = "Touhou SRPG"
         self.session = None
         self.session_list = {}
         self.running = True
-
         self.start(screen_resolution)
 
     def run(self):
@@ -44,8 +41,7 @@ class Touhou:
         self.session = self.session_list[s_name]
 
     def process(self):
-        events = pygame.event.get()
-        self.session.process(events)
+        self.session.process()
 
     def draw(self):
         self.session.gfx_manager.draw()
@@ -54,13 +50,7 @@ class Touhou:
         self.session_list[s_name] = session
 
     def start(self, dim):
-        pygame.init()
-        pygame.display.set_caption(self.name)
-        pygame.display.set_mode(dim, OPENGL|DOUBLEBUF)
-
-        #Setup OpenGL
-        glOrtho(0.0, dim[0], 0.0, dim[1],-1.0,1.0)
-        glClearColor(0.0,0.0,0.0,0.0)
+        screen.initialize(self.title, dim)
 
         f = open("./content/level/test.lvl", "r")
         self.level_state = pickle.load(f)

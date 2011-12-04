@@ -77,7 +77,8 @@ class TouhouPlay:
         else:
             raise OverwriteError(event_type, self.event_catalog[event_type])
 
-    def process(self, event_list):
+    def process(self):
+        event_list = pygame.event.get()
         self.ui.update((self.gfx_manager.x,self.gfx_manager.y))
         self.process_ui()
         self.gfx_manager.register_draw(self.map.draw_ground())

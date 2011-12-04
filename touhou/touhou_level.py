@@ -16,7 +16,6 @@
 * along with Touhou SRPG.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import pygame
 from math import *
 
 from graphics.graphic import Graphic, GraphicPositioned, GraphicList
